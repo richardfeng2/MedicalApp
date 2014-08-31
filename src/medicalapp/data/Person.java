@@ -10,7 +10,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,6 +50,18 @@ public class Person {
     }
     
     public static void deletePerson(int personID) {
+        Connection conn = DBConnection.getInstance().getConnection();
+        
+        Person p = null;
+        try {
+            String query = "DELETE FROM Person WHERE PersonID = ?";
+            PreparedStatement stm = conn.prepareStatement(query);
+            stm.setInt(1, personID);
+            
+            stm.executeQuery();
+        } catch (SQLException ex) {
+            Logger.getLogger(Person.class.getName()).log(Level.SEVERE, "Error deleting person personID=" + personID, ex);
+        }
         
     }
     
@@ -79,7 +90,7 @@ public class Person {
                 p = new Person(personID, firstName, lastName, isPatient, isStaff, address, dateOfBirth, contactNumber);
             }
         } catch (SQLException ex) {
-            Logger.getLogger(Person.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Person.class.getName()).log(Level.SEVERE, "Error getting person personID=" + ID, ex);
         }
         return p;
     }
