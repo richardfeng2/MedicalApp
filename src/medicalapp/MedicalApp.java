@@ -29,7 +29,7 @@ public class MedicalApp {
         Date date;
         cal.set(Calendar.YEAR, 2014);
         cal.set(Calendar.MONTH, 05);
-        cal.set(Calendar.DATE, 01);
+        cal.set(Calendar.DATE, 02);
         date = cal.getTime();
 //        
           //Test update person  
@@ -39,10 +39,15 @@ public class MedicalApp {
        // Appointment a = Appointment.getAppointment(1);
        // System.out.println(a.getDate());
         
-        //Test update appointment
-        Appointment a = new Appointment(1, date,1,1,"Emergency Checkup",Duration.ofMinutes(15), "Dr. Tan");
-        Appointment.updateAppointment(a);
-        System.out.println(a.getDate());
+//        //Test update appointment
+//        Appointment a = new Appointment(1, date,1,1,"Emergency Checkup",Duration.ofMinutes(15), "Dr. Tan");
+//        Appointment.updateAppointment(a);
+//        System.out.println(a.getDate());
+        
+        //Test Insert appointment
+        Appointment a = new Appointment(2, date,1,2,"General Checkup",Duration.ofMinutes(15), "Dr. Lee");
+        Appointment.insertAppointment(a);
+        System.out.println(a.getReferringGP());
     }
     
 }

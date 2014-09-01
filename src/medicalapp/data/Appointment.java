@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.Date;
 import java.util.logging.Level;
@@ -28,7 +29,7 @@ public class Appointment {
     private Duration duration; //TO-DO: assume appointment duration is 15 minutes
     private String referringGP;
 
-    public Appointment(int appointmentID, Date date, int patientID, int doctorID, 
+    public Appointment(int appointmentID, Date date, int patientID, int doctorID,
             String description, Duration duration, String referringGP) {
         this.appointmentID = appointmentID;
         this.date = date;
@@ -39,8 +40,25 @@ public class Appointment {
         this.referringGP = referringGP;
     }
 
-    public static void insertAppointment() {
+    public static void insertAppointment(Appointment appointment) {
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
 
+            String query = "INSERT INTO Appointment VALUES (?,?,?,?,?,?,?)";
+            PreparedStatement stm = conn.prepareStatement(query);
+            stm.setInt(1, appointment.getAppointmentID());
+            stm.setTimestamp(2, convertJavaDateToSqlTimestamp(appointment.getDate()));
+            stm.setInt(3, appointment.getPatientID());
+            stm.setInt(4, appointment.getDoctorID());
+            stm.setString(5, appointment.getDescription());
+            stm.setDouble(6, durationToDouble(appointment.getDuration()));
+            stm.setString(7, appointment.getReferringGP());
+
+            stm.executeUpdate();
+
+        } catch (SQLException ex) {
+            Logger.getLogger(Person.class.getName()).log(Level.SEVERE, "Error inserting appointment", ex);
+        }
     }
 
     public static void updateAppointment(Appointment appointment) {
@@ -57,8 +75,8 @@ public class Appointment {
             stm.setString(2, appointment.getDescription());
             stm.setInt(3, appointment.getDoctorID());
             stm.setDouble(4, durationToDouble(appointment.getDuration()));
-            stm.setString(5, appointment.getReferringGP());    
-            stm.setInt(6, appointment.getAppointmentID());    
+            stm.setString(5, appointment.getReferringGP());
+            stm.setInt(6, appointment.getAppointmentID());
             stm.executeUpdate();
 
         } catch (SQLException ex) {
@@ -124,6 +142,11 @@ public class Appointment {
 
     public static java.sql.Date convertJavaDateToSqlDate(java.util.Date date) {
         return new java.sql.Date(date.getTime());
+    }
+
+    public static java.sql.Timestamp convertJavaDateToSqlTimestamp(java.util.Date date) {
+        //Date dt = new Date(Calendar.getInstance().getTimeInMillis()); // Your exising sql Date .
+        return new Timestamp(date.getTime());
     }
 
     public int getPatientID() {
