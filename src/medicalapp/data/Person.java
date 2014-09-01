@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package medicalapp.data;
 
 import java.sql.Connection;
@@ -19,6 +18,7 @@ import java.util.logging.Logger;
  * @author Richard
  */
 public class Person {
+
     private int personID;
     private String firstName;
     private String lastName;
@@ -38,63 +38,103 @@ public class Person {
         this.dateOfBirth = dateOfBirth;
         this.contactNumber = contactNumber;
     }
+
     public static void insertPerson(Person person) {
-        
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+
+            String query = "INSERT INTO Person VALUES (?,?,?,?,?,?,?,?)";
+            PreparedStatement stm = conn.prepareStatement(query);
+            stm.setInt(1, person.getPersonID());
+            stm.setString(2, person.getFirstName());
+            stm.setString(3, person.getLastName());
+            stm.setString(4, person.getAddress());
+            stm.setString(5, person.getContactNumber());
+            stm.setDate(6, new java.sql.Date(person.getDateOfBirth().getTime()));
+            stm.setBoolean(7, person.isIsPatient());
+            stm.setBoolean(8, person.isIsStaff());
+            
+            stm.executeUpdate();
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(Person.class.getName()).log(Level.SEVERE, "Error inserting person", ex);
+        }
     }
+
     public static void updatePerson(Person person) {
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            
+            String query = "UPDATE Person "
+                    + "SET FirstName = ?, LastName = ?, Address = ?, ContactNumber = ?,"
+                    + "dateOfBirth = ?, isPatient = ?, isStaff = ?"
+                    + "WHERE personID = ?";
+            
+            PreparedStatement stm = conn.prepareStatement(query);
+            
+            stm.setString(1, person.getFirstName());
+            stm.setString(2, person.getLastName());
+            stm.setString(3, person.getAddress());
+            stm.setString(4, person.getContactNumber());
+            stm.setDate(5, convertJavaDateToSqlDate(person.getDateOfBirth()));
+            stm.setBoolean(6, person.isIsPatient());
+            stm.setBoolean(7, person.isIsStaff());
+            stm.setInt(8, person.getPersonID());
+            
+            stm.executeUpdate();
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(Person.class.getName()).log(Level.SEVERE, "Error updating person", ex);
+        }
         
     }
-    
+
     public static void deletePerson(Person person) {
         deletePerson(person.getPersonID());
     }
-    
+
     public static void deletePerson(int personID) {
         Connection conn = DBConnection.getInstance().getConnection();
-        
-        Person p = null;
+
         try {
             String query = "DELETE FROM Person WHERE PersonID = ?";
             PreparedStatement stm = conn.prepareStatement(query);
             stm.setInt(1, personID);
-            
+
             stm.executeQuery();
         } catch (SQLException ex) {
             Logger.getLogger(Person.class.getName()).log(Level.SEVERE, "Error deleting person personID=" + personID, ex);
         }
-        
     }
-    
-    
-    public static Person getPerson(int ID){
+
+    public static Person getPerson(int ID) {
         Connection conn = DBConnection.getInstance().getConnection();
-        
-        Person p = null;
+
+        Person person = null;
         try {
             String query = "SELECT * FROM Person WHERE PersonID = ?";
             PreparedStatement stm = conn.prepareStatement(query);
             stm.setInt(1, ID);
-            
+
             ResultSet personResults = stm.executeQuery();
-            while (personResults.next())
-            {
+            while (personResults.next()) {
                 int personID = personResults.getInt("personID");
                 String firstName = personResults.getString("firstName");
                 String lastName = personResults.getString("lastName");
-                boolean isPatient= personResults.getBoolean("isPatient");
-                boolean isStaff= personResults.getBoolean("isStaff");
-                String address= personResults.getString("address");
-                Date dateOfBirth= personResults.getDate("dateOfBirth");
-                String contactNumber= personResults.getString("contactNumber");
-                
-                p = new Person(personID, firstName, lastName, isPatient, isStaff, address, dateOfBirth, contactNumber);
+                boolean isPatient = personResults.getBoolean("isPatient");
+                boolean isStaff = personResults.getBoolean("isStaff");
+                String address = personResults.getString("address");
+                Date dateOfBirth = personResults.getDate("dateOfBirth");
+                String contactNumber = personResults.getString("contactNumber");
+
+                person = new Person(personID, firstName, lastName, isPatient, isStaff, address, dateOfBirth, contactNumber);
             }
         } catch (SQLException ex) {
             Logger.getLogger(Person.class.getName()).log(Level.SEVERE, "Error getting person personID=" + ID, ex);
         }
-        return p;
+        return person;
     }
-    
+
     public int getPersonID() {
         return personID;
     }
@@ -158,6 +198,8 @@ public class Person {
     public void setContactNumber(String contactNumber) {
         this.contactNumber = contactNumber;
     }
-    
-    
+
+    public static java.sql.Date convertJavaDateToSqlDate(java.util.Date date) {
+        return new java.sql.Date(date.getTime());
+    }
 }
