@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,17 +46,17 @@ public class Person {
 
             String query = "INSERT INTO Person VALUES (?,?,?,?,?,?,?,?)";
             PreparedStatement stm = conn.prepareStatement(query);
-            stm.setInt(1, person.getPersonID());
+            stm.setInt(1, getNextID());
             stm.setString(2, person.getFirstName());
             stm.setString(3, person.getLastName());
             stm.setString(4, person.getAddress());
             stm.setString(5, person.getContactNumber());
             stm.setDate(6, new java.sql.Date(person.getDateOfBirth().getTime()));
-            stm.setBoolean(7, person.isIsPatient());
-            stm.setBoolean(8, person.isIsStaff());
-            
+            stm.setBoolean(7, person.isPatient());
+            stm.setBoolean(8, person.isStaff());
+
             stm.executeUpdate();
-            
+
         } catch (SQLException ex) {
             Logger.getLogger(Person.class.getName()).log(Level.SEVERE, "Error inserting person", ex);
         }
@@ -64,29 +65,29 @@ public class Person {
     public static void updatePerson(Person person) {
         try {
             Connection conn = DBConnection.getInstance().getConnection();
-            
+
             String query = "UPDATE Person "
                     + "SET FirstName = ?, LastName = ?, Address = ?, ContactNumber = ?,"
                     + "dateOfBirth = ?, isPatient = ?, isStaff = ?"
                     + "WHERE personID = ?";
-            
+
             PreparedStatement stm = conn.prepareStatement(query);
-            
+
             stm.setString(1, person.getFirstName());
             stm.setString(2, person.getLastName());
             stm.setString(3, person.getAddress());
             stm.setString(4, person.getContactNumber());
             stm.setDate(5, convertJavaDateToSqlDate(person.getDateOfBirth()));
-            stm.setBoolean(6, person.isIsPatient());
-            stm.setBoolean(7, person.isIsStaff());
+            stm.setBoolean(6, person.isPatient());
+            stm.setBoolean(7, person.isStaff());
             stm.setInt(8, person.getPersonID());
-            
+
             stm.executeUpdate();
-            
+
         } catch (SQLException ex) {
             Logger.getLogger(Person.class.getName()).log(Level.SEVERE, "Error updating person", ex);
         }
-        
+
     }
 
     public static void deletePerson(Person person) {
@@ -116,16 +117,16 @@ public class Person {
             PreparedStatement stm = conn.prepareStatement(query);
             stm.setInt(1, ID);
 
-            ResultSet personResults = stm.executeQuery();
-            while (personResults.next()) {
-                int personID = personResults.getInt("personID");
-                String firstName = personResults.getString("firstName");
-                String lastName = personResults.getString("lastName");
-                boolean isPatient = personResults.getBoolean("isPatient");
-                boolean isStaff = personResults.getBoolean("isStaff");
-                String address = personResults.getString("address");
-                Date dateOfBirth = personResults.getDate("dateOfBirth");
-                String contactNumber = personResults.getString("contactNumber");
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                int personID = rs.getInt("personID");
+                String firstName = rs.getString("firstName");
+                String lastName = rs.getString("lastName");
+                boolean isPatient = rs.getBoolean("isPatient");
+                boolean isStaff = rs.getBoolean("isStaff");
+                String address = rs.getString("address");
+                Date dateOfBirth = rs.getDate("dateOfBirth");
+                String contactNumber = rs.getString("contactNumber");
 
                 person = new Person(personID, firstName, lastName, isPatient, isStaff, address, dateOfBirth, contactNumber);
             }
@@ -133,6 +134,26 @@ public class Person {
             Logger.getLogger(Person.class.getName()).log(Level.SEVERE, "Error getting person personID=" + ID, ex);
         }
         return person;
+    }
+
+    //When inserting new records, increment the maximum ID by 1.
+    public static int getNextID() {
+        int nextID = 0;
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            String query = "SELECT (MAX(personID) + 1) AS nextID FROM Person";
+            Statement stm = conn.createStatement();
+            ResultSet rs = stm.executeQuery(query);
+            if (rs.next()) {
+                nextID = rs.getInt("nextID");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Person.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if (nextID == 0) {
+            nextID++;
+        }
+        return (nextID);
     }
 
     public int getPersonID() {
@@ -159,7 +180,7 @@ public class Person {
         this.lastName = lastName;
     }
 
-    public boolean isIsPatient() {
+    public boolean isPatient() {
         return isPatient;
     }
 
@@ -167,7 +188,7 @@ public class Person {
         this.isPatient = isPatient;
     }
 
-    public boolean isIsStaff() {
+    public boolean isStaff() {
         return isStaff;
     }
 

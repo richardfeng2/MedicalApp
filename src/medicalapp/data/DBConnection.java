@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package medicalapp.data;
 
 import java.sql.Connection;
@@ -19,20 +18,17 @@ import java.util.logging.Logger;
 public class DBConnection {
 
     private static final String dbURL = "jdbc:derby://localhost:1527/medicalDB;create=true;user=sa;password=sa";
-    
+
     private static DBConnection instance;
-    
-    private Connection connection;
-    
-    private DBConnection(Connection conn)
-    {
+
+    private final Connection connection;
+
+    private DBConnection(Connection conn) {
         this.connection = conn;
     }
-    
-    public static DBConnection getInstance()
-    {
-        if (instance == null)
-        {
+
+    public static DBConnection getInstance() {
+        if (instance == null) {
             Connection conn = null;
             try {
                 Class.forName("org.apache.derby.jdbc.ClientDriver").newInstance();
@@ -40,17 +36,16 @@ public class DBConnection {
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | SQLException ex) {
                 Logger.getLogger(DBConnection.class.getName()).log(Level.SEVERE, "Failed to get connection", ex);
             }
-            
-            if (conn == null)
-            {
-                System.out.println("Unable to connect. Check server mebbe.");
+
+            if (conn == null) {
+                System.out.println("Unable to connect. Connect to server!.");
             }
-        
+
             instance = new DBConnection(conn);
         }
         return instance;
     }
-    
+
     public Connection getConnection() {
         return this.connection;
     }
