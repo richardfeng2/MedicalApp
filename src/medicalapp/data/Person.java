@@ -220,6 +220,7 @@ public class Person {
         this.contactNumber = contactNumber;
     }
 
+    //convert java and sql date compatability
     public static java.sql.Date convertJavaDateToSqlDate(java.util.Date date) {
         return new java.sql.Date(date.getTime());
     }

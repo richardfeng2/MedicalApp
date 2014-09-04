@@ -20,7 +20,7 @@ public class MedicalApp {
      */
     public static void main(String[] args) {
 
-        //TODO : database for payments (think line items) ; tables for different services and costs
+        //TODO : Documents table storing attachments; Notes table storing timestamped notes
 
         //Sample date
         Calendar cal = Calendar.getInstance();
