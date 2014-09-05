@@ -22,8 +22,7 @@ public class MedicalApp {
      */
     public static void main(String[] args) {
 
-        //TODO : Documents table storing attachments; Notes table storing timestamped notes
-        //consider services table with set of costs.
+        //TODO :consider services table with set of costs.
 
         //Sample date
         Calendar cal = Calendar.getInstance();
