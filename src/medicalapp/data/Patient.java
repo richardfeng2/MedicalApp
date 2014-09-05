@@ -10,6 +10,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,13 +24,64 @@ public class Patient extends Person {
 
     private int patientID;
     private String billingInfo;
+    private ArrayList<String> conditions;
 
-    public Patient(int patientID, String billingInfo, int personID, String firstName,
+    public Patient(int patientID, String billingInfo, ArrayList<String> conditions, int personID, String firstName,
             String lastName, boolean isPatient, boolean isStaff, String address, Date dateOfBirth,
             String contactNumber) {
         super(personID, firstName, lastName, isPatient, isStaff, address, dateOfBirth, contactNumber);
         this.patientID = patientID;
         this.billingInfo = billingInfo;
+        this.conditions = conditions;
+    }
+
+    public static String arrayToString(ArrayList<String> conditions) {
+        String string = "";
+        for (String condition : conditions) {
+            //formating use of semi-colon
+            if (!string.equals("")) {
+                string += condition;
+            } else {
+                string += "; " + condition;
+            }
+        }
+        return string;
+    }
+
+    //Diagnose a new condition, then update to database.
+    public void addCondition(int patientID, String condition) {
+        getPatient(patientID).getConditions().add(condition);
+        Connection conn = DBConnection.getInstance().getConnection();
+        try {
+            String query = "UPDATE Patient SET conditions = ? WHERE patientID = ?";
+            PreparedStatement stm = conn.prepareStatement(query);
+            stm.setString(1, arrayToString(getPatient(patientID).getConditions()));
+            stm.setInt(2, patientID);
+
+            stm.executeUpdate();
+            conn.close();
+
+        } catch (SQLException ex) {
+            Logger.getLogger(Patient.class.getName()).log(Level.SEVERE, "Error adding condition", ex);
+        }
+    }
+
+    //Remove diagnosis of a condition, then update to database.
+    public void removeCondition(int patientID, String condition) {
+        getPatient(patientID).getConditions().remove(condition);
+        Connection conn = DBConnection.getInstance().getConnection();
+        try {
+            String query = "UPDATE Patient SET conditions = ? WHERE patientID = ?";
+            PreparedStatement stm = conn.prepareStatement(query);
+            stm.setString(1, arrayToString(getPatient(patientID).getConditions()));
+            stm.setInt(2, patientID);
+
+            stm.executeUpdate();
+            conn.close();
+
+        } catch (SQLException ex) {
+            Logger.getLogger(Patient.class.getName()).log(Level.SEVERE, "Error removing condition", ex);
+        }
     }
 
     public static void insertPatient(Patient patient) {
@@ -36,11 +89,12 @@ public class Patient extends Person {
         try {
             Connection conn = DBConnection.getInstance().getConnection();
 
-            String query = "INSERT INTO Patient VALUES (?,?,?)";
+            String query = "INSERT INTO Patient VALUES (?,?,?,?)";
             PreparedStatement stm = conn.prepareStatement(query);
             stm.setInt(1, getNextID());
             stm.setInt(2, Person.getNextID());
             stm.setString(3, patient.getBillingInfo());
+            stm.setString(4, arrayToString(patient.getConditions()));
 
             stm.executeUpdate();
 
@@ -95,22 +149,25 @@ public class Patient extends Person {
             PreparedStatement stm = conn.prepareStatement(query);
             stm.setInt(1, id);
 
-            ResultSet patientResults = stm.executeQuery();
-            while (patientResults.next()) {
-                int patientID = patientResults.getInt("patientID");
-                int personID = patientResults.getInt("personID");
-                String firstName = patientResults.getString("firstName");
-                String lastName = patientResults.getString("lastName");
-                boolean isPatient = patientResults.getBoolean("isPatient");
-                boolean isStaff = patientResults.getBoolean("isStaff");
-                String address = patientResults.getString("address");
-                Date dateOfBirth = patientResults.getDate("dateOfBirth");
-                String contactNumber = patientResults.getString("contactNumber");
-                String billingInfo = patientResults.getString("billingInfo");
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                int patientID = rs.getInt("patientID");
+                int personID = rs.getInt("personID");
+                String firstName = rs.getString("firstName");
+                String lastName = rs.getString("lastName");
+                boolean isPatient = rs.getBoolean("isPatient");
+                boolean isStaff = rs.getBoolean("isStaff");
+                String address = rs.getString("address");
+                Date dateOfBirth = rs.getDate("dateOfBirth");
+                String contactNumber = rs.getString("contactNumber");
+                String billingInfo = rs.getString("billingInfo");
+                String conditions = rs.getString("conditions");
 
-                patient = new Patient(patientID, billingInfo, personID, firstName, lastName, isPatient,
+                //String from db to arrayList
+                ArrayList<String> diagnosis = new ArrayList<>(Arrays.asList(conditions.split("; ")));
+
+                patient = new Patient(patientID, billingInfo, diagnosis, personID, firstName, lastName, isPatient,
                         isStaff, address, dateOfBirth, contactNumber);
-
             }
         } catch (SQLException ex) {
             Logger.getLogger(Person.class
@@ -137,6 +194,14 @@ public class Patient extends Person {
             nextID++;
         }
         return (nextID);
+    }
+
+    public ArrayList<String> getConditions() {
+        return conditions;
+    }
+
+    public void setConditions(ArrayList<String> conditions) {
+        this.conditions = conditions;
     }
 
     public String getBillingInfo() {
