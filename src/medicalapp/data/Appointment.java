@@ -96,7 +96,7 @@ public class Appointment {
             PreparedStatement stm = conn.prepareStatement(query);
             stm.setInt(1, appointmentID);
 
-            stm.executeQuery();
+            stm.executeUpdate();
         } catch (SQLException ex) {
             Logger.getLogger(Person.class.getName()).log(Level.SEVERE, "Error deleting appointment, ID=" + appointmentID, ex);
         }

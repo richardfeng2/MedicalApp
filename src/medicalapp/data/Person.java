@@ -87,7 +87,6 @@ public class Person {
         } catch (SQLException ex) {
             Logger.getLogger(Person.class.getName()).log(Level.SEVERE, "Error updating person", ex);
         }
-
     }
 
     public static void deletePerson(Person person) {
@@ -102,7 +101,7 @@ public class Person {
             PreparedStatement stm = conn.prepareStatement(query);
             stm.setInt(1, personID);
 
-            stm.executeQuery();
+            stm.executeUpdate();
         } catch (SQLException ex) {
             Logger.getLogger(Person.class.getName()).log(Level.SEVERE, "Error deleting person personID=" + personID, ex);
         }

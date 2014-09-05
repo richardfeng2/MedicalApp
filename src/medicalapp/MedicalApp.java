@@ -7,7 +7,9 @@ package medicalapp;
 
 import java.util.Calendar;
 import java.util.Date;
-import static medicalapp.data.Doctor.deleteDoctor;
+import medicalapp.data.Document;
+import static medicalapp.data.Document.deleteDocument;
+import static medicalapp.data.Document.updateDocument;
 
 /**
  *
@@ -31,7 +33,10 @@ public class MedicalApp {
         cal.set(Calendar.DATE, 02);
         date = cal.getTime();
         
-        deleteDoctor(1);
+       Document d = new Document(1,1,"Lung X-ray",null,true);
+       updateDocument(d, "C:\\Users\\Richard\\Pictures\\lungCancer.jpg");
+       deleteDocument(1);
+        
     }
 
 

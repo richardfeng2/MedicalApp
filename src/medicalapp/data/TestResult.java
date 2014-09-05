@@ -110,7 +110,7 @@ public class TestResult {
             PreparedStatement stm = conn.prepareStatement(query);
             stm.setInt(1, testResultID);
 
-            stm.executeQuery();
+            stm.executeUpdate();
         } catch (SQLException ex) {
             Logger.getLogger(TestResult.class.getName()).log(Level.SEVERE, "Error deleting testResult testResultID="
                     + testResultID, ex);
