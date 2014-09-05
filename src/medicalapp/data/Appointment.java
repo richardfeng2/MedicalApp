@@ -135,7 +135,7 @@ public class Appointment {
         return (double) duration.toMinutes();
     }
 
-    //Converts doubles to duration type. Use when you want to display output to user.
+    //Converts doubles to duration type. Use for appointment scheduling.
     public static Duration doubleToDuration(double d) {
         return Duration.ofMinutes((long) d);
     }
@@ -144,6 +144,7 @@ public class Appointment {
         return new java.sql.Date(date.getTime());
     }
 
+    //Store java date as a timestamp on DB. The reason being sql date doesnt have time.
     public static java.sql.Timestamp convertJavaDateToSqlTimestamp(java.util.Date date) {
         //Date dt = new Date(Calendar.getInstance().getTimeInMillis()); // Your exising sql Date .
         return new Timestamp(date.getTime());

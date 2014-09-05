@@ -7,7 +7,7 @@ package medicalapp;
 
 import java.util.Calendar;
 import java.util.Date;
-import static medicalapp.data.Doctor.getDoctor;
+import static medicalapp.data.Doctor.deleteDoctor;
 
 /**
  *
@@ -21,6 +21,7 @@ public class MedicalApp {
     public static void main(String[] args) {
 
         //TODO : Documents table storing attachments; Notes table storing timestamped notes
+        //consider services table with set of costs.
 
         //Sample date
         Calendar cal = Calendar.getInstance();
@@ -30,8 +31,7 @@ public class MedicalApp {
         cal.set(Calendar.DATE, 02);
         date = cal.getTime();
         
-        System.out.println((getDoctor(1).getAddress()));
-
+        deleteDoctor(1);
     }
 
 

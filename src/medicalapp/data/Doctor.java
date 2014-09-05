@@ -50,32 +50,32 @@ public class Doctor extends Staff {
 
     public static void deleteDoctor(Doctor doctor) {
         deleteDoctor(doctor.getDoctorID());
-//        deletePerson(doctor.getStaff(getDoctor(doctorID).getStaffID()).getPersonID());
-//        deleteStaff(getDoctor(doctorID).getStaffID());
     }
 
+    //Deletes records from Doctor, Staff, Person table.
     public static void deleteDoctor(int doctorID) {
         Connection conn = DBConnection.getInstance().getConnection();
 
         try {
-           // String query = "DELETE s, d, p FROM Staff AS s, Doctor AS d, Person AS p WHERE StaffID = ?";
-
             String query1 = "DELETE FROM Doctor WHERE doctorID = ?";
             String query2 = "DELETE FROM Staff WHERE staffID = ?";
             String query3 = "DELETE FROM Person WHERE personID = ?";
 
-            PreparedStatement stm1 = conn.prepareStatement(query1);
-//            PreparedStatement stm2 = conn.prepareStatement(query2);
-//            PreparedStatement stm3 = conn.prepareStatement(query3);
-//            
-            stm1.setInt(1, doctorID);
-//            stm2.setInt(1, getDoctor(doctorID).getStaffID());
-//            stm3.setInt(1, getStaff(getDoctor(doctorID).getStaffID()).getPersonID());
-//            
-
-            stm1.executeUpdate();
-//            stm2.executeUpdate();
-//            stm3.executeUpdate();
+            int staffID = getDoctor(doctorID).getStaffID();
+            int personID = getDoctor(doctorID).getPersonID();
+            
+            PreparedStatement stm = conn.prepareStatement(query1);
+            stm.setInt(1, doctorID);
+            stm.executeUpdate();
+            
+            stm = conn.prepareStatement(query2);
+            stm.setInt(1, staffID);
+            stm.executeUpdate();
+            
+            stm = conn.prepareStatement(query3);
+            stm.setInt(1, personID);
+            stm.executeUpdate();
+            
         } catch (SQLException ex) {
             Logger.getLogger(Doctor.class.getName()).log(Level.SEVERE, "Error deleting doctor doctorID=" + doctorID, ex);
         }
@@ -149,5 +149,4 @@ public class Doctor extends Staff {
     public void setDoctorID(int doctorID) {
         this.doctorID = doctorID;
     }
-
 }
