@@ -22,7 +22,7 @@ public class MedicalApp {
      */
     public static void main(String[] args) {
 
-        //TODO :consider services table with set of costs.
+        //TODO :consider services table with set of costs; make a list of statements for demo purposes / add dummy data
 
         //Sample date
         Calendar cal = Calendar.getInstance();
@@ -35,8 +35,6 @@ public class MedicalApp {
        Document d = new Document(1,1,"Lung X-ray",null,true);
        updateDocument(d, "C:\\Users\\Richard\\Pictures\\lungCancer.jpg");
        deleteDocument(1);
-        
+       
     }
-
-
 }

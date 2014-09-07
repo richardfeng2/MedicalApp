@@ -72,7 +72,7 @@ public class Staff extends Person {
             stm.setBoolean(1, staff.isAdmin());
             stm.setBoolean(2, staff.isNurse());
             stm.setBoolean(3, staff.isDoctor());
-            stm.setInt(3, staff.getStaffID());
+            stm.setInt(4, staff.getStaffID());
 
             stm.executeUpdate();
 

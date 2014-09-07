@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  */
 public class DBConnection {
 
-    private static final String dbURL = "jdbc:derby://localhost:1527/medicalDB;create=true;user=sa;password=sa";
+    private static final String dbURL = "jdbc:derby://localhost:1527/medicalDB;user=sa;password=sa";
 
     private static DBConnection instance;
 
