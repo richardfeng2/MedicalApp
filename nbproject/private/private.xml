@@ -5,7 +5,9 @@
         <group>
             <file>file:/C:/Users/Richard/Documents/NetBeansProjects/MedicalApp/MedicalApp/src/medicalapp/MedicalApp.java</file>
             <file>file:/C:/Users/Richard/Documents/NetBeansProjects/MedicalApp/MedicalApp/src/medicalapp/data/Document.java</file>
-            <file>file:/C:/Users/Richard/Documents/NetBeansProjects/MedicalApp/MedicalApp/src/medicalapp/data/DBConnection.java</file>
+            <file>file:/C:/Users/Richard/Documents/NetBeansProjects/MedicalApp/MedicalApp/src/medicalapp/Schedule.java</file>
+            <file>file:/C:/Users/Richard/Documents/NetBeansProjects/MedicalApp/MedicalApp/src/medicalapp/data/-SQL%20Script.sql</file>
+            <file>file:/C:/Users/Richard/Documents/NetBeansProjects/MedicalApp/MedicalApp/src/medicalapp/data/Doctor.java</file>
             <file>file:/C:/Users/Richard/Documents/NetBeansProjects/MedicalApp/MedicalApp/src/medicalapp/data/Patient.java</file>
             <file>file:/C:/Users/Richard/Documents/NetBeansProjects/MedicalApp/MedicalApp/src/medicalapp/data/Appointment.java</file>
         </group>
