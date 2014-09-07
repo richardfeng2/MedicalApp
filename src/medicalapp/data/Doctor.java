@@ -120,6 +120,47 @@ public class Doctor extends Staff {
                     .getName()).log(Level.SEVERE, "Error getting doctor doctorID = " + id, ex);
         }
         return doctor;
+    }
+    
+    public static Doctor getDoctor(String firstName, String lastName) {
+        Doctor doctor = null;
+        Connection conn = DBConnection.getInstance().getConnection();
+        try {
+            String query = "SELECT * "
+                    + " FROM Doctor AS d "
+                    + " INNER JOIN Staff AS s"
+                    + "     ON d.staffID = s.staffID "
+                    + " INNER JOIN Person As p"
+                    + "     ON s.personID = p.personID "
+                    + " WHERE firstName = ?"
+                    + " AND lastName = ?";
+            PreparedStatement stm = conn.prepareStatement(query);
+            stm.setString(1, firstName);
+            stm.setString(2, lastName);
+
+            ResultSet doctorResults = stm.executeQuery();
+            while (doctorResults.next()) {
+                int doctorID = doctorResults.getInt("doctorID");
+                int staffID = doctorResults.getInt("staffID");
+                int personID = doctorResults.getInt("personID");
+                boolean isPatient = doctorResults.getBoolean("isPatient");
+                boolean isStaff = doctorResults.getBoolean("isStaff");
+                boolean isAdmin = doctorResults.getBoolean("isAdmin");
+                boolean isNurse = doctorResults.getBoolean("isNurse");
+                boolean isDoctor = doctorResults.getBoolean("isDoctor");
+                String address = doctorResults.getString("address");
+                Date dateOfBirth = doctorResults.getDate("dateOfBirth");
+                String contactNumber = doctorResults.getString("contactNumber");
+                String username = doctorResults.getString("username");
+                String password = doctorResults.getString("password");
+                doctor = new Doctor(doctorID, staffID, isAdmin, isNurse, isDoctor, username, password,
+                        personID, firstName, lastName, isPatient, isStaff, address, dateOfBirth, contactNumber);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Person.class
+                    .getName()).log(Level.SEVERE, "Error getting doctor: " + firstName + " " + lastName, ex);
+        }
+        return doctor;
 
     }
 

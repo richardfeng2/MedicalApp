@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.Date;
@@ -150,6 +151,26 @@ public class Appointment {
         return new Timestamp(date.getTime());
     }
 
+    //generate next PK
+    public static int getNextID() {
+        int nextID = 0;
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            String query = "SELECT (MAX(appointmentID) + 1) AS nextID FROM Appointment";
+            Statement stm = conn.createStatement();
+            ResultSet rs = stm.executeQuery(query);
+            if (rs.next()) {
+                nextID = rs.getInt("nextID");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Patient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if (nextID == 0) {
+            nextID++;
+        }
+        return (nextID);
+    }
+    
     public int getPatientID() {
         return patientID;
     }

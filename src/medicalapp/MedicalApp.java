@@ -22,7 +22,11 @@ public class MedicalApp {
      */
     public static void main(String[] args) {
 
-        //TODO :consider services table with set of costs; make a list of statements for demo purposes / add dummy data
+        //TODO :
+        //consider services table with set of costs; 
+        //make a list of statements for demo purposes / add dummy data
+        //Create SQL script generating tables + dummy data
+        //Add  boolean "expired" columns and fields, indicating deleted data, and/or completed appointments
 
         //Sample date
         Calendar cal = Calendar.getInstance();
