@@ -29,10 +29,11 @@ public class Appointment {
     private String purpose;
     private Duration duration; //assume appointment duration is 15 minutes
     private String referringGP;
-    private boolean expired; //back-end boolean to keep track of cancelled and/or completed appointments
+    private boolean expired; //back-end boolean to keep track of cancelled appointments
+    private boolean finished; //back-end variable to check if appointment is finished
 
     public Appointment(int appointmentID, Date date, int patientID, int doctorID,
-            String purpose, Duration duration, String referringGP, boolean expired) {
+            String purpose, Duration duration, String referringGP, boolean expired, boolean finished) {
         this.appointmentID = appointmentID;
         this.date = date;
         this.patientID = patientID;
@@ -47,7 +48,7 @@ public class Appointment {
         try {
             Connection conn = DBConnection.getInstance().getConnection();
 
-            String query = "INSERT INTO Appointment VALUES (?,?,?,?,?,?,?,?)";
+            String query = "INSERT INTO Appointment VALUES (?,?,?,?,?,?,?,?,?)";
             PreparedStatement stm = conn.prepareStatement(query);
             stm.setInt(1, getNextID());
             stm.setTimestamp(2, convertJavaDateToSqlTimestamp(appointment.getDate()));
@@ -57,6 +58,7 @@ public class Appointment {
             stm.setDouble(6, durationToDouble(appointment.getDuration()));
             stm.setString(7, appointment.getReferringGP());
             stm.setBoolean(8,false);
+            stm.setBoolean(9,false);
 
             stm.executeUpdate();
 
@@ -71,6 +73,7 @@ public class Appointment {
 
             String query = "UPDATE Appointment "
                     + "SET Date = ?, purpose = ?, doctorID = ?, duration = ?, referringGP = ?"
+                    + " finished = ? "
                     + "WHERE appointmentID = ?";
 
             PreparedStatement stm = conn.prepareStatement(query);
@@ -80,7 +83,8 @@ public class Appointment {
             stm.setInt(3, appointment.getDoctorID());
             stm.setDouble(4, durationToDouble(appointment.getDuration()));
             stm.setString(5, appointment.getReferringGP());
-            stm.setInt(6, appointment.getAppointmentID());
+            stm.setBoolean(6,appointment.isFinished());
+            stm.setInt(7, appointment.getAppointmentID());
             stm.executeUpdate();
 
         } catch (SQLException ex) {
@@ -127,7 +131,9 @@ public class Appointment {
                 Duration duration = doubleToDuration(rs.getDouble("duration")); //DB stores duration as a double. Convert double -> long -> Duration (minutes)
                 String referringGP = rs.getString("referringGP");
                 Boolean expired = rs.getBoolean("expired");
-                appointment = new Appointment(appointmentID, date, patientID, doctorID, purpose, duration, referringGP,expired);
+                Boolean finished = rs.getBoolean("finished");
+                appointment = new Appointment(appointmentID, date, patientID, doctorID, purpose,
+                        duration, referringGP,expired, finished);
             }
         } catch (SQLException ex) {
             Logger.getLogger(Appointment.class.getName()).log(Level.SEVERE, null, ex);
@@ -238,7 +244,13 @@ public class Appointment {
     public void setExpired(boolean expired) {
         this.expired = expired;
     }
-    
-    
+
+    public boolean isFinished() {
+        return finished;
+    }
+
+    public void setFinished(boolean finished) {
+        this.finished = finished;
+    }
 
 }
