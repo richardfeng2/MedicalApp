@@ -27,9 +27,11 @@ public class Payment {
     private boolean isPaid;
     private Date dateIssued;
     private Date datePaid;
+    private boolean expired;
+    private boolean locked;
 
     public Payment(int paymentID, int appointmentID, String service, double price,
-            boolean isPaid, Date dateIssued, Date datePaid) {
+            boolean isPaid, Date dateIssued, Date datePaid, boolean expired, boolean locked) {
         this.paymentID = paymentID;
         this.appointmentID = appointmentID;
         this.service = service;
@@ -37,13 +39,15 @@ public class Payment {
         this.isPaid = isPaid;
         this.dateIssued = dateIssued;
         this.datePaid = datePaid;
+        this.expired = expired;
+        this.locked = locked;
     }
 
     public static void insertPayment(Payment payment) {
         try {
             Connection conn = DBConnection.getInstance().getConnection();
 
-            String query = "INSERT INTO Payment VALUES (?,?,?,?,?,?,?)";
+            String query = "INSERT INTO Payment VALUES (?,?,?,?,?,?,?,?,?)";
             PreparedStatement stm = conn.prepareStatement(query);
             stm.setInt(1, getNextID());
             stm.setInt(2, payment.getAppointmentID());
@@ -52,6 +56,8 @@ public class Payment {
             stm.setBoolean(5, payment.isPaid());
             stm.setDate(6, convertJavaDateToSqlDate(payment.getDateIssued()));
             stm.setDate(7, convertJavaDateToSqlDate(payment.getDatePaid()));
+            stm.setBoolean(8, false);
+            stm.setBoolean(9, false);
 
             stm.executeUpdate();
 
@@ -60,13 +66,14 @@ public class Payment {
         }
     }
 
-            //convert java and sql date compatability
+    //convert java and sql date compatability
     public static void updatePayment(Payment payment) {
         try {
             Connection conn = DBConnection.getInstance().getConnection();
 
             String query = "UPDATE Payment"
-                    + " SET appointmentID = ?, service = ?, price = ?, isPaid= ?, dateIssued = ?, datePaid = ?"
+                    + " SET appointmentID = ?, service = ?, price = ?, isPaid= ?, "
+                    + " dateIssued = ?, datePaid = ?, locked = ?"
                     + " WHERE paymentID = ?";
 
             PreparedStatement stm = conn.prepareStatement(query);
@@ -77,7 +84,8 @@ public class Payment {
             stm.setBoolean(4, payment.isPaid());
             stm.setDate(5, convertJavaDateToSqlDate(payment.getDateIssued()));
             stm.setDate(6, convertJavaDateToSqlDate(payment.getDatePaid()));
-            stm.setInt(7, payment.getPaymentID());
+            stm.setInt(8, payment.getPaymentID());
+            stm.setBoolean(7, payment.isLocked());
 
             stm.executeUpdate();
 
@@ -95,7 +103,7 @@ public class Payment {
         Connection conn = DBConnection.getInstance().getConnection();
 
         try {
-            String query = "DELETE FROM Payment WHERE PaymentID = ?";
+            String query = "UPDATE Payment SET locked = true WHERE PaymentID = ?";
             PreparedStatement stm = conn.prepareStatement(query);
             stm.setInt(1, paymentID);
 
@@ -123,8 +131,10 @@ public class Payment {
                 boolean isPaid = rs.getBoolean("isPaid");
                 Date dateIssued = rs.getDate("dateIssued");
                 Date datePaid = rs.getDate("datePaid");
-
-                payment = new Payment(paymentID, appointmentID, service, price, isPaid, dateIssued, datePaid);
+                boolean expired = rs.getBoolean("expired");
+                boolean locked = rs.getBoolean("locked");
+                payment = new Payment(paymentID, appointmentID, service, price, isPaid, 
+                        dateIssued, datePaid, expired, locked);
             }
         } catch (SQLException ex) {
             Logger.getLogger(Payment.class.getName()).log(Level.SEVERE, "Error getting payment paymentID=" + ID, ex);
@@ -209,5 +219,21 @@ public class Payment {
 
     public void setDatePaid(Date datePaid) {
         this.datePaid = datePaid;
+    }
+
+    public boolean isExpired() {
+        return expired;
+    }
+
+    public void setExpired(boolean expired) {
+        this.expired = expired;
+    }
+
+    public boolean isLocked() {
+        return locked;
+    }
+
+    public void setLocked(boolean locked) {
+        this.locked = locked;
     }
 }

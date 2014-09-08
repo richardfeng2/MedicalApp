@@ -24,10 +24,10 @@ public class Doctor extends Staff {
 
     public Doctor(int doctorID, int staffID, boolean isAdmin, boolean isNurse, boolean isDoctor,
             String username, String password, int personID, String firstName, String lastName,
-            boolean isPatient, boolean isStaff, String address, Date dateOfBirth, String contactNumber) {
+            boolean isPatient, boolean isStaff, String address, Date dateOfBirth, String contactNumber, boolean expired) {
 
         super(staffID, isAdmin, isNurse, isDoctor, username, password, personID, firstName, lastName,
-                isPatient, isStaff, address, dateOfBirth, contactNumber);
+                isPatient, isStaff, address, dateOfBirth, contactNumber, expired);
         this.doctorID = doctorID;
     }
 
@@ -95,25 +95,27 @@ public class Doctor extends Staff {
             PreparedStatement stm = conn.prepareStatement(query);
             stm.setInt(1, id);
 
-            ResultSet doctorResults = stm.executeQuery();
-            while (doctorResults.next()) {
-                int doctorID = doctorResults.getInt("doctorID");
-                int staffID = doctorResults.getInt("staffID");
-                int personID = doctorResults.getInt("personID");
-                String firstName = doctorResults.getString("firstName");
-                String lastName = doctorResults.getString("lastName");
-                boolean isPatient = doctorResults.getBoolean("isPatient");
-                boolean isStaff = doctorResults.getBoolean("isStaff");
-                boolean isAdmin = doctorResults.getBoolean("isAdmin");
-                boolean isNurse = doctorResults.getBoolean("isNurse");
-                boolean isDoctor = doctorResults.getBoolean("isDoctor");
-                String address = doctorResults.getString("address");
-                Date dateOfBirth = doctorResults.getDate("dateOfBirth");
-                String contactNumber = doctorResults.getString("contactNumber");
-                String username = doctorResults.getString("username");
-                String password = doctorResults.getString("password");
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                int doctorID = rs.getInt("doctorID");
+                int staffID = rs.getInt("staffID");
+                int personID = rs.getInt("personID");
+                String firstName = rs.getString("firstName");
+                String lastName = rs.getString("lastName");
+                boolean isPatient = rs.getBoolean("isPatient");
+                boolean isStaff = rs.getBoolean("isStaff");
+                boolean isAdmin = rs.getBoolean("isAdmin");
+                boolean isNurse = rs.getBoolean("isNurse");
+                boolean isDoctor = rs.getBoolean("isDoctor");
+                String address = rs.getString("address");
+                Date dateOfBirth = rs.getDate("dateOfBirth");
+                String contactNumber = rs.getString("contactNumber");
+                String username = rs.getString("username");
+                String password = rs.getString("password");
+                Boolean expired = rs.getBoolean("expired");
+                
                 doctor = new Doctor(doctorID, staffID, isAdmin, isNurse, isDoctor, username, password,
-                        personID, firstName, lastName, isPatient, isStaff, address, dateOfBirth, contactNumber);
+                        personID, firstName, lastName, isPatient, isStaff, address, dateOfBirth, contactNumber, expired);
             }
         } catch (SQLException ex) {
             Logger.getLogger(Person.class
@@ -138,30 +140,31 @@ public class Doctor extends Staff {
             stm.setString(1, firstName);
             stm.setString(2, lastName);
 
-            ResultSet doctorResults = stm.executeQuery();
-            while (doctorResults.next()) {
-                int doctorID = doctorResults.getInt("doctorID");
-                int staffID = doctorResults.getInt("staffID");
-                int personID = doctorResults.getInt("personID");
-                boolean isPatient = doctorResults.getBoolean("isPatient");
-                boolean isStaff = doctorResults.getBoolean("isStaff");
-                boolean isAdmin = doctorResults.getBoolean("isAdmin");
-                boolean isNurse = doctorResults.getBoolean("isNurse");
-                boolean isDoctor = doctorResults.getBoolean("isDoctor");
-                String address = doctorResults.getString("address");
-                Date dateOfBirth = doctorResults.getDate("dateOfBirth");
-                String contactNumber = doctorResults.getString("contactNumber");
-                String username = doctorResults.getString("username");
-                String password = doctorResults.getString("password");
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                int doctorID = rs.getInt("doctorID");
+                int staffID = rs.getInt("staffID");
+                int personID = rs.getInt("personID");
+                boolean isPatient = rs.getBoolean("isPatient");
+                boolean isStaff = rs.getBoolean("isStaff");
+                boolean isAdmin = rs.getBoolean("isAdmin");
+                boolean isNurse = rs.getBoolean("isNurse");
+                boolean isDoctor = rs.getBoolean("isDoctor");
+                String address = rs.getString("address");
+                Date dateOfBirth = rs.getDate("dateOfBirth");
+                String contactNumber = rs.getString("contactNumber");
+                String username = rs.getString("username");
+                String password = rs.getString("password");
+                Boolean expired = rs.getBoolean("expired");
+                
                 doctor = new Doctor(doctorID, staffID, isAdmin, isNurse, isDoctor, username, password,
-                        personID, firstName, lastName, isPatient, isStaff, address, dateOfBirth, contactNumber);
+                        personID, firstName, lastName, isPatient, isStaff, address, dateOfBirth, contactNumber, expired);
             }
         } catch (SQLException ex) {
             Logger.getLogger(Person.class
                     .getName()).log(Level.SEVERE, "Error getting doctor: " + firstName + " " + lastName, ex);
         }
         return doctor;
-
     }
 
     public static int getNextID() {

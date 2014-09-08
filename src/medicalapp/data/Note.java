@@ -22,22 +22,28 @@ public class Note {
     private int noteID;
     private int appointmentID;
     private String text;
+    private boolean expired;
+    private boolean locked;
 
-    public Note(int noteID, int appointmentID, String text) {
+    public Note(int noteID, int appointmentID, String text, boolean expired, boolean locked) {
         this.noteID = noteID;
         this.appointmentID = appointmentID;
         this.text = text;
+        this.expired = expired;
+        this.locked = locked;
     }
 
     public static void insertNote(Note note) {
         try {
             Connection conn = DBConnection.getInstance().getConnection();
 
-            String query = "INSERT INTO Note VALUES (?,?, ?)";
+            String query = "INSERT INTO Note VALUES (?,?,?,?,?)";
             PreparedStatement stm = conn.prepareStatement(query);
             stm.setInt(1, getNextID());
             stm.setInt(2, note.getAppointmentID());
             stm.setString(3, note.getText());
+            stm.setBoolean(4, false);
+            stm.setBoolean(5, false);
 
             stm.executeUpdate();
 
@@ -50,12 +56,13 @@ public class Note {
         try {
             Connection conn = DBConnection.getInstance().getConnection();
 
-            String query = "UPDATE Note SET Text = ? WHERE noteID = ?";
+            String query = "UPDATE Note SET text = ?, locked = ? WHERE noteID = ?";
 
             PreparedStatement stm = conn.prepareStatement(query);
 
             stm.setString(1, note.getText());
-            stm.setInt(2, note.getNoteID());
+            stm.setBoolean(2, note.isLocked());
+            stm.setInt(3, note.getNoteID());
 
             stm.executeUpdate();
 
@@ -72,7 +79,7 @@ public class Note {
         Connection conn = DBConnection.getInstance().getConnection();
 
         try {
-            String query = "DELETE FROM Note WHERE NoteID = ?";
+            String query = "UPDATE Note SET expired = true WHERE NoteID = ?";
             PreparedStatement stm = conn.prepareStatement(query);
             stm.setInt(1, noteID);
 
@@ -96,7 +103,11 @@ public class Note {
                 int noteID = rs.getInt("noteID");
                 int appointmentID = rs.getInt("appointmentID");
                 String text = rs.getString("text");
-                note = new Note(noteID, appointmentID, text);
+                Boolean expired = rs.getBoolean("expired");
+                Boolean locked = rs.getBoolean("locked");
+
+                note = new Note(noteID, appointmentID, text, expired, locked);
+                
             }
         } catch (SQLException ex) {
             Logger.getLogger(Note.class.getName()).log(Level.SEVERE, "Error getting note noteID=" + ID, ex);
@@ -146,6 +157,22 @@ public class Note {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public boolean isExpired() {
+        return expired;
+    }
+
+    public void setExpired(boolean expired) {
+        this.expired = expired;
+    }
+
+    public boolean isLocked() {
+        return locked;
+    }
+
+    public void setLocked(boolean locked) {
+        this.locked = locked;
     }
     
     

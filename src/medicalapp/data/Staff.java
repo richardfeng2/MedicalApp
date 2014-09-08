@@ -30,8 +30,8 @@ public class Staff extends Person {
 
     public Staff(int staffID, boolean isAdmin, boolean isNurse, boolean isDoctor, String username,
             String password, int personID, String firstName, String lastName,
-            boolean isPatient, boolean isStaff, String address, Date dateOfBirth, String contactNumber) {
-        super(personID, firstName, lastName, isPatient, isStaff, address, dateOfBirth, contactNumber);
+            boolean isPatient, boolean isStaff, String address, Date dateOfBirth, String contactNumber, boolean expired) {
+        super(personID, firstName, lastName, isPatient, isStaff, address, dateOfBirth, contactNumber, expired);
         this.staffID = staffID;
         this.isAdmin = isAdmin;
         this.isNurse = isNurse;
@@ -85,14 +85,14 @@ public class Staff extends Person {
         deleteStaff(staff.getStaffID());
     }
 
+    //Sets person's isStaff to false.
     public static void deleteStaff(int staffID) {
         Connection conn = DBConnection.getInstance().getConnection();
 
         try {
-            //Deleting Staff record does not delete Person record.
-            String query = "DELETE FROM Staff WHERE StaffID = ?";
+            String query = "UPDATE Person SET isStaff = false WHERE personID = ?";
             PreparedStatement stm = conn.prepareStatement(query);
-            stm.setInt(1, staffID);
+            stm.setInt(1, getStaff(staffID).getPersonID());
 
             stm.executeUpdate();
         } catch (SQLException ex) {
@@ -127,9 +127,10 @@ public class Staff extends Person {
                 String address = rs.getString("address");
                 Date dateOfBirth = rs.getDate("dateOfBirth");
                 String contactNumber = rs.getString("contactNumber");
+                boolean expired = rs.getBoolean("expired");
 
                 staff = new Staff(staffID, isAdmin, isNurse, isDoctor, username,
-                        password, personID, firstName, lastName, isPatient, isStaff, address, dateOfBirth, contactNumber);
+                        password, personID, firstName, lastName, isPatient, isStaff, address, dateOfBirth, contactNumber, expired);
             }
         } catch (SQLException ex) {
             Logger.getLogger(Person.class.getName()).log(Level.SEVERE, "Error getting staff staffID = " + id, ex);

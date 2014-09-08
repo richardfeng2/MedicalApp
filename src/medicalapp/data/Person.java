@@ -28,8 +28,10 @@ public class Person {
     private String address;
     private Date dateOfBirth;
     private String contactNumber;
+    private boolean expired;
 
-    public Person(int personID, String firstName, String lastName, boolean isPatient, boolean isStaff, String address, Date dateOfBirth, String contactNumber) {
+    public Person(int personID, String firstName, String lastName, boolean isPatient, 
+            boolean isStaff, String address, Date dateOfBirth, String contactNumber, boolean expired) {
         this.personID = personID;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -38,13 +40,14 @@ public class Person {
         this.address = address;
         this.dateOfBirth = dateOfBirth;
         this.contactNumber = contactNumber;
+        this.expired = expired;
     }
 
     public static void insertPerson(Person person) {
         try {
             Connection conn = DBConnection.getInstance().getConnection();
 
-            String query = "INSERT INTO Person VALUES (?,?,?,?,?,?,?,?)";
+            String query = "INSERT INTO Person VALUES (?,?,?,?,?,?,?,?,?)";
             PreparedStatement stm = conn.prepareStatement(query);
             stm.setInt(1, getNextID());
             stm.setString(2, person.getFirstName());
@@ -54,6 +57,7 @@ public class Person {
             stm.setDate(6, new java.sql.Date(person.getDateOfBirth().getTime()));
             stm.setBoolean(7, person.isPatient());
             stm.setBoolean(8, person.isStaff());
+            stm.setBoolean(9, false);
 
             stm.executeUpdate();
 
@@ -93,11 +97,12 @@ public class Person {
         deletePerson(person.getPersonID());
     }
 
+    //If someone asks to be removed from system, set expired = true.
     public static void deletePerson(int personID) {
         Connection conn = DBConnection.getInstance().getConnection();
 
         try {
-            String query = "DELETE FROM Person WHERE PersonID = ?";
+            String query = "UPDATE Person SET expired = true WHERE PersonID = ?";
             PreparedStatement stm = conn.prepareStatement(query);
             stm.setInt(1, personID);
 
@@ -126,8 +131,10 @@ public class Person {
                 String address = rs.getString("address");
                 Date dateOfBirth = rs.getDate("dateOfBirth");
                 String contactNumber = rs.getString("contactNumber");
-
-                person = new Person(personID, firstName, lastName, isPatient, isStaff, address, dateOfBirth, contactNumber);
+                Boolean expired = rs.getBoolean("expired");
+                
+                person = new Person(personID, firstName, lastName, isPatient, isStaff, address, 
+                        dateOfBirth, contactNumber, expired);
             }
         } catch (SQLException ex) {
             Logger.getLogger(Person.class.getName()).log(Level.SEVERE, "Error getting person personID=" + ID, ex);
@@ -223,4 +230,13 @@ public class Person {
     public static java.sql.Date convertJavaDateToSqlDate(java.util.Date date) {
         return new java.sql.Date(date.getTime());
     }
+
+    public boolean isExpired() {
+        return expired;
+    }
+
+    public void setExpired(boolean expired) {
+        this.expired = expired;
+    }
+    
 }

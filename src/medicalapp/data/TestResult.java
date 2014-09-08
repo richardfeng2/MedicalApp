@@ -10,10 +10,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static medicalapp.data.Person.convertJavaDateToSqlDate;
 
 /**
  *
@@ -21,39 +19,35 @@ import static medicalapp.data.Person.convertJavaDateToSqlDate;
  */
 public class TestResult {
 
-    int testResultID;
-    double weight;
-    String bloodPressure;
-    int heartRate;
-    double oxygenLevel;
-    double lungCapacity;
-    double oxygenUptake;
-    int appointmentID;
+    private int testResultID;
+    private double weight;
+    private String bloodPressure;
+    private int heartRate;
+    private double oxygenLevel;
+    private double lungCapacity;
+    private double oxygenUptake;
+    private int appointmentID;
+    private boolean expired;
+    private boolean locked;
 
-    public static int getNextID() {
-        int nextID = 0;
-        try {
-            Connection conn = DBConnection.getInstance().getConnection();
-            String query = "SELECT (MAX(testResultID) + 1) AS nextID FROM TestResult";
-            Statement stm = conn.createStatement();
-            ResultSet rs = stm.executeQuery(query);
-            if (rs.next()) {
-                nextID = rs.getInt("nextID");
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(Person.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        if (nextID == 0) {
-            nextID++;
-        }
-        return (nextID);
+    public TestResult(int testResultID, double weight, String bloodPressure, int heartRate, double oxygenLevel, double lungCapacity, double oxygenUptake, int appointmentID, boolean expired, boolean locked) {
+        this.testResultID = testResultID;
+        this.weight = weight;
+        this.bloodPressure = bloodPressure;
+        this.heartRate = heartRate;
+        this.oxygenLevel = oxygenLevel;
+        this.lungCapacity = lungCapacity;
+        this.oxygenUptake = oxygenUptake;
+        this.appointmentID = appointmentID;
+        this.expired = expired;
+        this.locked = locked;
     }
 
     public static void insertTestResult(TestResult testResult) {
         try {
             Connection conn = DBConnection.getInstance().getConnection();
 
-            String query = "INSERT INTO TestResult VALUES (?,?,?,?,?,?,?,?)";
+            String query = "INSERT INTO TestResult VALUES (?,?,?,?,?,?,?,?,?,?)";
             PreparedStatement stm = conn.prepareStatement(query);
             stm.setInt(1, getNextID());
             stm.setDouble(2, testResult.getWeight());
@@ -63,6 +57,8 @@ public class TestResult {
             stm.setDouble(6, testResult.getLungCapacity());
             stm.setDouble(7, testResult.getOxygenUptake());
             stm.setInt(8, testResult.getAppointmentID());
+            stm.setBoolean(9, false);
+            stm.setBoolean(10, false);
 
             stm.executeUpdate();
 
@@ -77,7 +73,7 @@ public class TestResult {
 
             String query = "UPDATE TestResult "
                     + "SET weight = ?, bloodPressure = ?, heartRate= ?, oxygenLevel = ?,"
-                    + "lungCapacity = ?, oxygenUptake = ?, appointmentID = ?"
+                    + "lungCapacity = ?, oxygenUptake = ?, appointmentID = ?, locked = ?"
                     + "WHERE testResultID = ?";
 
             PreparedStatement stm = conn.prepareStatement(query);
@@ -89,7 +85,8 @@ public class TestResult {
             stm.setDouble(5, testResult.getLungCapacity());
             stm.setDouble(6, testResult.getOxygenUptake());
             stm.setInt(7, testResult.getAppointmentID());
-            stm.setInt(8, testResult.getTestResultID());
+            stm.setBoolean(8, testResult.isLocked());
+            stm.setInt(9, testResult.getTestResultID());
 
             stm.executeUpdate();
 
@@ -101,12 +98,12 @@ public class TestResult {
     public static void deleteTestResult(TestResult testResult) {
         deleteTestResult(testResult.getTestResultID());
     }
-    
+
     public static void deleteTestResult(int testResultID) {
         Connection conn = DBConnection.getInstance().getConnection();
 
         try {
-            String query = "DELETE FROM TestResult WHERE testResultID = ?";
+            String query = "UPDATE TestResult SET expired = true WHERE testResultID = ?";
             PreparedStatement stm = conn.prepareStatement(query);
             stm.setInt(1, testResultID);
 
@@ -136,8 +133,11 @@ public class TestResult {
                 double lungCapacity = rs.getDouble("lungCapacity");
                 double oxygenUptake = rs.getDouble("oxygenUptake");
                 int appointmentID = rs.getInt("appointmentID");
+                Boolean expired = rs.getBoolean("expired");
+                Boolean locked = rs.getBoolean("locked");
 
-                testResult = new TestResult(testResultID, weight, bloodPressure, heartRate, oxygenLevel, lungCapacity, oxygenUptake, appointmentID);
+                testResult = new TestResult(testResultID, weight, bloodPressure, heartRate,
+                        oxygenLevel, lungCapacity, oxygenUptake, appointmentID, expired, locked);
             }
         } catch (SQLException ex) {
             Logger.getLogger(TestResult.class.getName()).log(Level.SEVERE, "Error getting testResult ID = " + id, ex);
@@ -145,15 +145,23 @@ public class TestResult {
         return testResult;
     }
 
-    public TestResult(int testResultID, double weight, String bloodPressure, int heartRate, double oxygenLevel, double lungCapacity, double oxygenUptake, int appointmentID) {
-        this.testResultID = testResultID;
-        this.weight = weight;
-        this.bloodPressure = bloodPressure;
-        this.heartRate = heartRate;
-        this.oxygenLevel = oxygenLevel;
-        this.lungCapacity = lungCapacity;
-        this.oxygenUptake = oxygenUptake;
-        this.appointmentID = appointmentID;
+    public static int getNextID() {
+        int nextID = 0;
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            String query = "SELECT (MAX(testResultID) + 1) AS nextID FROM TestResult";
+            Statement stm = conn.createStatement();
+            ResultSet rs = stm.executeQuery(query);
+            if (rs.next()) {
+                nextID = rs.getInt("nextID");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Person.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if (nextID == 0) {
+            nextID++;
+        }
+        return (nextID);
     }
 
     public int getTestResultID() {
@@ -218,6 +226,22 @@ public class TestResult {
 
     public void setAppointmentID(int appointmentID) {
         this.appointmentID = appointmentID;
+    }
+
+    public boolean isExpired() {
+        return expired;
+    }
+
+    public void setExpired(boolean expired) {
+        this.expired = expired;
+    }
+
+    public boolean isLocked() {
+        return locked;
+    }
+
+    public void setLocked(boolean locked) {
+        this.locked = locked;
     }
 
 }

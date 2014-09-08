@@ -26,34 +26,37 @@ public class Appointment {
     private Date date;
     private int patientID;
     private int doctorID;
-    private String description;
-    private Duration duration; //TO-DO: assume appointment duration is 15 minutes
+    private String purpose;
+    private Duration duration; //assume appointment duration is 15 minutes
     private String referringGP;
+    private boolean expired; //back-end boolean to keep track of cancelled and/or completed appointments
 
     public Appointment(int appointmentID, Date date, int patientID, int doctorID,
-            String description, Duration duration, String referringGP) {
+            String purpose, Duration duration, String referringGP, boolean expired) {
         this.appointmentID = appointmentID;
         this.date = date;
         this.patientID = patientID;
         this.doctorID = doctorID;
-        this.description = description;
+        this.purpose = purpose;
         this.duration = duration;
         this.referringGP = referringGP;
+        this.expired = expired;
     }
 
     public static void insertAppointment(Appointment appointment) {
         try {
             Connection conn = DBConnection.getInstance().getConnection();
 
-            String query = "INSERT INTO Appointment VALUES (?,?,?,?,?,?,?)";
+            String query = "INSERT INTO Appointment VALUES (?,?,?,?,?,?,?,?)";
             PreparedStatement stm = conn.prepareStatement(query);
-            stm.setInt(1, appointment.getAppointmentID());
+            stm.setInt(1, getNextID());
             stm.setTimestamp(2, convertJavaDateToSqlTimestamp(appointment.getDate()));
             stm.setInt(3, appointment.getPatientID());
             stm.setInt(4, appointment.getDoctorID());
-            stm.setString(5, appointment.getDescription());
+            stm.setString(5, appointment.getPurpose());
             stm.setDouble(6, durationToDouble(appointment.getDuration()));
             stm.setString(7, appointment.getReferringGP());
+            stm.setBoolean(8,false);
 
             stm.executeUpdate();
 
@@ -67,13 +70,13 @@ public class Appointment {
             Connection conn = DBConnection.getInstance().getConnection();
 
             String query = "UPDATE Appointment "
-                    + "SET Date = ?, description = ?, doctorID = ?, duration = ?, referringGP = ?"
+                    + "SET Date = ?, purpose = ?, doctorID = ?, duration = ?, referringGP = ?"
                     + "WHERE appointmentID = ?";
 
             PreparedStatement stm = conn.prepareStatement(query);
 
             stm.setDate(1, convertJavaDateToSqlDate(appointment.getDate()));
-            stm.setString(2, appointment.getDescription());
+            stm.setString(2, appointment.getPurpose());
             stm.setInt(3, appointment.getDoctorID());
             stm.setDouble(4, durationToDouble(appointment.getDuration()));
             stm.setString(5, appointment.getReferringGP());
@@ -89,11 +92,12 @@ public class Appointment {
         deleteAppointment(appointment.getAppointmentID());
     }
 
+    //Expired boolean true reflects deletion.
     public static void deleteAppointment(int appointmentID) {
         Connection conn = DBConnection.getInstance().getConnection();
 
         try {
-            String query = "DELETE FROM Appointment WHERE appointemntID = ?";
+            String query = "UDPATE Appointment SET expired = false WHERE appointemntID = ?";
             PreparedStatement stm = conn.prepareStatement(query);
             stm.setInt(1, appointmentID);
 
@@ -113,17 +117,17 @@ public class Appointment {
             PreparedStatement stm = conn.prepareStatement(query);
             stm.setInt(1, ID);
 
-            ResultSet appointmentResults = stm.executeQuery();
-            while (appointmentResults.next()) {
-                int appointmentID = appointmentResults.getInt("appointmentID");
-                Date date = appointmentResults.getDate("date");
-                int patientID = appointmentResults.getInt("patientID");
-                int doctorID = appointmentResults.getInt("doctorID");
-                String description = appointmentResults.getString("description");
-                //DB stores duration as a double. Convert double -> long -> Duration (minutes)
-                Duration duration = doubleToDuration(appointmentResults.getDouble("duration"));
-                String referringGP = appointmentResults.getString("referringGP");
-                appointment = new Appointment(appointmentID, date, patientID, doctorID, description, duration, referringGP);
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                int appointmentID = rs.getInt("appointmentID");
+                Date date = rs.getDate("date");
+                int patientID = rs.getInt("patientID");
+                int doctorID = rs.getInt("doctorID");
+                String purpose = rs.getString("purpose");
+                Duration duration = doubleToDuration(rs.getDouble("duration")); //DB stores duration as a double. Convert double -> long -> Duration (minutes)
+                String referringGP = rs.getString("referringGP");
+                Boolean expired = rs.getBoolean("expired");
+                appointment = new Appointment(appointmentID, date, patientID, doctorID, purpose, duration, referringGP,expired);
             }
         } catch (SQLException ex) {
             Logger.getLogger(Appointment.class.getName()).log(Level.SEVERE, null, ex);
@@ -203,12 +207,12 @@ public class Appointment {
         this.date = date;
     }
 
-    public String getDescription() {
-        return description;
+    public String getPurpose() {
+        return purpose;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setPurpose(String purpose) {
+        this.purpose = purpose;
     }
 
     public Duration getDuration() {
@@ -226,5 +230,15 @@ public class Appointment {
     public void setReferringGP(String referringGP) {
         this.referringGP = referringGP;
     }
+
+    public boolean isExpired() {
+        return expired;
+    }
+
+    public void setExpired(boolean expired) {
+        this.expired = expired;
+    }
+    
+    
 
 }

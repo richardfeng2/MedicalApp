@@ -7,9 +7,9 @@ package medicalapp;
 
 import java.util.Calendar;
 import java.util.Date;
-import medicalapp.data.Document;
-import static medicalapp.data.Document.deleteDocument;
-import static medicalapp.data.Document.updateDocument;
+import java.time.Duration;
+import medicalapp.data.Appointment;
+import static medicalapp.data.Appointment.insertAppointment;
 
 /**
  *
@@ -36,9 +36,11 @@ public class MedicalApp {
         cal.set(Calendar.DATE, 02);
         date = cal.getTime();
         
-       Document d = new Document(1,1,"Lung X-ray",null,true);
-       updateDocument(d, "C:\\Users\\Richard\\Pictures\\lungCancer.jpg");
-       deleteDocument(1);
-       
+//       Document d = new Document(1,1,"Lung X-ray",null,true);
+//       updateDocument(d, "C:\\Users\\Richard\\Pictures\\lungCancer.jpg");
+//       deleteDocument(1);
+  
+        Appointment a = new Appointment(1, date, 1, 1, "General checkup", Duration.ofMinutes(15), "Dr Tai", false);
+        insertAppointment(a);
     }
 }

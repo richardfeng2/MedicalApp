@@ -28,8 +28,8 @@ public class Patient extends Person {
 
     public Patient(int patientID, String billingInfo, ArrayList<String> conditions, int personID, String firstName,
             String lastName, boolean isPatient, boolean isStaff, String address, Date dateOfBirth,
-            String contactNumber) {
-        super(personID, firstName, lastName, isPatient, isStaff, address, dateOfBirth, contactNumber);
+            String contactNumber, boolean expired) {
+        super(personID, firstName, lastName, isPatient, isStaff, address, dateOfBirth, contactNumber, expired);
         this.patientID = patientID;
         this.billingInfo = billingInfo;
         this.conditions = conditions;
@@ -125,13 +125,14 @@ public class Patient extends Person {
         deletePerson(patient.getPersonID());
     }
 
+    //If patient asks his/her patient file to be removed, set Person's isPatient = false.
     public static void deletePatient(int patientID) {
         Connection conn = DBConnection.getInstance().getConnection();
 
         try {
-            String query = "DELETE FROM Patient WHERE PatientID = ?";
+            String query = "UPDATE Pereson SET isPatient = false WHERE personID = ?";
             PreparedStatement stm = conn.prepareStatement(query);
-            stm.setInt(1, patientID);
+            stm.setInt(1, getPatient(patientID).getPersonID());
 
             stm.executeQuery();
         } catch (SQLException ex) {
@@ -162,12 +163,13 @@ public class Patient extends Person {
                 String contactNumber = rs.getString("contactNumber");
                 String billingInfo = rs.getString("billingInfo");
                 String conditions = rs.getString("conditions");
+                boolean expired = rs.getBoolean("expired");
 
                 //String from db to arrayList
                 ArrayList<String> diagnosis = new ArrayList<>(Arrays.asList(conditions.split("; ")));
 
                 patient = new Patient(patientID, billingInfo, diagnosis, personID, firstName, lastName, isPatient,
-                        isStaff, address, dateOfBirth, contactNumber);
+                        isStaff, address, dateOfBirth, contactNumber, expired);
             }
         } catch (SQLException ex) {
             Logger.getLogger(Person.class
@@ -199,12 +201,13 @@ public class Patient extends Person {
                 String contactNumber = rs.getString("contactNumber");
                 String billingInfo = rs.getString("billingInfo");
                 String conditions = rs.getString("conditions");
+                boolean expired = rs.getBoolean("expired");
 
                 //String from db to arrayList
                 ArrayList<String> diagnosis = new ArrayList<>(Arrays.asList(conditions.split("; ")));
 
                 patient = new Patient(patientID, billingInfo, diagnosis, personID, firstName, lastName, isPatient,
-                        isStaff, address, dateOfBirth, contactNumber);
+                        isStaff, address, dateOfBirth, contactNumber,expired);
             }
         } catch (SQLException ex) {
             Logger.getLogger(Person.class.getName()).log(Level.SEVERE, "Error getting patient = "

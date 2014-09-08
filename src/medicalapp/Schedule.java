@@ -18,9 +18,9 @@ public class Schedule {
     //In GUI options of addresses should be displayed/generated when entering firstname and lastname. This addresses
     //common patient names. 
     //Doctor name is concatenated. 
-    //Description may be left optionally blank as "".
+    //Purpose may be left optionally blank as "".
     public static void createAppointment(String patientFirstName, String patientLastName,
-            String address, String doctorName, Date date, String description) {
+            String address, String doctorName, Date date, String purpose) {
 
         Appointment appointment = null;
 
@@ -37,7 +37,8 @@ public class Schedule {
         appointment.setDoctorID(Doctor.getDoctor(firstName, lastName).getDoctorID()); //expect bugs regarding doctors with common names
         appointment.setDuration(Duration.ofMinutes(15)); //Default duration of 15 minutes
         appointment.setReferringGP("TBA"); //Filled in upon checkin.
-        appointment.setDescription(description);
+        appointment.setPurpose(purpose);
+        appointment.setExpired(false);
 
         insertAppointment(appointment);
 
