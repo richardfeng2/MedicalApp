@@ -20,12 +20,12 @@ import java.util.logging.Logger;
 public class TestResult {
 
     private int testResultID;
-    private double weight;
-    private String bloodPressure;
-    private int heartRate;
-    private double oxygenLevel;
-    private double lungCapacity;
-    private double oxygenUptake;
+    private double weight; //kg's
+    private String bloodPressure; // "x/y"
+    private int heartRate; //bpm (beats per min)
+    private double oxygenLevel; // mmHg
+    private double lungCapacity; //%
+    private double oxygenUptake; //mL/min
     private int appointmentID;
     private boolean expired;
     private boolean locked;
