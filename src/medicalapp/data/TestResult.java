@@ -30,7 +30,9 @@ public class TestResult {
     private boolean expired;
     private boolean locked;
 
-    public TestResult(int testResultID, double weight, String bloodPressure, int heartRate, double oxygenLevel, double lungCapacity, double oxygenUptake, int appointmentID, boolean expired, boolean locked) {
+    public TestResult(int testResultID, double weight, String bloodPressure, int heartRate, 
+            double oxygenLevel, double lungCapacity, double oxygenUptake, int appointmentID,
+            boolean expired, boolean locked) {
         this.testResultID = testResultID;
         this.weight = weight;
         this.bloodPressure = bloodPressure;
