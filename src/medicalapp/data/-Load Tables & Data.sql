@@ -10,6 +10,7 @@ purpose varchar(255),
 duration double,
 referringGP varchar(255),
 expired boolean,
+finished boolean,
 PRIMARY KEY(appointmentID)
 );
 
@@ -144,4 +145,27 @@ INSERT INTO DOCTOR
       VALUES (1,3);
 INSERT INTO DOCTOR
       VALUES (2,4);
+
+INSERT INTO APPOINTMENT
+    VALUES (1,TIMESTAMP('2014-04-08 10:00:00'),1,1,'General Checkup',15,'Dr Who',false, true);
+INSERT INTO APPOINTMENT
+    VALUES (2,TIMESTAMP('2014-07-08 12:00:00'),2,2,'Respiratory Tests',15,'Dr Referrer',false, true);
+INSERT INTO APPOINTMENT
+    VALUES (3,TIMESTAMP('2014-09-30 14:15:00'),3,3,'General Checkup',15,'Dr Who',false, false);
+
+INSERT INTO PAYMENT
+    VALUES (1,1,'General Checkup', true, '2014-04-08','2014-04-08',false,true);
+INSERT INTO PAYMENT
+    VALUES (2,2,'Respiratory Tests', false, '2014-04-08',null,false,false);
+
+INSERT INTO TESTRESULT
+    VALUES (1, 60, '120/80',80, 75, 100, 250,1,false,true);
+INSERT INTO TESTRESULT
+    VALUES (2, 65, '110/90',85, 75, 90, 240,1,false,true);
+
+INSERT INTO NOTE
+    VALUES (1,1,'Patient has reported difficulty in breathing after collapsing in a 7km run', false,true);
+INSERT INTO NOTE
+    VALUES (2,2,'Patient has a history of substance abuse', false,true);
+
 
