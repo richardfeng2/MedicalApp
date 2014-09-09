@@ -30,7 +30,7 @@ public class TestResult {
     private boolean expired;
     private boolean locked;
 
-    public TestResult(int testResultID, double weight, String bloodPressure, int heartRate, 
+    public TestResult(int testResultID, double weight, String bloodPressure, int heartRate,
             double oxygenLevel, double lungCapacity, double oxygenUptake, int appointmentID,
             boolean expired, boolean locked) {
         this.testResultID = testResultID;
@@ -43,6 +43,34 @@ public class TestResult {
         this.appointmentID = appointmentID;
         this.expired = expired;
         this.locked = locked;
+    }
+
+    public static void insertTestResult(int appointmentID, double weight, String bloodPressure,
+            int heartRate, double oxygenLevel, double lungCapacity, double oxygenUptake) {
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+
+            String query = "INSERT INTO TestResult VALUES (?,?,?,?,?,?,?,?,?,?)";
+            PreparedStatement stm = conn.prepareStatement(query);
+            
+            int nextID = getNextID();
+            stm.setInt(1, nextID);
+            stm.setDouble(2, weight);
+            stm.setString(3, bloodPressure);
+            stm.setInt(4, heartRate);
+            stm.setDouble(5, oxygenLevel);
+            stm.setDouble(6, lungCapacity);
+            stm.setDouble(7, oxygenUptake);
+            stm.setInt(8, appointmentID);
+            stm.setBoolean(9, false);
+            stm.setBoolean(10, false);
+
+            stm.executeUpdate();
+
+            System.out.println("TestResultID: " + nextID + " inserted successfully.");
+        } catch (SQLException ex) {
+            Logger.getLogger(TestResult.class.getName()).log(Level.SEVERE, "Error inserting test result", ex);
+        }
     }
 
     public static void insertTestResult(TestResult testResult) {
@@ -65,7 +93,7 @@ public class TestResult {
             stm.executeUpdate();
 
         } catch (SQLException ex) {
-            Logger.getLogger(TestResult.class.getName()).log(Level.SEVERE, "Error inserting person", ex);
+            Logger.getLogger(TestResult.class.getName()).log(Level.SEVERE, "Error inserting testResult", ex);
         }
     }
 
@@ -140,6 +168,12 @@ public class TestResult {
 
                 testResult = new TestResult(testResultID, weight, bloodPressure, heartRate,
                         oxygenLevel, lungCapacity, oxygenUptake, appointmentID, expired, locked);
+
+                System.out.println("TestResultID\tAppointmentID\tWeight\tBlood Pressure\tHeart Rate\tOxygen Level"
+                        + "\tLung Capacity\tOxygen Uptake\tTaken on");
+                System.out.println(testResultID + "\t\t" + appointmentID + "\t\t" + weight + "kg\t" + 
+                        bloodPressure + " mmHg\t" + heartRate + " pbm\t\t" + oxygenLevel + " mmHg\t" + lungCapacity + "%\t\t"
+                        + oxygenUptake + " mL/min\t" + Appointment.getAppointment(appointmentID).getDate());
             }
         } catch (SQLException ex) {
             Logger.getLogger(TestResult.class.getName()).log(Level.SEVERE, "Error getting testResult ID = " + id, ex);

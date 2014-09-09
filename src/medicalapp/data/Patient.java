@@ -39,7 +39,7 @@ public class Patient extends Person {
         String string = "";
         for (String condition : conditions) {
             //formating use of semi-colon
-            if (!string.equals("")) {
+            if (string.equals("")) {
                 string += condition;
             } else {
                 string += "; " + condition;
@@ -49,36 +49,57 @@ public class Patient extends Person {
     }
 
     //Diagnose a new condition, then update to database.
-    public void addCondition(int patientID, String condition) {
-        getPatient(patientID).getConditions().add(condition);
+    public static void addCondition(int patientID, String condition) {
+        Patient patient = getPatient(patientID);
+        ArrayList<String> conditions = patient.getConditions();
+        conditions.add(condition);
         Connection conn = DBConnection.getInstance().getConnection();
         try {
             String query = "UPDATE Patient SET conditions = ? WHERE patientID = ?";
             PreparedStatement stm = conn.prepareStatement(query);
-            stm.setString(1, arrayToString(getPatient(patientID).getConditions()));
+            stm.setString(1, arrayToString(conditions));
             stm.setInt(2, patientID);
 
+            if(!(arrayToString(getPatient(patientID).getConditions())).contains(condition)){
+            
             stm.executeUpdate();
-            conn.close();
+            
 
+            System.out.println(getPatient(patientID).getFirstName()+ " " +
+                    getPatient(patientID).getLastName() + " " + "has successfully been"
+                    + " diagnosed with " + condition + ".");
+            }else{
+                System.out.println(getPatient(patientID).getFirstName()+ " " +
+                    getPatient(patientID).getLastName() + " " + "is already"
+                    + " diagnosed with " + condition + ".");
+            }
+            conn.close();
         } catch (SQLException ex) {
             Logger.getLogger(Patient.class.getName()).log(Level.SEVERE, "Error adding condition", ex);
         }
     }
 
     //Remove diagnosis of a condition, then update to database.
-    public void removeCondition(int patientID, String condition) {
-        getPatient(patientID).getConditions().remove(condition);
+    public static void removeCondition(int patientID, String condition) {
+       
+        Patient patient = getPatient(patientID);
+        
+        ArrayList<String> conditions = patient.getConditions();
+        conditions.remove(condition);
         Connection conn = DBConnection.getInstance().getConnection();
         try {
             String query = "UPDATE Patient SET conditions = ? WHERE patientID = ?";
             PreparedStatement stm = conn.prepareStatement(query);
-            stm.setString(1, arrayToString(getPatient(patientID).getConditions()));
+            stm.setString(1, arrayToString(conditions));
             stm.setInt(2, patientID);
 
             stm.executeUpdate();
-            conn.close();
+            
+            System.out.println(getPatient(patientID).getFirstName()+ " " +
+                    getPatient(patientID).getLastName() + "'s " + "diagnosis has successfully been"
+                    + " removed.");
 
+            conn.close();
         } catch (SQLException ex) {
             Logger.getLogger(Patient.class.getName()).log(Level.SEVERE, "Error removing condition", ex);
         }
@@ -145,6 +166,7 @@ public class Patient extends Person {
 
         Patient patient = null;
         try {
+            
             String query = "SELECT * FROM Patient INNER JOIN Person "
                     + "ON Patient.personID = Person.personID WHERE patientID = ?";
             PreparedStatement stm = conn.prepareStatement(query);
@@ -171,25 +193,25 @@ public class Patient extends Person {
                 patient = new Patient(patientID, billingInfo, diagnosis, personID, firstName, lastName, isPatient,
                         isStaff, address, dateOfBirth, contactNumber, expired);
             }
+            //conn.close();
         } catch (SQLException ex) {
             Logger.getLogger(Person.class
                     .getName()).log(Level.SEVERE, "Error getting patient patientID = " + id, ex);
         }
+        
         return patient;
     }
 
-     public static Patient getPatient(String firstName, String lastName, String address) {
+    public static void getPatient(String firstName, String lastName) {
         Connection conn = DBConnection.getInstance().getConnection();
 
-        Patient patient = null;
         try {
             String query = "SELECT * FROM Patient INNER JOIN Person "
                     + "ON Patient.personID = Person.personID "
-                    + "WHERE firstName = ? AND lastName = ? AND address = ?";
+                    + "WHERE firstName = ? AND lastName = ?";
             PreparedStatement stm = conn.prepareStatement(query);
             stm.setString(1, firstName);
             stm.setString(2, lastName);
-            stm.setString(3, address);
 
             ResultSet rs = stm.executeQuery();
             while (rs.next()) {
@@ -202,20 +224,52 @@ public class Patient extends Person {
                 String billingInfo = rs.getString("billingInfo");
                 String conditions = rs.getString("conditions");
                 boolean expired = rs.getBoolean("expired");
+                String address = rs.getString("address");
 
                 //String from db to arrayList
                 ArrayList<String> diagnosis = new ArrayList<>(Arrays.asList(conditions.split("; ")));
+                
+                if(!expired){
+                System.out.println(firstName + "\t" + lastName + "\t" + address);
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Person.class.getName()).log(Level.SEVERE, "Error getting patient = "
+                    + firstName + " " + lastName, ex);
+        }
+    }
+    
+    public static Patient getPatient(String firstName, String lastName, String address) {
+        Connection conn = DBConnection.getInstance().getConnection();
+        Patient patient = null;
 
-                patient = new Patient(patientID, billingInfo, diagnosis, personID, firstName, lastName, isPatient,
-                        isStaff, address, dateOfBirth, contactNumber,expired);
+        try {
+            String query = "SELECT * FROM Patient INNER JOIN Person "
+                    + "ON Patient.personID = Person.personID "
+                    + "WHERE firstName = ? AND lastName = ? AND address = ?";
+            PreparedStatement stm = conn.prepareStatement(query);
+            stm.setString(1, firstName);
+            stm.setString(2, lastName);
+            stm.setString(3, address);
+
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                int patientID = rs.getInt("patientID");
+                boolean expired = rs.getBoolean("expired");
+
+                patient = getPatient(patientID);
+                if(!expired){
+                System.out.println(firstName + "\t" + lastName + "\t" + address);
+                }
             }
         } catch (SQLException ex) {
             Logger.getLogger(Person.class.getName()).log(Level.SEVERE, "Error getting patient = "
                     + firstName + " " + lastName + " " + address, ex);
         }
+        
         return patient;
     }
-     
+
     //When inserting new records, increment the maximum ID by 1.
     public static int getNextID() {
         int nextID = 0;

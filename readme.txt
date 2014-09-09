@@ -1,7 +1,10 @@
 //To start server, enter these in cmd
 
-cd C:\Program Files\Java\jdk1.8.0\db\bin
+Enter "ipconfig" in cmd to find the IP ADDRESS
 
-startNetworkServer.bat -h <IP ADDRESS>
+Enter "cd C:\Program Files\Java\jdk1.8.0\db\bin"
 
-ipconfig
+Enter with your IP ADDRESS "startNetworkServer.bat -h <IP ADDRESS>"
+
+Home: 192.168.1.101
+Uni: ?

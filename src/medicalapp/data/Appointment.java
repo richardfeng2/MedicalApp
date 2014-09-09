@@ -11,6 +11,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Date;
 import java.util.logging.Level;
@@ -57,14 +59,29 @@ public class Appointment {
             stm.setString(5, appointment.getPurpose());
             stm.setDouble(6, durationToDouble(appointment.getDuration()));
             stm.setString(7, appointment.getReferringGP());
-            stm.setBoolean(8,false);
-            stm.setBoolean(9,false);
+            stm.setBoolean(8, false);
+            stm.setBoolean(9, false);
 
             stm.executeUpdate();
 
         } catch (SQLException ex) {
             Logger.getLogger(Person.class.getName()).log(Level.SEVERE, "Error inserting appointment", ex);
         }
+    }
+    
+        public static void insertAppointment(String patientFirstName, String patientLastName,
+            String address, String doctorName, Date date, String purpose) {
+
+        //splitting doctor's full name into parts.
+        String[] docFullName = doctorName.split(" ");
+        String firstName = docFullName[0];
+        String lastName = docFullName[1];
+
+        Appointment appointment = new Appointment(1, date, Patient.getPatient(patientFirstName, patientLastName, address)
+                .getPatientID(), Doctor.getDoctor(firstName, lastName).getDoctorID(), purpose,
+                Duration.ofMinutes(15), "", false, false); //bugs with same-name doctors. assume duration 15 minutes
+
+        insertAppointment(appointment);
     }
 
     public static void updateAppointment(Appointment appointment) {
@@ -83,7 +100,7 @@ public class Appointment {
             stm.setInt(3, appointment.getDoctorID());
             stm.setDouble(4, durationToDouble(appointment.getDuration()));
             stm.setString(5, appointment.getReferringGP());
-            stm.setBoolean(6,appointment.isFinished());
+            stm.setBoolean(6, appointment.isFinished());
             stm.setInt(7, appointment.getAppointmentID());
             stm.executeUpdate();
 
@@ -133,7 +150,7 @@ public class Appointment {
                 Boolean expired = rs.getBoolean("expired");
                 Boolean finished = rs.getBoolean("finished");
                 appointment = new Appointment(appointmentID, date, patientID, doctorID, purpose,
-                        duration, referringGP,expired, finished);
+                        duration, referringGP, expired, finished);
             }
         } catch (SQLException ex) {
             Logger.getLogger(Appointment.class.getName()).log(Level.SEVERE, null, ex);
@@ -141,6 +158,52 @@ public class Appointment {
         return appointment;
     }
 
+    //Get a patient's appointment upon checking in.
+    public static Appointment getAppointment(String firstName, String lastName, String address) {
+        Appointment appointment = null;
+        Connection conn = DBConnection.getInstance().getConnection();
+        try {
+            String query = "SELECT * FROM Patient "
+                    + "INNER JOIN Appointment "
+                    + "ON Patient.patientID = Appointment.patientID "
+                    + "INNER JOIN Doctor "
+                    + "ON Appointment.doctorID = Doctor.doctorID "
+                    + "WHERE Appointment.patientID = ? AND expired <> true "
+                    + "AND Appointment.finished <> true";
+            PreparedStatement stm = conn.prepareStatement(query);
+            stm.setInt(1, Patient.getPatient(firstName, lastName, address).getPatientID());
+            
+            ResultSet rs = stm.executeQuery();
+            while(rs.next()){
+                int appointmentID = rs.getInt("appointmentID");
+                Date date = rs.getTimestamp("date");
+                int patientID = rs.getInt("patientID");
+                int doctorID = rs.getInt("doctorID");
+                String purpose = rs.getString("purpose");
+                Duration duration = doubleToDuration(rs.getDouble("duration")); //DB stores duration as a double. Convert double -> long -> Duration (minutes)
+                String referringGP = rs.getString("referringGP");
+                Boolean expired = rs.getBoolean("expired");
+                Boolean finished = rs.getBoolean("finished");
+                appointment = new Appointment(appointmentID, date, patientID, doctorID, purpose,
+                        duration, referringGP, expired, finished);
+                
+                DateFormat timeFormat = new SimpleDateFormat("HH:mm");
+                DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+                
+                System.out.println("Appointment ID" + "\t\t" + "Patient" + "\t\t" + "Doctor" + 
+                        "\t\t" + "Time" + "\t"+ "Date");
+                System.out.println("\t" + appointment.getAppointmentID() + "\t\t" + firstName + " " + lastName + 
+                        "\t" + Doctor.getDoctor(doctorID).getFirstName() 
+                        + " " + Doctor.getDoctor(doctorID).getLastName() + "\t"
+                        + timeFormat.format(date) +
+                        "\t" + dateFormat.format(date));
+            }
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(Appointment.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return appointment;
+    }
     //Converts duration type to double type. Use when you want to input data in the DB.
     public static double durationToDouble(Duration duration) {
         return (double) duration.toMinutes();
@@ -180,7 +243,7 @@ public class Appointment {
         }
         return (nextID);
     }
-    
+
     public int getPatientID() {
         return patientID;
     }
