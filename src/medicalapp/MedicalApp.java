@@ -23,7 +23,6 @@ public class MedicalApp {
 
         //TODO :
         //consider services table with set of costs; changeLog table
-        //make a list of statements for demo purposes / add dummy data
 
         //Sample date
         Calendar cal = Calendar.getInstance();
