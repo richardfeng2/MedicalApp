@@ -20,10 +20,10 @@ public class MedicalApp {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-
+        
         //TODO :
         //consider services table with set of costs; changeLog table
-
+                
         //Sample date
         Calendar cal = Calendar.getInstance();
         Date date;
