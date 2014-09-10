@@ -7,8 +7,7 @@ package medicalapp;
 
 import java.util.Calendar;
 import java.util.Date;
-import static medicalapp.data.Appointment.getAppointment;
-import static medicalapp.data.Patient.removeCondition;
+import static medicalapp.data.Patient.getPatient;
 
 /**
  *
@@ -21,6 +20,7 @@ public class MedicalApp {
      */
     public static void main(String[] args) {
         
+        
         //TODO :
         //consider services table with set of costs; changeLog table
                 
@@ -31,7 +31,8 @@ public class MedicalApp {
         cal.set(Calendar.MONTH, 9);
         cal.set(Calendar.DATE, 10);
         date = cal.getTime();
-
+        
+        
 
         /*
             Schedule an appointment with John Smith, and Dr. Jacky Chan
@@ -41,7 +42,7 @@ public class MedicalApp {
         /*
             Checkin   
         */
-        //getPatient("John","Smith");
+       // getPatient("John","Smith");
         //getAppointment("John","Smith","123 Fake St, Fakeville");
 
         /*

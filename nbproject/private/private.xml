@@ -5,7 +5,11 @@
         <group>
             <file>file:/C:/Users/Richard/Documents/NetBeansProjects/MedicalApp/MedicalApp/src/medicalapp/data/Staff.java</file>
             <file>file:/C:/Users/Richard/Documents/NetBeansProjects/MedicalApp/MedicalApp/src/medicalapp/MedicalApp.java</file>
+            <file>file:/C:/Users/Richard/Documents/NetBeansProjects/MedicalApp/MedicalApp/src/medicalapp/Schedule.java</file>
+            <file>file:/C:/Users/Richard/Documents/NetBeansProjects/MedicalApp/MedicalApp/src/medicalapp/guilogin/GuiLogin.fxml</file>
+            <file>file:/C:/Users/Richard/Documents/NetBeansProjects/MedicalApp/MedicalApp/src/medicalapp/guilogin/GuiLoginController.java</file>
             <file>file:/C:/Users/Richard/Documents/NetBeansProjects/MedicalApp/MedicalApp/src/medicalapp/data/Patient.java</file>
+            <file>file:/C:/Users/Richard/Documents/NetBeansProjects/MedicalApp/MedicalApp/src/medicalapp/guilogin/GuiLogin.java</file>
             <file>file:/C:/Users/Richard/Documents/NetBeansProjects/MedicalApp/MedicalApp/src/medicalapp/data/Appointment.java</file>
         </group>
     </open-files>
