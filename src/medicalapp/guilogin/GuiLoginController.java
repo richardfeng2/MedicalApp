@@ -26,7 +26,7 @@ public class GuiLoginController implements Initializable {
     @FXML
     private PasswordField password;
     @FXML
-    private Label message;
+    private Label message; //label
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
