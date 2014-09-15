@@ -65,7 +65,7 @@ public class GuiLoginController implements Initializable {
             if (passwordDB.equals(passwordText) && !passwordText.equals("")) {
                 message.setText("\tWelcome " + firstName + " !");
             }else {
-                message.setText("Invalid login details.");
+                message.setText("Invalid login details. \n Please contact Tony Lu for IT support.");
             }
         } catch (SQLException ex) {
             Logger.getLogger(GuiLoginController.class.getName()).log(Level.SEVERE, null, ex);

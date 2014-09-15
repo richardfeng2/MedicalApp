@@ -68,8 +68,8 @@ public class Appointment {
             Logger.getLogger(Person.class.getName()).log(Level.SEVERE, "Error inserting appointment", ex);
         }
     }
-    
-        public static void insertAppointment(String patientFirstName, String patientLastName,
+
+    public static void insertAppointment(String patientFirstName, String patientLastName,
             String address, String doctorName, Date date, String purpose) {
 
         //splitting doctor's full name into parts.
@@ -82,6 +82,12 @@ public class Appointment {
                 Duration.ofMinutes(15), "", false, false); //bugs with same-name doctors. assume duration 15 minutes
 
         insertAppointment(appointment);
+        
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
+        System.out.println("Appointment Created");
+        System.out.println("Patient\t\tDoctor\t\tDate");
+        System.out.println(patientFirstName + " " + patientLastName + " "
+                + "\tDr. " + doctorName + "\t" + dateFormat.format(date));
     }
 
     public static void updateAppointment(Appointment appointment) {
@@ -172,9 +178,9 @@ public class Appointment {
                     + "AND Appointment.finished <> true";
             PreparedStatement stm = conn.prepareStatement(query);
             stm.setInt(1, Patient.getPatient(firstName, lastName, address).getPatientID());
-            
+
             ResultSet rs = stm.executeQuery();
-            while(rs.next()){
+            while (rs.next()) {
                 int appointmentID = rs.getInt("appointmentID");
                 Date date = rs.getTimestamp("date");
                 int patientID = rs.getInt("patientID");
@@ -186,24 +192,25 @@ public class Appointment {
                 Boolean finished = rs.getBoolean("finished");
                 appointment = new Appointment(appointmentID, date, patientID, doctorID, purpose,
                         duration, referringGP, expired, finished);
-                
+
                 DateFormat timeFormat = new SimpleDateFormat("HH:mm");
                 DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-                
-                System.out.println("Appointment ID" + "\t\t" + "Patient" + "\t\t" + "Doctor" + 
-                        "\t\t" + "Time" + "\t"+ "Date");
-                System.out.println("\t" + appointment.getAppointmentID() + "\t\t" + firstName + " " + lastName + 
-                        "\t" + Doctor.getDoctor(doctorID).getFirstName() 
+
+                System.out.println("Appointment ID" + "\t\t" + "Patient" + "\t\t" + "Doctor"
+                        + "\t\t" + "Time" + "\t" + "Date");
+                System.out.println("\t" + appointment.getAppointmentID() + "\t\t" + firstName + " " + lastName
+                        + "\t" + Doctor.getDoctor(doctorID).getFirstName()
                         + " " + Doctor.getDoctor(doctorID).getLastName() + "\t"
-                        + timeFormat.format(date) +
-                        "\t" + dateFormat.format(date));
+                        + timeFormat.format(date)
+                        + "\t" + dateFormat.format(date));
             }
-            
+
         } catch (SQLException ex) {
             Logger.getLogger(Appointment.class.getName()).log(Level.SEVERE, null, ex);
         }
         return appointment;
     }
+
     //Converts duration type to double type. Use when you want to input data in the DB.
     public static double durationToDouble(Duration duration) {
         return (double) duration.toMinutes();

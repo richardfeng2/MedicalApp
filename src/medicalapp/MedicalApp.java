@@ -8,6 +8,7 @@ package medicalapp;
 import java.util.Calendar;
 import java.util.Date;
 import static medicalapp.data.Patient.getPatient;
+import static medicalapp.data.Patient.removeCondition;
 
 /**
  *
@@ -26,35 +27,36 @@ public class MedicalApp {
                 
         //Sample date
         Calendar cal = Calendar.getInstance();
-        Date date;
         cal.set(Calendar.YEAR, 2014);
-        cal.set(Calendar.MONTH, 9);
-        cal.set(Calendar.DATE, 10);
-        date = cal.getTime();
+        //cal.set(Calendar.MONTH, 9);
+        //cal.set(Calendar.DATE, 10);
+        Date date = cal.getTime();
         
-        
+        /**
+         * Schedule an appointment with John Smith, and Dr. Jacky Chan
+         */
 
-        /*
-            Schedule an appointment with John Smith, and Dr. Jacky Chan
-        */
         //insertAppointment("John", "Smith", "123 Fake St, Fakeville", "Jacky Chan", date, "General Checkup");
         
-        /*
-            Checkin   
-        */
-       // getPatient("John","Smith");
+        /**
+         * Check in   
+         */
+        //getPatient("John","Smith");
         //getAppointment("John","Smith","123 Fake St, Fakeville");
 
-        /*
-            Test results
-        */
+        /**
+         * Test results
+         */
         //insertTestResult(4, 70, "140/120", 100, 40, 75, 230);
         //getTestResult(3);
         
-        /*
-            Diagnosis
-        */
+        /**
+         * Diagnosis
+         */
         //addCondition(getAppointment(4).getPatientID(), "Asthma");
+        //addCondition(getPatient(1).getPatientID(), "Bronchitis");
+        //addCondition(getPatient(1).getPatientID(), "Bronchitis");
+        removeCondition(getPatient(1).getPatientID(), "Bronchitis");
         //removeCondition(getAppointment(4).getPatientID(), "Asthma");
        
         
