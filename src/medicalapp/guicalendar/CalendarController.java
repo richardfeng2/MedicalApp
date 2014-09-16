@@ -30,7 +30,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.util.Duration;
+import medicalapp.data.Appointment;
+import medicalapp.data.Doctor;
 
 /**
  * FXML Controller class
@@ -64,6 +65,9 @@ public class CalendarController implements Initializable {
      */
     private static Label scheduleLabel;
     private static Label scheduleDateLabel;
+    private static ComboBox doctorCombo;
+    private static TilePane scheduleTile = new TilePane();
+    private static ArrayList<Button> timeBtn;
     /**
      * Initializes the controller class.
      */
@@ -300,7 +304,7 @@ public class CalendarController implements Initializable {
                 cellButton[column][row].setStyle("-fx-background-color: lightsalmon; -fx-alignment: center;");
                 currentDay = i; //initializes the schedule date label
             }
-            
+
         }
     }
 
@@ -337,47 +341,84 @@ public class CalendarController implements Initializable {
      */
     public static VBox initSchedule() {
         VBox scheduleBox = new VBox();
-        HBox scheduleLabelBox = new HBox();
+        HBox scheduleTitleBox = new HBox();
 
         scheduleLabel = new Label("Showing times for: ");
         scheduleDateLabel = new Label(currentDay + getDateSuffix(currentDay)
-                + " " + months.get(currentMonth) + " " + currentYear);
+                + " " + months.get(currentMonth) + " " + currentYear + "  ");
 
         scheduleDateLabel.setTextFill(Color.web("#0076a3"));
 
-        scheduleLabelBox.setPadding(new Insets(20, 10, 20, 0));
+        //Populate doctor combobox
+        doctorCombo = new ComboBox();
+        doctorCombo.getItems().add("All doctors");
+        doctorCombo.setValue("All doctors");
 
+        ArrayList<Doctor> doctors = new ArrayList<>();
+        for (int i = 1; i <= Doctor.getMaxID(); i++) {
+            doctors.add(Doctor.getDoctor(i));
+        }
+        for (Doctor doctor : doctors) {
+            doctorCombo.getItems().add("Dr. " + doctor.getFirstName() + " "
+                    + doctor.getLastName());
+        }
+
+        doctorCombo.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if (doctorCombo.getValue() != "All doctors" && !doctorCombo.getValue().toString().isEmpty()) {
+                    String name = doctorCombo.getValue().toString();
+                    String[] splitName = name.split("\\s+"); //split when at least one whitespace is identified
+
+                    refreshSchedule(currentDay, currentMonth, currentYear, Doctor.getDoctor(splitName[1], splitName[2]));
+                } else if (doctorCombo.getValue() == "All doctors") {
+                    //Check all timeslots & render.
+                }
+            }
+        });
+
+        //Add padding
+        scheduleTitleBox.setPadding(new Insets(20, 10, 10, 0));
         scheduleBox.setPadding(new Insets(10, 10, 10, 10));
         ScrollPane scheduleScroll = new ScrollPane();
-        TilePane scheduleTile = new TilePane();
+        scheduleTile = new TilePane();
         scheduleTile.setPrefColumns(4);
 
+        timeBtn = new ArrayList<>();
         //Create times 9-4.45pm, 15 min intervals
         for (int i = 0; i < 32; i++) {
+            timeBtn.add(new Button(""));
 
-            Button timeBtn = new Button("Put time here");
-            timeBtn.setPrefSize(100, 50);
-
+            //Set time for timeslot
             Calendar cal = Calendar.getInstance();
             cal.set(Calendar.HOUR, 9);
             cal.set(Calendar.MINUTE, 0);
             cal.set(Calendar.AM_PM, Calendar.AM);
-            cal.add(Calendar.MINUTE, 15 * i);
+            cal.add(Calendar.MINUTE, 15 * i); //15 minute intervals
 
             Date date = cal.getTime();
-
             SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a");
 
-            timeBtn.setText(timeFormat.format(date));
-            scheduleTile.getChildren().add(timeBtn);
+            timeBtn.get(i).setText(timeFormat.format(date));
+            timeBtn.get(i).setPrefSize(90, 50);
+
+            timeBtn.get(i).setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    
+                    System.out.println(timeFormat.format(date));                    
+                }
+            });
+            scheduleTile.getChildren().add(timeBtn.get(i));
         }
 
         scheduleScroll.setPrefSize(420, 315);
         scheduleScroll.setContent(scheduleTile);
 
-        scheduleLabelBox.getChildren().add(scheduleLabel);
-        scheduleLabelBox.getChildren().add(scheduleDateLabel);
-        scheduleBox.getChildren().add(scheduleLabelBox);
+        scheduleTitleBox.getChildren().add(scheduleLabel);
+        scheduleTitleBox.getChildren().add(scheduleDateLabel);
+        scheduleTitleBox.getChildren().add(doctorCombo);
+        scheduleBox.getChildren().add(scheduleTitleBox);
         scheduleBox.getChildren().add(scheduleScroll);
 
         return scheduleBox;
@@ -386,6 +427,67 @@ public class CalendarController implements Initializable {
     public static void refreshSchedule(int day, int month, int year) {
         scheduleDateLabel.setText(currentDay + getDateSuffix(currentDay)
                 + " " + months.get(currentMonth));
+        //refresh timeslots\
+        for (int i = 0; i < 32; i++) {
+
+        }
+
+        //take in new parameter, doctor/alldoctors
+    }
+
+    public static void refreshSchedule(int day, int month, int year, Doctor doctor) {
+
+        //Re-render buttons
+        for (int i = 0; i < 32; i++) {
+            timeBtn.get(i).setStyle("   -fx-base: honeydew;"
+                    + "    -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );");
+        }
+
+        System.out.println(doctor.getFirstName());
+        System.out.println(Appointment.getMaxID());
+        SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a");
+
+        //refresh timeslots\
+        //populate an arraylist of appointments
+        ArrayList<Appointment> appointments = new ArrayList<>();
+        Appointment appointment;
+        for (int i = 1; i <= Appointment.getMaxID(); i++) {
+            appointment = Appointment.getAppointment(i);
+            System.out.println(appointment.getAppointmentID());
+
+            //Get appointments only on dictated day, month, and year
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(appointment.getDate());
+            int apptDay = cal.get(Calendar.DAY_OF_MONTH);
+            int apptMonth = cal.get(Calendar.MONTH);
+            int apptYear = cal.get(Calendar.YEAR);
+            String name = doctorCombo.getValue().toString();
+            String[] splitName = name.split("\\s+"); //split when at least one whitespace is identified
+
+            if (Doctor.getDoctor(splitName[1], splitName[2]).getDoctorID() == appointment.getDoctorID()
+                    && !appointment.isExpired() && apptDay == day && apptMonth == month
+                    && apptYear == year) { //ignore expired appointments
+                appointments.add(appointment);
+            }
+        }
+
+        //Populate a list of booked out times from existing appointments
+        ArrayList<String> bookedTimes = new ArrayList<>();
+        for (int i = 0; i < appointments.size(); i++) {
+            System.out.println(timeFormat.format(appointments.get(i).getDate()));
+            bookedTimes.add(timeFormat.format(appointments.get(i).getDate()));
+        }
+
+        for (int i = 0; i < 32; i++) {//Scan time slots for any booked appointments, then render
+
+            if (bookedTimes.contains(timeBtn.get(i).getText())) { //appointment booked out at subject timeslot
+                //render button red + disable
+                timeBtn.get(i).setStyle(" -fx-base: expectsomeerrorlulz;"); //throws an css error, but resulting in a disabled button.
+                System.out.println("we have some app");
+                //unrender buttons + disable at every refresh
+                //TO-DO differentiate between doctors
+            }
+        }
     }
 
     public static String getDateSuffix(int day) {

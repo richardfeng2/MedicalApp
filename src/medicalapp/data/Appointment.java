@@ -82,7 +82,7 @@ public class Appointment {
                 Duration.ofMinutes(15), "", false, false); //bugs with same-name doctors. assume duration 15 minutes
 
         insertAppointment(appointment);
-        
+
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
         System.out.println("Appointment Created");
         System.out.println("Patient\t\tDoctor\t\tDate");
@@ -147,7 +147,7 @@ public class Appointment {
             ResultSet rs = stm.executeQuery();
             while (rs.next()) {
                 int appointmentID = rs.getInt("appointmentID");
-                Date date = rs.getDate("date");
+                Date date = rs.getTimestamp("date");
                 int patientID = rs.getInt("patientID");
                 int doctorID = rs.getInt("doctorID");
                 String purpose = rs.getString("purpose");
@@ -225,6 +225,10 @@ public class Appointment {
         return new java.sql.Date(date.getTime());
     }
 
+    public static java.util.Date convertSqlDateToJavaDate(java.sql.Date date) {
+        return new java.util.Date(date.getTime());
+    }
+
     //Store java date as a timestamp on DB. The reason being sql date doesnt have time.
     public static java.sql.Timestamp convertJavaDateToSqlTimestamp(java.util.Date date) {
         //Date dt = new Date(Calendar.getInstance().getTimeInMillis()); // Your exising sql Date .
@@ -249,6 +253,22 @@ public class Appointment {
             nextID++;
         }
         return (nextID);
+    }
+
+    public static int getMaxID() {
+        int maxID = 1;
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            String query = "SELECT (MAX(appointmentID)) AS maxID FROM Appointment";
+            Statement stm = conn.createStatement();
+            ResultSet rs = stm.executeQuery(query);
+            if (rs.next()) {
+                maxID = rs.getInt("maxID");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Person.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return maxID;
     }
 
     public int getPatientID() {

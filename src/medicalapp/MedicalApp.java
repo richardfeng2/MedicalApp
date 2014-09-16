@@ -5,10 +5,10 @@
  */
 package medicalapp;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import static medicalapp.data.Patient.getPatient;
-import static medicalapp.data.Patient.removeCondition;
+import medicalapp.data.Appointment;
 
 /**
  *
@@ -56,9 +56,21 @@ public class MedicalApp {
         //addCondition(getAppointment(4).getPatientID(), "Asthma");
         //addCondition(getPatient(1).getPatientID(), "Bronchitis");
         //addCondition(getPatient(1).getPatientID(), "Bronchitis");
-        removeCondition(getPatient(1).getPatientID(), "Bronchitis");
+        //removeCondition(getPatient(1).getPatientID(), "Bronchitis");
         //removeCondition(getAppointment(4).getPatientID(), "Asthma");
        
+        /**
+         * Test getDoctor
+         */
+        
+//        System.out.println(getDoctor(1).getFirstName());
+        
+        /**
+         * Get time from an appointment
+         */
+        
+        SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a");
+        System.out.println(timeFormat.format(Appointment.getAppointment(1).getDate()));
         
         //Attach document - lung cancer
         //End appointment

@@ -33,10 +33,6 @@ public class Calendar extends Application {
 
         primaryStage.setTitle("Calendar");
 
-
-        //((AnchorPane) root).getChildren().add(gridPane);
-        //Adding GridPane to the scene
-
         Scene scene = new Scene(root);
 
         primaryStage.setScene(scene);

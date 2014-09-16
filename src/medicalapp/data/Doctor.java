@@ -186,6 +186,23 @@ public class Doctor extends Staff {
         return (nextID);
     }
 
+    //Used to populate comboboxes
+    public static int getMaxID(){
+        int maxID = 1;
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            String query = "SELECT (MAX(doctorID)) AS maxID FROM Doctor";
+            Statement stm = conn.createStatement();
+            ResultSet rs = stm.executeQuery(query);
+            if (rs.next()) {
+                maxID = rs.getInt("maxID");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Person.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return maxID;
+    }
+    
     public int getDoctorID() {
         return doctorID;
     }
