@@ -193,6 +193,7 @@ public class CalendarController implements Initializable {
     }
 
     private static void refreshCalendar(int month, int year) {
+
         months.add("January");
         months.add("February");
         months.add("March");
@@ -255,11 +256,16 @@ public class CalendarController implements Initializable {
 
             cellButton[column][row].setText(String.valueOf(i));
 
-            //Event handler setting day label in schedule
+            //Event handler setting day label in schedule & refresh schedule
             cellButton[column][row].setOnAction((ActionEvent event) -> { //Select a cell button
                 currentDay = Integer.parseInt(cellButton[column][row].getText());
-                refreshSchedule(currentDay, currentMonth, currentYear);
+                //refresh schedule
+                if (doctorCombo.getValue() != "All doctors" && !doctorCombo.getValue().toString().isEmpty()) {
+                    String name = doctorCombo.getValue().toString();
+                    String[] splitName = name.split("\\s+"); //split when at least one whitespace is identified
 
+                    refreshSchedule(currentDay, currentMonth, currentYear, Doctor.getDoctor(splitName[1], splitName[2]));
+                }
                 //render all cells other than currently selected
                 for (int x = 0; x < 7; x++) {
                     for (int y = 0; y < 6; y++) {
@@ -304,8 +310,8 @@ public class CalendarController implements Initializable {
                 cellButton[column][row].setStyle("-fx-background-color: lightsalmon; -fx-alignment: center;");
                 currentDay = i; //initializes the schedule date label
             }
-
         }
+
     }
 
     public static void renderCalendar() {
@@ -341,11 +347,12 @@ public class CalendarController implements Initializable {
      */
     public static VBox initSchedule() {
         VBox scheduleBox = new VBox();
-        HBox scheduleTitleBox = new HBox();
+        TilePane scheduleTitlePane = new TilePane();
+        scheduleTitlePane.setPrefColumns(3);
 
-        scheduleLabel = new Label("Showing times for: ");
+        scheduleLabel = new Label("Times for: ");
         scheduleDateLabel = new Label(currentDay + getDateSuffix(currentDay)
-                + " " + months.get(currentMonth) + " " + currentYear + "  ");
+                + " " + months.get(currentMonth) + " " + currentYear);
 
         scheduleDateLabel.setTextFill(Color.web("#0076a3"));
 
@@ -362,7 +369,6 @@ public class CalendarController implements Initializable {
             doctorCombo.getItems().add("Dr. " + doctor.getFirstName() + " "
                     + doctor.getLastName());
         }
-
         doctorCombo.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -371,15 +377,13 @@ public class CalendarController implements Initializable {
                     String[] splitName = name.split("\\s+"); //split when at least one whitespace is identified
 
                     refreshSchedule(currentDay, currentMonth, currentYear, Doctor.getDoctor(splitName[1], splitName[2]));
+                    //setDocComboLayout();
+
                 } else if (doctorCombo.getValue() == "All doctors") {
                     //Check all timeslots & render.
                 }
             }
         });
-
-        //Add padding
-        scheduleTitleBox.setPadding(new Insets(20, 10, 10, 0));
-        scheduleBox.setPadding(new Insets(10, 10, 10, 10));
         ScrollPane scheduleScroll = new ScrollPane();
         scheduleTile = new TilePane();
         scheduleTile.setPrefColumns(4);
@@ -405,43 +409,46 @@ public class CalendarController implements Initializable {
             timeBtn.get(i).setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-                    
-                    System.out.println(timeFormat.format(date));                    
+
+                    System.out.println(timeFormat.format(date));
                 }
             });
             scheduleTile.getChildren().add(timeBtn.get(i));
         }
 
-        scheduleScroll.setPrefSize(420, 315);
+        scheduleScroll.setPrefSize(400, 315);
         scheduleScroll.setContent(scheduleTile);
-
-        scheduleTitleBox.getChildren().add(scheduleLabel);
-        scheduleTitleBox.getChildren().add(scheduleDateLabel);
-        scheduleTitleBox.getChildren().add(doctorCombo);
-        scheduleBox.getChildren().add(scheduleTitleBox);
+        
+        //Add padding
+        scheduleTitlePane.setPadding(new Insets(20, 10, 10, 0));
+        scheduleBox.setPadding(new Insets(10, 10, 10, 10));
+        
+        scheduleTitlePane.getChildren().add(scheduleLabel);
+        scheduleTitlePane.getChildren().add(scheduleDateLabel);
+        scheduleTitlePane.getChildren().add(doctorCombo);
+        scheduleBox.getChildren().add(scheduleTitlePane);
         scheduleBox.getChildren().add(scheduleScroll);
+        
+        renderSchedule();
 
         return scheduleBox;
     }
-
+    
     public static void refreshSchedule(int day, int month, int year) {
         scheduleDateLabel.setText(currentDay + getDateSuffix(currentDay)
-                + " " + months.get(currentMonth));
-        //refresh timeslots\
+                + " " + months.get(currentMonth) + " " + year);
+        renderSchedule();
+    }
+
+    public static void renderSchedule() {
         for (int i = 0; i < 32; i++) {
-
+            timeBtn.get(i).setStyle("-fx-base: honeydew; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6),5,0.0 ,0,1);");
         }
-
-        //take in new parameter, doctor/alldoctors
     }
 
     public static void refreshSchedule(int day, int month, int year, Doctor doctor) {
 
-        //Re-render buttons
-        for (int i = 0; i < 32; i++) {
-            timeBtn.get(i).setStyle("   -fx-base: honeydew;"
-                    + "    -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );");
-        }
+        refreshSchedule(day, month, year);
 
         System.out.println(doctor.getFirstName());
         System.out.println(Appointment.getMaxID());
@@ -470,22 +477,15 @@ public class CalendarController implements Initializable {
                 appointments.add(appointment);
             }
         }
-
         //Populate a list of booked out times from existing appointments
         ArrayList<String> bookedTimes = new ArrayList<>();
         for (int i = 0; i < appointments.size(); i++) {
             System.out.println(timeFormat.format(appointments.get(i).getDate()));
             bookedTimes.add(timeFormat.format(appointments.get(i).getDate()));
         }
-
         for (int i = 0; i < 32; i++) {//Scan time slots for any booked appointments, then render
-
             if (bookedTimes.contains(timeBtn.get(i).getText())) { //appointment booked out at subject timeslot
-                //render button red + disable
                 timeBtn.get(i).setStyle(" -fx-base: expectsomeerrorlulz;"); //throws an css error, but resulting in a disabled button.
-                System.out.println("we have some app");
-                //unrender buttons + disable at every refresh
-                //TO-DO differentiate between doctors
             }
         }
     }
@@ -496,15 +496,12 @@ public class CalendarController implements Initializable {
             case 21:
             case 31:
                 return ("st");
-
             case 2:
             case 22:
                 return ("nd");
-
             case 3:
             case 23:
                 return ("rd");
-
             default:
                 return ("th");
         }

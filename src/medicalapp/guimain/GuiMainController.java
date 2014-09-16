@@ -10,6 +10,8 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
@@ -82,6 +84,14 @@ public class GuiMainController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
+//        for (Node n : MedicalAppCalendar.getChildren()) {
+//            System.out.println("hello world");  
+//        }
     }    
+    
+//    public static group getGroup(AnchorPane parent){
+//        Group g = new Group();
+//        
+//    }
     
 }
