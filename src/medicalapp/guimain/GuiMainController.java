@@ -24,7 +24,10 @@ import javafx.scene.layout.AnchorPane;
  *
  * @author Tony
  */
-public class GuiMainController implements Initializable {
+public class GuiMainController implements Initializable{
+    
+    @FXML
+    private CalendarController calendarContoller;
     
     //FXML for the Search
     @FXML
