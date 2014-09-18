@@ -69,7 +69,7 @@
             </children>
         </AnchorPane>
         <TextField fx:id="MedicalAppSearch" layoutX="114.0" layoutY="37.0" prefHeight="28.0" prefWidth="1072.0" promptText="Search Patients" />
-        <AnchorPane fx:id="MedicalAppNewPatient" layoutX="122.0" layoutY="80.0" prefHeight="867.0" prefWidth="1199.0" visible="false">
+        <AnchorPane fx:id="MedicalAppNewPatient" layoutX="122.0" layoutY="80.0" prefHeight="867.0" prefWidth="1199.0" visible="false" >
             <children>
                 <Label layoutX="479.0" layoutY="42.0" text="New Patient Registration">
                     <font>

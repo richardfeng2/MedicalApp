@@ -37,12 +37,15 @@ public class Patient extends Person {
 
     public static String arrayToString(ArrayList<String> conditions) {
         String string = "";
-        for (String condition : conditions) {
-            //formating use of semi-colon
-            if (string.equals("")) {
-                string += condition;
-            } else {
-                string += "; " + condition;
+
+        if (!conditions.isEmpty()) {
+            for (String condition : conditions) {
+                //formating use of semi-colon
+                if (string.equals("")) {
+                    string += condition;
+                } else {
+                    string += "; " + condition;
+                }
             }
         }
         return string;
@@ -60,18 +63,17 @@ public class Patient extends Person {
             stm.setString(1, arrayToString(conditions));
             stm.setInt(2, patientID);
 
-            if(!(arrayToString(getPatient(patientID).getConditions())).contains(condition)){
-            
-            stm.executeUpdate();
-            
+            if (!(arrayToString(getPatient(patientID).getConditions())).contains(condition)) {
 
-            System.out.println(getPatient(patientID).getFirstName()+ " " +
-                    getPatient(patientID).getLastName() + " " + "has successfully been"
-                    + " diagnosed with " + condition + ".");
-            }else{
-                System.out.println(getPatient(patientID).getFirstName()+ " " +
-                    getPatient(patientID).getLastName() + " " + "is already"
-                    + " diagnosed with " + condition + ".");
+                stm.executeUpdate();
+
+                System.out.println(getPatient(patientID).getFirstName() + " "
+                        + getPatient(patientID).getLastName() + " " + "has successfully been"
+                        + " diagnosed with " + condition + ".");
+            } else {
+                System.out.println(getPatient(patientID).getFirstName() + " "
+                        + getPatient(patientID).getLastName() + " " + "is already"
+                        + " diagnosed with " + condition + ".");
             }
             conn.close();
         } catch (SQLException ex) {
@@ -81,9 +83,9 @@ public class Patient extends Person {
 
     //Remove diagnosis of a condition, then update to database.
     public static void removeCondition(int patientID, String condition) {
-       
+
         Patient patient = getPatient(patientID);
-        
+
         ArrayList<String> conditions = patient.getConditions();
         conditions.remove(condition);
         Connection conn = DBConnection.getInstance().getConnection();
@@ -94,9 +96,9 @@ public class Patient extends Person {
             stm.setInt(2, patientID);
 
             stm.executeUpdate();
-            
-            System.out.println(getPatient(patientID).getFirstName()+ " " +
-                    getPatient(patientID).getLastName() + "'s " + "diagnosis has successfully been"
+
+            System.out.println(getPatient(patientID).getFirstName() + " "
+                    + getPatient(patientID).getLastName() + "'s " + "diagnosis has successfully been"
                     + " removed.");
 
             conn.close();
@@ -115,7 +117,7 @@ public class Patient extends Person {
             stm.setInt(1, getNextID());
             stm.setInt(2, Person.getNextID());
             stm.setString(3, patient.getBillingInfo());
-            stm.setString(4, arrayToString(patient.getConditions()));
+            stm.setString(4, "");
 
             stm.executeUpdate();
 
@@ -166,7 +168,7 @@ public class Patient extends Person {
 
         Patient patient = null;
         try {
-            
+
             String query = "SELECT * FROM Patient INNER JOIN Person "
                     + "ON Patient.personID = Person.personID WHERE patientID = ?";
             PreparedStatement stm = conn.prepareStatement(query);
@@ -198,7 +200,7 @@ public class Patient extends Person {
             Logger.getLogger(Person.class
                     .getName()).log(Level.SEVERE, "Error getting patient patientID = " + id, ex);
         }
-        
+
         return patient;
     }
 
@@ -228,9 +230,9 @@ public class Patient extends Person {
 
                 //String from db to arrayList
                 ArrayList<String> diagnosis = new ArrayList<>(Arrays.asList(conditions.split("; ")));
-                
-                if(!expired){
-                System.out.println(firstName + "\t" + lastName + "\t" + address);
+
+                if (!expired) {
+                    System.out.println(firstName + "\t" + lastName + "\t" + address);
                 }
             }
         } catch (SQLException ex) {
@@ -238,7 +240,7 @@ public class Patient extends Person {
                     + firstName + " " + lastName, ex);
         }
     }
-    
+
     public static Patient getPatient(String firstName, String lastName, String address) {
         Connection conn = DBConnection.getInstance().getConnection();
         Patient patient = null;
@@ -258,15 +260,15 @@ public class Patient extends Person {
                 boolean expired = rs.getBoolean("expired");
 
                 patient = getPatient(patientID);
-                if(!expired){
-                System.out.println(firstName + "\t" + lastName + "\t" + address);
+                if (!expired) {
+                    System.out.println(firstName + "\t" + lastName + "\t" + address);
                 }
             }
         } catch (SQLException ex) {
             Logger.getLogger(Person.class.getName()).log(Level.SEVERE, "Error getting patient = "
                     + firstName + " " + lastName + " " + address, ex);
         }
-        
+
         return patient;
     }
 

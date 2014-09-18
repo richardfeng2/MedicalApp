@@ -18,10 +18,11 @@ import javafx.stage.Stage;
  * @author Tony
  */
 public class GuiMain extends Application {
+    public static Stage stage;
 
     @Override
     public void start(Stage primaryStage) throws IOException {
-        
+        stage = primaryStage;
         Parent root = FXMLLoader.load(getClass().getResource("GuiMain.fxml"));
         primaryStage.setTitle("MedicalApp");
         Scene scene = new Scene(root);
@@ -29,6 +30,10 @@ public class GuiMain extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
+    }
+
+    public static Stage getStage() {
+        return stage;
     }
 
 
