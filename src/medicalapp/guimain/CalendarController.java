@@ -32,6 +32,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import medicalapp.data.Appointment;
 import medicalapp.data.Doctor;
+import static medicalapp.guimain.GuiMainController.refreshTimetable;
 
 /**
  * FXML Controller class
@@ -259,6 +260,11 @@ public class CalendarController implements Initializable {
             //Event handler setting day label in schedule & refresh schedule
             cellButton[column][row].setOnAction((ActionEvent event) -> { //Select a cell button
                 currentDay = Integer.parseInt(cellButton[column][row].getText());
+                System.out.println("sup");
+
+                //refresh timetable
+                refreshTimetable();
+
                 //refresh schedule
                 if (doctorCombo.getValue() != "All doctors" && !doctorCombo.getValue().toString().isEmpty()) {
                     String name = doctorCombo.getValue().toString();
@@ -288,7 +294,9 @@ public class CalendarController implements Initializable {
                         }
                     }
                 }
+                //render selected cell
                 cellButton[column][row].setStyle("-fx-background-color: cyan; -fx-alignment: center;");
+
             });
 
             //highlight future days in month
@@ -311,7 +319,6 @@ public class CalendarController implements Initializable {
                 currentDay = i; //initializes the schedule date label
             }
         }
-
     }
 
     public static void renderCalendar() {
@@ -418,26 +425,27 @@ public class CalendarController implements Initializable {
 
         scheduleScroll.setPrefSize(400, 315);
         scheduleScroll.setContent(scheduleTile);
-        
+
         //Add padding
         scheduleTitlePane.setPadding(new Insets(20, 10, 10, 0));
         scheduleBox.setPadding(new Insets(10, 10, 10, 10));
-        
+
         scheduleTitlePane.getChildren().add(scheduleLabel);
         scheduleTitlePane.getChildren().add(scheduleDateLabel);
         scheduleTitlePane.getChildren().add(doctorCombo);
         scheduleBox.getChildren().add(scheduleTitlePane);
         scheduleBox.getChildren().add(scheduleScroll);
-        
+
         renderSchedule();
 
         return scheduleBox;
     }
-    
+
     public static void refreshSchedule(int day, int month, int year) {
         scheduleDateLabel.setText(currentDay + getDateSuffix(currentDay)
                 + " " + months.get(currentMonth) + " " + year);
         renderSchedule();
+
     }
 
     public static void renderSchedule() {
@@ -506,4 +514,17 @@ public class CalendarController implements Initializable {
                 return ("th");
         }
     }
+
+    public static int getCurrentMonth() {
+        return currentMonth;
+    }
+
+    public static int getCurrentYear() {
+        return currentYear;
+    }
+
+    public static int getCurrentDay() {
+        return currentDay;
+    }
+
 }

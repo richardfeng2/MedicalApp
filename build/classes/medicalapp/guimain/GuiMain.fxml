@@ -65,11 +65,17 @@
         <AnchorPane fx:id="MedicalAppCalendar" layoutX="111.0" layoutY="124.0" prefHeight="793.0" prefWidth="1072.0">
             <children>
                 <fx:include fx:id="AnchorPane" source="calendar.fxml" />
-                <ListView layoutX="17.0" layoutY="396.0" prefHeight="408.0" prefWidth="1046.0" />
+            <AnchorPane fx:id="timetableAnchorPane" layoutY="397.0" prefHeight="396.0" prefWidth="1079.0" />
             </children>
         </AnchorPane>
-        <TextField fx:id="MedicalAppSearch" layoutX="114.0" layoutY="37.0" prefHeight="28.0" prefWidth="1072.0" promptText="Search Patients" />
-        <AnchorPane fx:id="MedicalAppNewPatient" layoutX="122.0" layoutY="80.0" prefHeight="867.0" prefWidth="1199.0" visible="false" >
+        <AnchorPane fx:id="MedicalAppSearch" layoutX="111.0" layoutY="34.0" prefHeight="81.0" prefWidth="1034.0">
+            <children>
+                <!--<fx:include fx:id="SearchPane" source="Search.fxml" />-->
+              <TextField fx:id="searchTextField" layoutX="41.0" prefHeight="28.0" prefWidth="907.0" promptText="Search Patients" />
+            <ListView fx:id="searchList" layoutX="41.0" layoutY="31.0" prefHeight="41.0" prefWidth="907.0" />
+            </children>
+        </AnchorPane>
+        <AnchorPane fx:id="MedicalAppNewPatient" layoutX="122.0" layoutY="80.0" prefHeight="867.0" prefWidth="1199.0" visible="false">
             <children>
                 <Label layoutX="479.0" layoutY="42.0" text="New Patient Registration">
                     <font>
