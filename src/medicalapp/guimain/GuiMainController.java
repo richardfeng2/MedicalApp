@@ -19,17 +19,15 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Scene;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
@@ -41,11 +39,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
+import javafx.scene.layout.StackPane;
 import javax.swing.event.ChangeEvent;
 import medicalapp.data.Appointment;
 import static medicalapp.data.Appointment.doubleToDuration;
@@ -54,6 +48,7 @@ import medicalapp.data.Doctor;
 import medicalapp.data.Patient;
 import static medicalapp.data.Patient.insertPatient;
 import static medicalapp.data.Patient.searchPatients;
+import org.controlsfx.dialog.Dialogs;
 
 /**
  * FXML Controller class
@@ -137,33 +132,103 @@ public class GuiMainController implements Initializable {
         MedicalAppNewPatient.setVisible(false);
     }
 
-//    private void handleSearchTextField(ChangeEvent event) {
-//        refreshSearchList();
-//    }
-//
+    private void handleSearchTextField(ChangeEvent event) {
+        refreshSearchList();
+    }
+
     private void refreshSearchList() {
 
         searchList.setVisible(true);
         String searchTerm = searchTextField.getText().toLowerCase();
+        String[] splitTerm = searchTerm.split("\\s+");
 
-        ArrayList<Patient> patients = searchPatients(searchTerm);
-        ObservableList<String> searchResultItems = FXCollections.observableArrayList();
-
+        //remove duplicate results
+        ArrayList<Patient> patients = searchPatients(splitTerm);
+        for (int i = 0; i < patients.size(); i++) {
+            if (i != patients.size() - 1) {
+                if (patients.get(i).getPatientID() == patients.get(i + 1).getPatientID()) {
+                    patients.remove(patients.get(i));
+                }
+            }
+        }
+        ObservableList<StackPane> searchResultItems = FXCollections.observableArrayList();
+        ArrayList<Label> labels = new ArrayList<>();
         if (patients != null || !patients.isEmpty()) {
             for (Patient p : patients) {
-                searchResultItems.add(p.getFirstName() + " " + p.getLastName() + "\t" + p.getAddress());
+
+                Label label = new Label(p.getFirstName() + " " + p.getLastName() + "\t" + p.getAddress());
+                labels.add(label);
+                StackPane itemPane = new StackPane();
+
+                HBox labelBox = new HBox();
+                labelBox.setAlignment(Pos.CENTER_LEFT);
+
+                boolean match = true; //all search terms match patient fields
+
+                for (String term : splitTerm) {
+                    if (!label.getText().toLowerCase().contains(term.toLowerCase())) {
+                        match = false;
+                        System.out.println("false");
+                    }
+                }
+                
+                if (match ) {
+                    System.out.println("match");
+                    labelBox.getChildren().add(label);
+
+                    HBox buttonBox = new HBox();
+                    buttonBox.setAlignment(Pos.CENTER_RIGHT);
+
+                    Button appointmentButton = new Button("Set Appointment");
+                    buttonBox.getChildren().add(appointmentButton);
+
+                    itemPane.getChildren().add(labelBox);
+
+                    itemPane.getChildren().add(buttonBox);
+                    searchResultItems.add(itemPane);
+                }
             }
+            // remove duplicates
+            HashSet hs = new HashSet();
+            hs.addAll(searchResultItems);
+            searchResultItems.clear();
+            searchResultItems.addAll(hs);
+
             searchList.getItems().clear();
             searchList.setItems(searchResultItems);
-            searchList.setPrefHeight(searchResultItems.size() * 30 + 2); //row height is 24 px by default
-
+            searchList.setMaxHeight(searchList.USE_PREF_SIZE);
+            searchList.setPrefHeight(searchResultItems.size() * 40 + 2); //row height is 24 px by default
         }
         if (searchTextField.getText().equals("")) {
             searchList.setVisible(false);
-
         }
     }
 
+//    private void refreshSearchList() {
+//
+//        searchList.setVisible(true);
+//        String searchTerm = searchTextField.getText().toLowerCase();
+//
+//        ArrayList<Patient> patients = searchPatients(searchTerm);
+//        ObservableList<StackPane> searchResultItems = FXCollections.observableArrayList();
+//
+//        if (patients != null || !patients.isEmpty()) {
+//            for (Patient p : patients) {
+//                Label lbl = new Label(p.getFirstName() + " " + p.getLastName() + "\t" + p.getAddress());
+//                StackPane sp = new StackPane();
+//                sp.getChildren().add(lbl);
+//                searchResultItems.add(sp);
+//            }
+//            searchList.getItems().clear();
+//            searchList.setItems(searchResultItems);
+//            searchList.setPrefHeight(searchResultItems.size() * 30 + 2); //row height is 24 px by default
+//
+//        }
+//        if (searchTextField.getText().equals("")) {
+//            searchList.setVisible(false);
+//
+//        }
+//    }
     //Event handler when add patient icon is clicked
     private void handleAddPatientButton(MouseEvent event) {
 
@@ -177,15 +242,21 @@ public class GuiMainController implements Initializable {
                 || PatientAddAddressSuburb.getText() == null || PatientAddAddressPostcode.getText() == null
                 || PatientAddPrimaryContactNumber.getText() == null || PatientAddDateOfBirth.getValue() == null) {
 
-            //A new stage for popup dialog box0
-            final Stage dialog = new Stage();
-            dialog.initModality(Modality.APPLICATION_MODAL);
-            //dialog.initOwner(primaryStage);
-            VBox dialogVbox = new VBox(20);
-            dialogVbox.getChildren().add(new Text("Pls enter stuff into fields"));
-            Scene dialogScene = new Scene(dialogVbox, 300, 200);
-            dialog.setScene(dialogScene);
-            dialog.show();
+//            //A new stage for popup dialog box0
+//            final Stage dialog = new Stage();
+//            dialog.initModality(Modality.APPLICATION_MODAL);
+//            //dialog.initOwner(primaryStage);
+//            VBox dialogVbox = new VBox(20);
+//            dialogVbox.getChildren().add(new Text("Pls enter stuff into fields"));
+//            Scene dialogScene = new Scene(dialogVbox, 300, 200);
+//            dialog.setScene(dialogScene);
+//            dialog.show();
+            Dialogs.create()
+                    .owner(null)
+                    .title("Input Error")
+                    .masthead(null)
+                    .message("You seem to have input missing in some field(s). Please complete the fields correctly.")
+                    .showInformation();
 
             System.out.println("Submit clicked");
             System.out.println(PatientAddFirstName.getText());
@@ -196,7 +267,7 @@ public class GuiMainController implements Initializable {
             Date dateOfBirth = convertLocalDateToDate(PatientAddDateOfBirth.getValue());
             String address = PatientAddAddressStreetNumber.getText() + " "
                     + PatientAddAddressStreetName.getText() + " "
-                    + PatientAddAddressSuburb.getId() + " "
+                    + PatientAddAddressSuburb.getText() + " "
                     + PatientAddAddressPostcode.getText();
             String contactNumber = PatientAddPrimaryContactNumber.getText() + " / "
                     + PatientAddSecondaryContactNumber.getText();
@@ -332,8 +403,7 @@ public class GuiMainController implements Initializable {
         HBox timetableBox = new HBox();
         timetableBox.getChildren().add(initTimetable());
         timetableAnchorPane.getChildren().add(timetableBox);
-        
-        
+
     }
 
 //    public static group getGroup(AnchorPane parent){

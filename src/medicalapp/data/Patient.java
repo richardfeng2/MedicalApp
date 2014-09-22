@@ -16,6 +16,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -118,7 +119,7 @@ public class Patient extends Person {
             String query = "INSERT INTO Patient VALUES (?,?,?,?)";
             PreparedStatement stm = conn.prepareStatement(query);
             stm.setInt(1, getNextID());
-            stm.setInt(2, Person.getNextID());
+            stm.setInt(2, Person.getNextID()-1);
             stm.setString(3, patient.getBillingInfo());
             stm.setString(4, "");
 
@@ -244,48 +245,100 @@ public class Patient extends Person {
 //                    + firstName + " " + lastName, ex);
 //        }
 //    }
-    public static ArrayList<Patient> searchPatients(String searchTerm) {
+    public static ArrayList<Patient> searchPatients(String[] searchTerm) {
         Connection conn = DBConnection.getInstance().getConnection();
-
-        String[] splitTerm = searchTerm.split("\\s+");
 
         ArrayList<Patient> patients = new ArrayList<>();
 
-        for (String word : splitTerm) {
-                try {
-                    String query = "SELECT * FROM Patient INNER JOIN Person "
-                            + "ON Patient.personID = Person.personID "
-                            + "WHERE LCASE(firstName) LIKE ? OR LCASE(lastName) LIKE ? "
-                            + " OR LCASE(address) LIKE ?"
-                            + " AND expired <> true";
-                    PreparedStatement stm = conn.prepareStatement(query);
-                    stm.setString(1, "%" + word + "%");
-                    stm.setString(2, "%" + word + "%");
-                    stm.setString(3, "%" + word + "%");
+        for (String word : searchTerm) {
+            try {
+                String query = "SELECT * FROM Patient INNER JOIN Person "
+                        + "ON Patient.personID = Person.personID "
+                        + "WHERE LCASE(firstName) LIKE ? OR LCASE(lastName) LIKE ? "
+                        + " OR LCASE(address) LIKE ?"
+                        + " AND expired <> true";
+                PreparedStatement stm = conn.prepareStatement(query);
+                stm.setString(1, "%" + word + "%");
+                stm.setString(2, "%" + word + "%");
+                stm.setString(3, "%" + word + "%");
 
-                    ResultSet rs = stm.executeQuery();
-                    while (rs.next()) {
-                        int patientID = rs.getInt("patientID");
+                ResultSet rs = stm.executeQuery();
+                while (rs.next()) {
+                    int patientID = rs.getInt("patientID");
 
+                    if (patients.contains(getPatient(patientID))) { //Check if array already contains the patient
+                    } else {
                         patients.add(getPatient(patientID));
-                        System.out.println(patients.get(patients.size() - 1));
+                        System.out.println("Added " + getPatient(patientID).getFirstName());
                     }
-                } catch (SQLException ex) {
-                    Logger.getLogger(Person.class.getName()).log(Level.SEVERE, "Error getting patient = "
-                            + searchTerm, ex);
                 }
+            } catch (SQLException ex) {
+                Logger.getLogger(Person.class.getName()).log(Level.SEVERE, "Error getting patient = "
+                        + searchTerm, ex);
             }
+        }
+        
+        //removes duplicated results due to multiple search
+        if (patients != null || !patients.isEmpty()) {
+            int n = patients.size()/Array.getLength(searchTerm);
+            for (int i = patients.size()/Array.getLength(searchTerm); i < patients.size(); i++) {
+                patients.remove(i);
+            }
+            
+            return patients;
+        } else {
+            System.out.println("No patients added");
+            return null;
+        }
+    }
+
+    public static ArrayList<Patient> searchPatients(String searchTerm) {
+        Connection conn = DBConnection.getInstance().getConnection();
+
+        ArrayList<Patient> patients = new ArrayList<>();
+
+        try {
+            String query = "SELECT * FROM Patient INNER JOIN Person "
+                    + "ON Patient.personID = Person.personID "
+                    + "WHERE LCASE(firstName) LIKE ? OR LCASE(lastName) LIKE ? "
+                    + " OR LCASE(address) LIKE ?"
+                    + " AND expired <> true";
+            PreparedStatement stm = conn.prepareStatement(query);
+            stm.setString(1, "%" + searchTerm + "%");
+            stm.setString(2, "%" + searchTerm + "%");
+            stm.setString(3, "%" + searchTerm + "%");
+
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                int patientID = rs.getInt("patientID");
+
+                patients.add(getPatient(patientID));
+                System.out.println(patients.get(patients.size() - 1));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Person.class.getName()).log(Level.SEVERE, "Error getting patient = "
+                    + searchTerm, ex);
+        }
 
         if (patients != null || !patients.isEmpty()) {
-
-            //Delete unique elements from patiens, as they dont not share common split search terms
-            Multiset<Patient> patientMultiset = HashMultiset.create();
-            patientMultiset.addAll(patients);
-            for (Multiset.Entry<Patient> p : patientMultiset.entrySet()) {
-                if(p.getCount() != Array.getLength(splitTerm)){ //# of patient instances doesnt match # of search terms
-                    patients.remove(p); //remove from patients, coz not what search terms looking for
-                } 
-            }
+//
+//            //Delete unique elements from patiens, as they dont not share common split search terms
+//            Multiset<Patient> patientMultiset = HashMultiset.create();
+//            patientMultiset.addAll(patients);
+//            for (Multiset.Entry<Patient> p : patientMultiset.entrySet()) {
+//                for (int i = 0; i < Array.getLength(splitTerm); i++) {
+//                    if(p.getElement().getPersonID() != p.)
+//                }
+//                
+//                if (p.getCount() != Array.getLength(splitTerm)) { //# of patient instances doesnt match # of search terms
+//                    patients.remove(p); //remove non duplicates, coz not what search terms looking for
+//                }
+//                // remove duplicates
+//                HashSet hs = new HashSet();
+//                hs.addAll(patients);
+//                patients.clear();
+//                patients.addAll(hs);
+//            }
 
             return patients;
         } else {

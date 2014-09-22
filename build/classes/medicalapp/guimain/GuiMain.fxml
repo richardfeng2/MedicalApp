@@ -8,7 +8,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" prefHeight="987.0" prefWidth="1113.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="medicalapp.guimain.GuiMainController">
+<AnchorPane id="AnchorPane" prefHeight="986.0" prefWidth="1038.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="medicalapp.guimain.GuiMainController">
     <children>
         <AnchorPane fx:id="MedicalAppMenu" layoutX="14.0" layoutY="180.0" prefHeight="652.0" prefWidth="97.0">
             <children>
@@ -62,10 +62,10 @@
                 </ImageView>
             </children>
         </AnchorPane>
-        <AnchorPane fx:id="MedicalAppCalendar" layoutX="111.0" layoutY="124.0" prefHeight="793.0" prefWidth="1072.0">
+        <AnchorPane fx:id="MedicalAppCalendar" layoutX="111.0" layoutY="121.0" prefHeight="796.0" prefWidth="773.0">
             <children>
                 <fx:include fx:id="AnchorPane" source="calendar.fxml" />
-            <AnchorPane fx:id="timetableAnchorPane" layoutY="397.0" prefHeight="396.0" prefWidth="1079.0" />
+            <AnchorPane fx:id="timetableAnchorPane" layoutY="408.0" prefHeight="385.0" prefWidth="945.0" />
             </children>
         </AnchorPane>
         <AnchorPane fx:id="MedicalAppSearch" layoutX="111.0" layoutY="34.0" prefHeight="81.0" prefWidth="1034.0">
@@ -106,5 +106,6 @@
                 <Button fx:id="PatientAddSubmit" layoutX="826.0" layoutY="456.0" mnemonicParsing="false" text="Submit" />
             </children>
         </AnchorPane>
+      <AnchorPane fx:id="MedicalAppNewAppointment" layoutX="149.0" layoutY="129.0" prefHeight="757.0" prefWidth="907.0" visible="false" />
     </children>
 </AnchorPane>
