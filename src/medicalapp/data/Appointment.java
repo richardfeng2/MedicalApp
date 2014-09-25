@@ -69,25 +69,18 @@ public class Appointment {
         }
     }
 
-    public static void insertAppointment(String patientFirstName, String patientLastName,
-            String address, String doctorName, Date date, String purpose) {
+    public static void insertAppointment(Patient patient, Doctor doctor, Date date, int duration, String purpose) {
 
-        //splitting doctor's full name into parts.
-        String[] docFullName = doctorName.split(" ");
-        String firstName = docFullName[0];
-        String lastName = docFullName[1];
-
-        Appointment appointment = new Appointment(1, date, Patient.getPatient(patientFirstName, patientLastName, address)
-                .getPatientID(), Doctor.getDoctor(firstName, lastName).getDoctorID(), purpose,
-                Duration.ofMinutes(15), "", false, false); //bugs with same-name doctors. assume duration 15 minutes
+        Appointment appointment = new Appointment(1, date, patient.getPatientID(),
+                doctor.getDoctorID(), purpose, Duration.ofMinutes(duration), "", false, false); 
 
         insertAppointment(appointment);
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
         System.out.println("Appointment Created");
         System.out.println("Patient\t\tDoctor\t\tDate");
-        System.out.println(patientFirstName + " " + patientLastName + " "
-                + "\tDr. " + doctorName + "\t" + dateFormat.format(date));
+        System.out.println(patient.getFirstName() + " " + patient.getLastName() + " "
+                + "\tDr. " + doctor.getLastName() + "\t" + dateFormat.format(date));
     }
 
     public static void updateAppointment(Appointment appointment) {

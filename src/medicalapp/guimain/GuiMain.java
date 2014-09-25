@@ -8,7 +8,6 @@ package medicalapp.guimain;
 import java.io.IOException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Cursor;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -18,6 +17,7 @@ import javafx.stage.Stage;
  * @author Tony
  */
 public class GuiMain extends Application {
+
     public static Stage stage;
 
     @Override
@@ -28,17 +28,12 @@ public class GuiMain extends Application {
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.show();
-
+    }
+        /**
+         * @param args the command line arguments
+         */
+        public static void main(String[] args) {
+            launch(args);
+        }
     }
 
-    public static Stage getStage() {
-        return stage;
-    }
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        launch(args);
-    }
-}
