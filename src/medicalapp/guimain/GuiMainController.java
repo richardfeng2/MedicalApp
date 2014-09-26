@@ -5,6 +5,7 @@
  */
 package medicalapp.guimain;
 
+import java.awt.Font;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,30 +25,30 @@ import java.util.HashSet;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Control;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.Labeled;
 import javafx.scene.control.ListView;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Toggle;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -59,10 +60,12 @@ import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javax.swing.event.ChangeEvent;
+import static jdk.nashorn.internal.objects.NativeFunction.bind;
 import medicalapp.data.Appointment;
 import static medicalapp.data.Appointment.doubleToDuration;
 import medicalapp.data.DBConnection;
 import medicalapp.data.Doctor;
+import static medicalapp.data.Doctor.getDoctor;
 import static medicalapp.data.Doctor.getDoctor;
 import medicalapp.data.Patient;
 import static medicalapp.data.Patient.insertPatient;
@@ -103,19 +106,22 @@ public class GuiMainController implements Initializable {
     private static Label scheduleDateLabel;
     private static ComboBox doctorCombo;
     private static TilePane scheduleTile = new TilePane();
-    private static ArrayList<Button> timeBtn;
+    private static ArrayList<ToggleButton> timeBtn;
+    final private static ToggleGroup timeBtnGroup = new ToggleGroup();
 
     private static HBox calDashBoard;
 
     /**
      * Fields for timetable
      */
-    private static ScrollPane timetablePane;
+    private static AnchorPane timetableAnchor = new AnchorPane();
+    private static ScrollPane timetableScroll;
 
     /**
      * Fields for search
      */
-    private static Patient currentPatient;
+    private static Patient currentPatient = null;
+    private static Label currentPatientName = new Label("");
 
     //FXML for the Search
     @FXML
@@ -237,10 +243,13 @@ public class GuiMainController implements Initializable {
                         public void handle(ActionEvent e) {
                             searchList.setVisible(false);
                             timetableAnchorPane.setVisible(false);
+                            MedicalAppNewPatient.setVisible(false);
+                            MedicalAppCalendar.setVisible(true);
                             calDashBoard.getChildren().get(1).setVisible(true); //Set schedule visible false
 //                            MedicalAppNewAppointment.setVisible(true);
 
                             currentPatient = p; //set the selected patient corresponding to button
+                            currentPatientName.setText(p.getFirstName() + " " + p.getLastName());
                         }
                     });
 
@@ -326,13 +335,40 @@ public class GuiMainController implements Initializable {
     }
 
     public static ScrollPane initTimetable() {
-        timetablePane = new ScrollPane();
-        timetablePane.setPrefSize(800, 200);
+        timetableScroll = new ScrollPane();
+        timetableScroll.setPrefSize(800, 400);
         refreshTimetable();
-        return timetablePane;
+        return timetableScroll;
     }
 
     public static void refreshTimetable() {
+        if (!timetableAnchor.getChildren().isEmpty()) {
+            timetableAnchor.getChildren().clear();
+//            timetableAnchor.getChildren().remove(0); //TO-DO: remove list of labels.
+        }
+
+        VBox timeBox = new VBox();
+        for (int i = 0; i < 48; i++) { //48 15 minute timeslots
+
+            //Set time for timeslot
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.HOUR, 9);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.AM_PM, Calendar.AM);
+            cal.add(Calendar.MINUTE, 15 * i); //15 minute intervals
+
+            Date date = cal.getTime();
+            SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
+
+            Label timeLbl = new Label(timeFormat.format(date));
+            timeLbl.prefWidthProperty().bind(timeBox.widthProperty());
+            timeLbl.prefHeightProperty().bind(timeBox.heightProperty());
+
+            timeLbl.setStyle("-fx-border-color: lightgrey");;
+            timeBox.getChildren().add(timeLbl);
+
+        }
+
         ArrayList<Doctor> doctors = new ArrayList<>();
         ArrayList<Appointment> appointments = new ArrayList<>();
 
@@ -365,35 +401,36 @@ public class GuiMainController implements Initializable {
             } catch (SQLException ex) {
                 Logger.getLogger(GuiMainController.class.getName()).log(Level.SEVERE, "Error getting appointments from doctor" + doctor.getDoctorID(), ex);
             }
-            if (!appointments.isEmpty()) {
 
+            timeBox.setPrefSize(doctors.size() * 90, 48 * 50);
+            System.out.println(doctors.size());
+            timeBox.setStyle("-fx-border-color: lightgrey; -fx-background-color: white;");
+            if (!appointments.isEmpty()) {
                 for (Appointment a : appointments) {
                     Calendar cal = Calendar.getInstance();
                     cal.setTime(a.getDate());
                     int day = cal.get(Calendar.DAY_OF_MONTH);
                     int month = cal.get(Calendar.MONTH);
                     int year = cal.get(Calendar.YEAR);
-                    System.out.println("timetable: read " + appointments.get(appointments.size() - 1).getAppointmentID());
 
-                    if (day == getCurrentDay() && month == getCurrentMonth()
-                            && year == getCurrentYear()) {
+                    if (day == currentDay && month == currentMonth && year == currentYear) {
                         Label label = new Label(Patient.getPatient(a.getPatientID()).getFirstName() + " "
-                                + Patient.getPatient(a.getPatientID()).getFirstName());
-                        label.setLayoutX((doctors.indexOf(doctor) / doctors.size() - 1) * timetablePane.getWidth()); //set layout according to placement of doctor in table column
+                                + Patient.getPatient(a.getPatientID()).getLastName());
 
+                        label.setLayoutX((doctors.indexOf(doctor) / doctors.size() - 1) * timetableAnchor.getWidth() + 90); //set layout according to placement of doctor in table column
+                        //label.layoutXProperty().bind(timeBox.widthProperty().multiply((doctors.indexOf(doctor))).add(1).divide( doctors.size()));
                         Date date = a.getDate();
                         DateFormat timeFormat = new SimpleDateFormat("HH:mm");
                         String time = timeFormat.format(date);
-                        label.setLayoutY((toMins(time) / 8 * 4 * 15) * timetablePane.getHeight()); //set layout according to proportion of 9-5pm time slots (32 of 15 min. slots)
+                        label.setLayoutY((toMins(time) - (9 * 60)) / 15 * 50); //(Time of appointment minus 9.00am) * height of 15 minute time labels
+                        //label.setPrefHeight((a.getDuration().toMinutes() /  15) * timetableAnchor.getHeight()); //set height of label reflecting its duration vs. height of timetable
+                        label.prefHeightProperty().bind(timeBox.heightProperty().multiply(a.getDuration().toMinutes()).divide(15).divide(48));
+                        
+                        label.setStyle("-fx-border-color: green; -fx-background-color: lightgreen;");
 
-                        label.setPrefHeight((a.getDuration().toMinutes() / 8 * 4 * 15) * timetablePane.getHeight()); //set height of label reflecting its duration vs. height of timetable
-                        label.setStyle("-fx-border-color: black;");
-
-                        timetablePane.setContent(label);
-                        System.out.println("theres an appointment on that date");
-
+                        timetableAnchor.getChildren().addAll(timeBox, label);
+                        timetableScroll.setContent(timetableAnchor);
                     }
-
                 }
             }
         }
@@ -481,13 +518,20 @@ public class GuiMainController implements Initializable {
         Label thuLabel = new Label("Thu");
         Label friLabel = new Label("Fri");
         Label satLabel = new Label("Sat");
-        sunLabel.setPrefSize(50, 30);
-        monLabel.setPrefSize(50, 30);
-        tueLabel.setPrefSize(50, 30);
-        wedLabel.setPrefSize(50, 30);
-        thuLabel.setPrefSize(50, 30);
-        friLabel.setPrefSize(50, 30);
-        satLabel.setPrefSize(50, 30);
+        sunLabel.setPrefSize(50 / 2, 30 / 2);
+        monLabel.setPrefSize(50 / 2, 30 / 2);
+        tueLabel.setPrefSize(50 / 2, 30 / 2);
+        wedLabel.setPrefSize(50 / 2, 30 / 2);
+        thuLabel.setPrefSize(50 / 2, 30 / 2);
+        friLabel.setPrefSize(50 / 2, 30 / 2);
+        satLabel.setPrefSize(50 / 2, 30 / 2);
+//        sunLabel.setPrefSize(50, 30);
+//        monLabel.setPrefSize(50, 30);
+//        tueLabel.setPrefSize(50, 30);
+//        wedLabel.setPrefSize(50, 30);
+//        thuLabel.setPrefSize(50, 30);
+//        friLabel.setPrefSize(50, 30);
+//        satLabel.setPrefSize(50, 30);
         headerBox.getChildren().add(sunLabel);
         headerBox.getChildren().add(monLabel);
         headerBox.getChildren().add(tueLabel);
@@ -514,7 +558,6 @@ public class GuiMainController implements Initializable {
     }
 
     private static void refreshCalendar(int month, int year) {
-
         months.add("January");
         months.add("February");
         months.add("March");
@@ -558,7 +601,8 @@ public class GuiMainController implements Initializable {
 
                 //Initializing 2D buttons with values i,j
                 cellButton[i][j] = new Button("");
-                cellButton[i][j].setPrefSize(50, 50);
+                cellButton[i][j].setPrefSize(50 / 2, 50 / 2);
+//                cellButton[i][j].setPrefSize(50, 50);
 
                 calendarGrid.add(cellButton[i][j], i, j);
             }
@@ -603,19 +647,19 @@ public class GuiMainController implements Initializable {
                         if (!cellButton[x][y].getText().equals("") && Integer.parseInt(cellButton[x][y].getText()) > realDay && currentMonth
                                 == realMonth && currentYear >= realYear) {
                             cellButton[x][y].setDisable(false);
-                            cellButton[x][y].setStyle("-fx-background-color: lightcyan; -fx-alignment: center;");
+                            cellButton[x][y].setStyle("-fx-font-size: 10; -fx-background-color: lightcyan; -fx-alignment: center;");
                         } else if (!cellButton[x][y].getText().equals("") && currentYear > realYear) {
                             cellButton[x][y].setDisable(false);
-                            cellButton[x][y].setStyle("-fx-background-color: lightcyan; -fx-alignment: center;");
+                            cellButton[x][y].setStyle("-fx-font-size: 10; -fx-background-color: lightcyan; -fx-alignment: center;");
                         } //highlight future months in current year
                         else if (!cellButton[x][y].getText().equals("") && currentMonth > realMonth && currentYear == realYear) {
                             cellButton[x][y].setDisable(false);
-                            cellButton[x][y].setStyle("-fx-background-color: lightcyan; -fx-alignment: center;");
+                            cellButton[x][y].setStyle("-fx-font-size: 10; -fx-background-color: lightcyan; -fx-alignment: center;");
                         } //highlight today's cell
                         else if (!cellButton[x][y].getText().equals("") && Integer.parseInt(cellButton[x][y].getText()) == realDay && currentMonth
                                 == realMonth && currentYear == realYear) { //Today
                             cellButton[x][y].setDisable(false);
-                            cellButton[x][y].setStyle("-fx-background-color: lightsalmon; -fx-alignment: center;");
+                            cellButton[x][y].setStyle("-fx-font-size: 10; -fx-background-color: lightsalmon; -fx-alignment: center;");
 
                         } else if (cellButton[x][y].getText().isEmpty()) {
                             cellButton[x][y].setDisable(false); //purely for presentation purposes
@@ -623,24 +667,24 @@ public class GuiMainController implements Initializable {
                     }
                 }
                 //render selected cell
-                cellButton[column][row].setStyle("-fx-background-color: cyan; -fx-alignment: center;");
+                cellButton[column][row].setStyle("-fx-font-size: 10; -fx-background-color: cyan; -fx-alignment: center;");
 
             });
 
             //highlight future days in month
             if (Integer.parseInt(cellButton[column][row].getText()) > realDay && currentMonth
                     == realMonth && currentYear >= realYear) { //Today
-                cellButton[column][row].setStyle("-fx-background-color: lightcyan; -fx-alignment: center;");
+                cellButton[column][row].setStyle("-fx-font-size: 10; -fx-background-color: lightcyan; -fx-alignment: center;");
             } //highlight all future years 
             else if (currentYear > realYear) {
-                cellButton[column][row].setStyle("-fx-background-color: lightcyan; -fx-alignment: center;");
+                cellButton[column][row].setStyle("-fx-font-size: 10; -fx-background-color: lightcyan; -fx-alignment: center;");
             } //highlight future months in current year
             else if (currentMonth > realMonth && currentYear == realYear) {
-                cellButton[column][row].setStyle("-fx-background-color: lightcyan; -fx-alignment: center;");
+                cellButton[column][row].setStyle("-fx-font-size: 10; -fx-background-color: lightcyan; -fx-alignment: center;");
             } //highlight today's cell
             else if (Integer.parseInt(cellButton[column][row].getText()) == realDay && currentMonth
                     == realMonth && currentYear == realYear) { //Today
-                cellButton[column][row].setStyle("-fx-background-color: lightsalmon; -fx-alignment: center;");
+                cellButton[column][row].setStyle("-fx-font-size: 10; -fx-background-color: lightsalmon; -fx-alignment: center;");
                 currentDay = i; //initializes the schedule date label
             } else {
                 cellButton[column][row].setDisable(true);
@@ -657,7 +701,7 @@ public class GuiMainController implements Initializable {
             if (n instanceof Control) {
                 Control control = (Control) n;
                 control.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-                control.setStyle("-fx-background-color: azure; -fx-alignment: center;");
+                control.setStyle("-fx-font-size: 10; -fx-background-color: azure; -fx-alignment: center;");
             }
 
             if (n instanceof Pane) {
@@ -713,6 +757,7 @@ public class GuiMainController implements Initializable {
                     currentDoctor = getDoctor(splitName[1], splitName[2]);
                     System.out.println(currentDoctor);
                     refreshSchedule(currentDay, currentMonth, currentYear, Doctor.getDoctor(splitName[1], splitName[2]));
+                    refreshSchedule(currentDay, currentMonth, currentYear, currentDoctor);
 
                 } else if (doctorCombo.getValue() == "All doctors") {
                     //Check all timeslots & render.
@@ -726,8 +771,8 @@ public class GuiMainController implements Initializable {
         timeBtn = new ArrayList<>();
         //Create times 9-4.45pm, 15 min intervals
         for (int i = 0; i < 48; i++) {
-            timeBtn.add(new Button(""));
-
+            timeBtn.add(new ToggleButton(""));
+            timeBtn.get(i).setToggleGroup(timeBtnGroup);
             //Set time for timeslot
             Calendar cal = Calendar.getInstance();
             cal.set(Calendar.HOUR, 9);
@@ -744,7 +789,8 @@ public class GuiMainController implements Initializable {
             timeBtn.get(i).setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-            
+                    renderSchedule();
+                    refreshSchedule(currentDay, currentMonth, currentYear, currentDoctor);
                     SimpleDateFormat hourFormat = new SimpleDateFormat("HH");
                     SimpleDateFormat minuteFormat = new SimpleDateFormat("mm");
                     currentHour = Integer.parseInt(hourFormat.format(date));
@@ -776,7 +822,7 @@ public class GuiMainController implements Initializable {
         shortRadioBtn.setToggleGroup(group);
         shortRadioBtn.setSelected(true);
         longRadioBtn.setToggleGroup(group);
-        
+
         radiosBox.getChildren().add(radioLabel);
         radiosBox.getChildren().add(shortRadioBtn);
         radiosBox.getChildren().add(longRadioBtn);
@@ -804,8 +850,8 @@ public class GuiMainController implements Initializable {
                 cal.set(currentYear, currentMonth, currentDay, currentHour, currentMinute);
                 Date date = cal.getTime();
                 int duration = 15;
-                
-                if(shortRadioBtn.isSelected()){
+
+                if (shortRadioBtn.isSelected()) {
                     duration = 15;
                 } else {
                     duration = 30;
@@ -815,28 +861,59 @@ public class GuiMainController implements Initializable {
                 System.out.println(date);
                 System.out.println(duration);
                 System.out.println(purposeText.getText());
-                Appointment.insertAppointment(currentPatient, currentDoctor, date,duration, purposeText.getText());
+                Appointment.insertAppointment(currentPatient, currentDoctor, date, duration, purposeText.getText());
                 refreshSchedule(currentDay, currentMonth, currentYear);
-                
+
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
+                System.out.println();
+                Dialogs.create()
+                        .owner(null)
+                        .title("Appointment Scheduled")
+                        .masthead(null)
+                        .message("Appointment for " + currentPatient.getFirstName()
+                                + " " + currentPatient.getLastName() + " with"
+                                + " Dr. " + currentDoctor.getLastName() + " at " + dateFormat.format(date)
+                                + " " + currentHour + ":" + currentMinute + " (" + duration
+                                + " mins) has been successfully scheduled.")
+                        .showInformation();
+
+                scheduleBox.setVisible(false);
             }
         });
         createButton.setAlignment(Pos.CENTER_RIGHT);
         Button cancelButton = new Button("Cancel");
+        cancelButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                scheduleBox.setVisible(false);
+            }
+        });
         cancelButton.setAlignment(Pos.CENTER_RIGHT);
 
         buttonsBox.getChildren().add(createButton);
         buttonsBox.getChildren().add(cancelButton);
         buttonsBox.setAlignment(Pos.CENTER_RIGHT);
 
-        buttonsBox.setPadding(new Insets(10, 10, 10, 10));
-        purposeBox.setPadding(new Insets(10, 10, 10, 10));
-        radiosBox.setPadding(new Insets(10, 10, 10, 10));
+        VBox nameBox = new VBox();
+        Label title = new Label("Patient: ");
+        Label name = new Label();
+        name.textProperty().bind(currentPatientName.textProperty());
+        nameBox.getChildren().add(title);
+        nameBox.getChildren().add(name);
+
+        controlsGrid.add(nameBox, 1, 0);
+        System.out.println(name);
 
         controlsGrid.add(radiosBox, 0, 0);
         controlsGrid.add(purposeBox, 0, 1);
         controlsGrid.add(buttonsBox, 1, 1);
 
         //Add padding
+        buttonsBox.setPadding(new Insets(10, 10, 10, 10));
+        purposeBox.setPadding(new Insets(10, 10, 10, 10));
+        radiosBox.setPadding(new Insets(10, 10, 10, 10));
+        nameBox.setPadding(new Insets(10, 10, 10, 10));
+
         scheduleTitlePane.setPadding(new Insets(20, 10, 10, 0));
         scheduleBox.setPadding(new Insets(10, 10, 10, 10));
 
@@ -920,7 +997,7 @@ public class GuiMainController implements Initializable {
             System.out.println(timeFormat.format(appointments.get(i).getDate()));
             bookedTimes.add(timeFormat.format(appointments.get(i).getDate()));
         }
-        for (int i = 0; i < 32; i++) {//Scan time slots for any booked appointments, then disable
+        for (int i = 0; i < 48; i++) {//Scan time slots for any booked appointments, then disable
             if (bookedTimes.contains(timeBtn.get(i).getText())) { //appointment booked out at subject timeslot
 //                timeBtn.get(i).setStyle(" -fx-base: expectsomeerrorlulz;"); //throws an css error, but resulting in a disabled button.
                 timeBtn.get(i).setDisable(true);
