@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
+<?import javafx.scene.effect.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.scene.image.*?>
 <?import java.lang.*?>
@@ -10,104 +12,172 @@
 
 <AnchorPane id="AnchorPane" prefHeight="660.0" prefWidth="993.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="medicalapp.guimain.GuiMainController">
     <children>
-        <AnchorPane fx:id="MedicalAppCalendar" layoutX="855.0" layoutY="33.0" prefHeight="101.0" prefWidth="114.0" />
-        <AnchorPane fx:id="MedicalAppMenu" layoutX="14.0" layoutY="3.0" prefHeight="587.0" prefWidth="98.0">
-            <children>
-                <ImageView fx:id="MenuHome" fitHeight="64.0" fitWidth="64.0" layoutX="17.0" layoutY="43.0">
-                    <cursor>
-                        <Cursor fx:constant="HAND" />
-                    </cursor>
-                    <image>
-                        <Image url="@../resources/home.png" />
-                    </image>
-                </ImageView>
-                <ImageView fx:id="MenuPatientAdd" fitHeight="64.0" fitWidth="64.0" layoutX="17.0" layoutY="134.0">
-                    <image>
-                        <Image url="@../resources/user_male_add.png" />
-                    </image>
-                    <cursor>
-                        <Cursor fx:constant="HAND" />
-                    </cursor>
-                </ImageView>
-                <ImageView fx:id="MenuAppointmentAdd" fitHeight="64.0" fitWidth="64.0" layoutX="17.0" layoutY="224.0">
-                    <image>
-                        <Image url="@../resources/appointment_new.png" />
-                    </image>
-                    <cursor>
-                        <Cursor fx:constant="HAND" />
-                    </cursor>
-                </ImageView>
-                <ImageView fx:id="MenuMessenger" fitHeight="64.0" fitWidth="64.0" layoutX="17.0" layoutY="310.0">
-                    <image>
-                        <Image url="@../resources/speech_bubble.png" />
-                    </image>
-                    <cursor>
-                        <Cursor fx:constant="HAND" />
-                    </cursor>
-                </ImageView>
-                <ImageView fx:id="MenuPatientDocuments" fitHeight="64.0" fitWidth="64.0" layoutX="17.0" layoutY="394.0">
-                    <image>
-                        <Image url="@../resources/documents_folder_badged.png" />
-                    </image>
-                    <cursor>
-                        <Cursor fx:constant="HAND" />
-                    </cursor>
-                </ImageView>
-                <ImageView fx:id="MenuSettings" fitHeight="64.0" fitWidth="64.0" layoutX="17.0" layoutY="480.0">
-                    <image>
-                        <Image url="@../resources/gear_red.png" />
-                    </image>
-                    <cursor>
-                        <Cursor fx:constant="HAND" />
-                    </cursor>
-                </ImageView>
-            </children>
-        </AnchorPane>
-      <AnchorPane fx:id="workSpace" layoutX="136.0" layoutY="83.0" prefHeight="532.0" prefWidth="589.0">
-         <children>
-              <AnchorPane fx:id="MedicalAppNewAppointment" prefHeight="552.0" prefWidth="605.0" visible="false" />
-                <!--<fx:include fx:id="AnchorPane" source="calendar.fxml" />-->
-                <AnchorPane fx:id="timetableAnchorPane" prefHeight="552.0" prefWidth="605.0" />
-              <AnchorPane fx:id="MedicalAppNewPatient" prefHeight="552.0" prefWidth="584.0" visible="false">
-                  <!--<fx:include fx:id="newPatientPane" source="NewPatient.fxml" />-->
-                           <children>
-                         <TextField fx:id="PatientAddAddressStreetNumber" layoutX="100.0" layoutY="209.0" prefHeight="31.0" prefWidth="126.0" />
-                         <Label layoutY="244.0" text="Street Name:" />
-                         <Label layoutX="303.0" layoutY="97.0" text="Last Name:" />
-                         <TextField fx:id="PatientAddAddressPostcode" layoutX="101.0" layoutY="309.0" prefHeight="31.0" prefWidth="126.0" />
-                         <ChoiceBox fx:id="PatientAddGender" layoutX="396.0" layoutY="126.0" prefWidth="150.0" />
-                         <TextField fx:id="PatientAddFirstName" layoutX="82.0" layoutY="91.0" prefHeight="31.0" prefWidth="147.0" />
-                         <Label layoutX="158.0" text="New Patient Registration">
-                             <font>
-                                 <Font name="Segoe UI" size="22.0" />
-                             </font>
-                         </Label>
-                         <TextField fx:id="PatientAddPrimaryContactNumber" layoutX="441.0" layoutY="216.0" prefHeight="25.0" prefWidth="149.0" />
-                         <Label layoutX="254.0" layoutY="251.0" text="Secondary Contact Number:" />
-                         <DatePicker fx:id="PatientAddDateOfBirth" layoutX="93.0" layoutY="127.0" prefHeight="25.0" prefWidth="149.0" />
-                         <TextField fx:id="PatientAddAddressStreetName" layoutX="101.0" layoutY="240.0" prefHeight="31.0" prefWidth="126.0" />
-                         <TextField fx:id="PatientAddLastName" layoutX="388.0" layoutY="91.0" />
-                         <TextField fx:id="PatientAddSecondaryContactNumber" layoutX="449.0" layoutY="249.0" prefHeight="25.0" prefWidth="149.0" />
-                         <Label layoutX="311.0" layoutY="129.0" text="Gender:" />
-                         <Label layoutY="129.0" text="Date of Birth:" />
-                         <Label layoutY="213.0" text="Street No:" />
-                         <Label layoutY="278.0" text="Suburb:" />
-                         <TextField fx:id="PatientAddAddressSuburb" layoutX="102.0" layoutY="274.0" prefHeight="31.0" prefWidth="126.0" />
-                         <Label layoutY="96.0" text="First Name:" />
-                         <Label layoutY="313.0" text="Postcode:" />
-                         <Label layoutX="254.0" layoutY="212.0" text="Primary Contact Number:" />
-                         <!--<Button fx:id="PatientAddSubmit" layoutX="826.0" layoutY="456.0" mnemonicParsing="false" onMouseDragged="#initialize" text="Submit" />-->
-                         <Button fx:id="PatientAddSubmit" layoutX="505.0" layoutY="414.0" mnemonicParsing="false" text="Submit" />
+      <BorderPane fx:id="mainScreen" prefHeight="660.0" prefWidth="993.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <left>
+              <AnchorPane fx:id="MedicalAppMenu" prefHeight="660.0" prefWidth="114.0" BorderPane.alignment="CENTER">
+                  <children>
+                      <ImageView fx:id="MenuHome" fitHeight="64.0" fitWidth="64.0" layoutX="25.0" layoutY="41.0">
+                          <cursor>
+                              <Cursor fx:constant="HAND" />
+                          </cursor>
+                          <image>
+                              <Image url="@../resources/home.png" />
+                          </image>
+                      </ImageView>
+                      <ImageView fx:id="MenuPatientAdd" fitHeight="64.0" fitWidth="64.0" layoutX="25.0" layoutY="134.0">
+                          <image>
+                              <Image url="@../resources/user_male_add.png" />
+                          </image>
+                          <cursor>
+                              <Cursor fx:constant="HAND" />
+                          </cursor>
+                      </ImageView>
+                      <ImageView fx:id="MenuAppointmentAdd" fitHeight="64.0" fitWidth="64.0" layoutX="25.0" layoutY="225.0">
+                          <image>
+                              <Image url="@../resources/appointment_new.png" />
+                          </image>
+                          <cursor>
+                              <Cursor fx:constant="HAND" />
+                          </cursor>
+                      </ImageView>
+                      <ImageView fx:id="MenuMessenger" fitHeight="64.0" fitWidth="64.0" layoutX="25.0" layoutY="311.0">
+                          <image>
+                              <Image url="@../resources/speech_bubble.png" />
+                          </image>
+                          <cursor>
+                              <Cursor fx:constant="HAND" />
+                          </cursor>
+                      </ImageView>
+                      <ImageView fx:id="MenuPatientDocuments" fitHeight="64.0" fitWidth="64.0" layoutX="25.0" layoutY="394.0">
+                          <image>
+                              <Image url="@../resources/documents_folder_badged.png" />
+                          </image>
+                          <cursor>
+                              <Cursor fx:constant="HAND" />
+                          </cursor>
+                      </ImageView>
+                      <ImageView fx:id="MenuSettings" fitHeight="64.0" fitWidth="64.0" layoutX="25.0" layoutY="480.0">
+                          <image>
+                              <Image url="@../resources/gear_red.png" />
+                          </image>
+                          <cursor>
+                              <Cursor fx:constant="HAND" />
+                          </cursor>
+                      </ImageView>
                   </children>
               </AnchorPane>
+         </left>
+         <center>
+            <AnchorPane fx:id="workSpace" prefHeight="535.0" prefWidth="605.0" BorderPane.alignment="CENTER">
+               <children>
+                      <!--<fx:include fx:id="AnchorPane" source="calendar.fxml" />-->
+                      <AnchorPane fx:id="timetableAnchorPane" prefHeight="611.0" prefWidth="785.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-4.0" AnchorPane.topAnchor="0.0" />
+                    <AnchorPane fx:id="MedicalAppNewPatient" prefHeight="552.0" prefWidth="584.0" visible="false">
+                        <!--<fx:include fx:id="newPatientPane" source="NewPatient.fxml" />-->
+                                 <children>
+                               <TextField fx:id="PatientAddAddressStreetNumber" layoutX="100.0" layoutY="209.0" prefHeight="31.0" prefWidth="126.0" />
+                               <Label layoutY="244.0" text="Street Name:" />
+                               <Label layoutX="303.0" layoutY="97.0" text="Last Name:" />
+                               <TextField fx:id="PatientAddAddressPostcode" layoutX="101.0" layoutY="309.0" prefHeight="31.0" prefWidth="126.0" />
+                               <ChoiceBox fx:id="PatientAddGender" layoutX="396.0" layoutY="126.0" prefWidth="150.0" />
+                               <TextField fx:id="PatientAddFirstName" layoutX="82.0" layoutY="91.0" prefHeight="31.0" prefWidth="147.0" />
+                               <Label layoutX="158.0" text="New Patient Registration">
+                                   <font>
+                                       <Font name="Segoe UI" size="22.0" />
+                                   </font>
+                               </Label>
+                               <TextField fx:id="PatientAddPrimaryContactNumber" layoutX="441.0" layoutY="216.0" prefHeight="25.0" prefWidth="149.0" />
+                               <Label layoutX="254.0" layoutY="251.0" text="Secondary Contact Number:" />
+                               <DatePicker fx:id="PatientAddDateOfBirth" layoutX="93.0" layoutY="127.0" prefHeight="25.0" prefWidth="149.0" />
+                               <TextField fx:id="PatientAddAddressStreetName" layoutX="101.0" layoutY="240.0" prefHeight="31.0" prefWidth="126.0" />
+                               <TextField fx:id="PatientAddLastName" layoutX="388.0" layoutY="91.0" />
+                               <TextField fx:id="PatientAddSecondaryContactNumber" layoutX="449.0" layoutY="249.0" prefHeight="25.0" prefWidth="149.0" />
+                               <Label layoutX="311.0" layoutY="129.0" text="Gender:" />
+                               <Label layoutY="129.0" text="Date of Birth:" />
+                               <Label layoutY="213.0" text="Street No:" />
+                               <Label layoutY="278.0" text="Suburb:" />
+                               <TextField fx:id="PatientAddAddressSuburb" layoutX="102.0" layoutY="274.0" prefHeight="31.0" prefWidth="126.0" />
+                               <Label layoutY="96.0" text="First Name:" />
+                               <Label layoutY="313.0" text="Postcode:" />
+                               <Label layoutX="254.0" layoutY="212.0" text="Primary Contact Number:" />
+                               <!--<Button fx:id="PatientAddSubmit" layoutX="826.0" layoutY="456.0" mnemonicParsing="false" onMouseDragged="#initialize" text="Submit" />-->
+                               <Button fx:id="PatientAddSubmit" layoutX="505.0" layoutY="414.0" mnemonicParsing="false" text="Submit" />
+                        </children>
+                    </AnchorPane>
+                  <AnchorPane fx:id="patientFile" prefHeight="552.0" prefWidth="605.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <BorderPane prefHeight="560.0" prefWidth="603.0">
+                           <bottom>
+                              <TabPane prefHeight="234.0" prefWidth="605.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+                                <tabs>
+                                  <Tab text="Notes">
+                                    <content>
+                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                                    </content>
+                                  </Tab>
+                                  <Tab text="Attachments">
+                                    <content>
+                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                                    </content>
+                                  </Tab>
+                                    <Tab text="Test Results">
+                                      <content>
+                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                                      </content>
+                                    </Tab>
+                                </tabs>
+                              </TabPane>
+                           </bottom>
+                           <top>
+                              <AnchorPane prefHeight="116.0" prefWidth="603.0" BorderPane.alignment="CENTER" />
+                           </top>
+                           <right>
+                              <ScrollPane prefHeight="251.0" prefWidth="297.0" BorderPane.alignment="CENTER">
+                                <content>
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0" />
+                                </content>
+                              </ScrollPane>
+                           </right>
+                           <left>
+                              <AnchorPane prefHeight="126.0" prefWidth="301.0" BorderPane.alignment="CENTER" />
+                           </left>
+                        </BorderPane>
+                     </children>
+                  </AnchorPane>
+                  <AnchorPane fx:id="newAppointment" prefHeight="560.0" prefWidth="605.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+               </children>
+            </AnchorPane>
+         </center>
+         <top>
+              <AnchorPane fx:id="MedicalAppSearch" prefHeight="49.0" prefWidth="993.0" BorderPane.alignment="CENTER">
+                  <children>
+                      <!--<fx:include fx:id="SearchPane" source="Search.fxml" />-->
+                      <TextField fx:id="searchTextField" layoutX="115.0" layoutY="8.0" prefHeight="31.0" prefWidth="612.0" promptText="Search Patients" AnchorPane.leftAnchor="115.0" AnchorPane.rightAnchor="266.0" />
+                      <ListView fx:id="searchList" layoutX="116.0" layoutY="38.0" prefHeight="1.0" prefWidth="666.0" />
+                  <Label fx:id="welcomeLabel" layoutX="23.0" layoutY="14.0" text="Welcome " />
+                  </children>
+              </AnchorPane>
+         </top>
+         <right>
+              <AnchorPane fx:id="MedicalAppCalendar" prefHeight="106.0" prefWidth="98.0" BorderPane.alignment="CENTER" />
+         </right>
+      </BorderPane>
+      <AnchorPane id="AnchorPane" fx:id="loginScreen" layoutX="297.0" layoutY="187.0" prefHeight="275.0" prefWidth="374.0">
+         <children>
+            <Label fx:id="message" layoutX="73.0" layoutY="38.0" text="Clinical Management System">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Label>
+            <TextField fx:id="usernameField" layoutX="94.0" layoutY="102.0" prefHeight="25.0" prefWidth="188.0" promptText="Username" />
+            <PasswordField fx:id="passwordField" layoutX="94.0" layoutY="150.0" prefHeight="25.0" prefWidth="188.0" promptText="Password" />
+            <Button fx:id="loginButton" layoutX="229.0" layoutY="206.0" mnemonicParsing="false" onAction="#loginAction" prefHeight="25.0" prefWidth="73.0" text="Login" />
+            <Label fx:id="loginErrorLabel" layoutX="94.0" layoutY="75.0" prefHeight="21.0" prefWidth="188.0" text="Invalid login details. Please try again. " textFill="RED" visible="false" wrapText="true">
+               <font>
+                  <Font size="11.0" />
+               </font>
+            </Label>
          </children>
       </AnchorPane>
-        <AnchorPane fx:id="MedicalAppSearch" layoutX="90.0" layoutY="33.0" prefHeight="31.0" prefWidth="675.0">
-            <children>
-                <!--<fx:include fx:id="SearchPane" source="Search.fxml" />-->
-                <TextField fx:id="searchTextField" layoutX="41.0" prefHeight="31.0" prefWidth="605.0" promptText="Search Patients" />
-                <ListView fx:id="searchList" layoutX="41.0" layoutY="31.0" prefHeight="4.0" prefWidth="605.0" />
-            </children>
-        </AnchorPane>
     </children>
 </AnchorPane>
