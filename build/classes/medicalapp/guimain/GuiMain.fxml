@@ -72,7 +72,7 @@
                <children>
                       <!--<fx:include fx:id="AnchorPane" source="calendar.fxml" />-->
                       <AnchorPane fx:id="timetableAnchorPane" prefHeight="611.0" prefWidth="785.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-4.0" AnchorPane.topAnchor="0.0" />
-                    <AnchorPane fx:id="MedicalAppNewPatient" prefHeight="552.0" prefWidth="584.0" visible="false">
+                    <AnchorPane fx:id="MedicalAppNewPatient" prefHeight="610.0" prefWidth="779.0" visible="false">
                         <!--<fx:include fx:id="newPatientPane" source="NewPatient.fxml" />-->
                                  <children>
                                <TextField fx:id="PatientAddAddressStreetNumber" layoutX="100.0" layoutY="209.0" prefHeight="31.0" prefWidth="126.0" />
@@ -104,44 +104,77 @@
                                <Button fx:id="PatientAddSubmit" layoutX="505.0" layoutY="414.0" mnemonicParsing="false" text="Submit" />
                         </children>
                     </AnchorPane>
-                  <AnchorPane fx:id="patientFile" prefHeight="552.0" prefWidth="605.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <AnchorPane fx:id="patientFile" prefHeight="552.0" prefWidth="605.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <children>
-                        <BorderPane prefHeight="560.0" prefWidth="603.0">
-                           <bottom>
-                              <TabPane prefHeight="234.0" prefWidth="605.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
-                                <tabs>
-                                  <Tab text="Notes">
-                                    <content>
-                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                                    </content>
-                                  </Tab>
-                                  <Tab text="Attachments">
-                                    <content>
-                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                                    </content>
-                                  </Tab>
-                                    <Tab text="Test Results">
-                                      <content>
-                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                                      </content>
-                                    </Tab>
-                                </tabs>
-                              </TabPane>
-                           </bottom>
+                        <BorderPane prefHeight="612.0" prefWidth="784.0">
                            <top>
-                              <AnchorPane prefHeight="116.0" prefWidth="603.0" BorderPane.alignment="CENTER" />
+                              <AnchorPane prefHeight="116.0" prefWidth="603.0" BorderPane.alignment="CENTER">
+                                 <children>
+                                    <GridPane fx:id="patientFileGeneral" layoutX="8.0" layoutY="13.0" prefHeight="96.0" prefWidth="763.0">
+                                      <columnConstraints>
+                                          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                      </columnConstraints>
+                                      <rowConstraints>
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                      </rowConstraints>
+                                       <children>
+                                          <Label fx:id="fileNameLabel" text="Patient File" />
+                                          <Label fx:id="pfDOB" text="DOB: " GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                          <Label fx:id="pfAddress" text="Address" GridPane.rowIndex="2" />
+                                          <Label fx:id="pfName" text="Name" GridPane.rowIndex="1" />
+                                       </children>
+                                    </GridPane>
+                                 </children></AnchorPane>
                            </top>
-                           <right>
-                              <ScrollPane prefHeight="251.0" prefWidth="297.0" BorderPane.alignment="CENTER">
-                                <content>
-                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0" />
-                                </content>
-                              </ScrollPane>
-                           </right>
-                           <left>
-                              <AnchorPane prefHeight="126.0" prefWidth="301.0" BorderPane.alignment="CENTER" />
-                           </left>
+                           <center>
+                              <AnchorPane prefHeight="126.0" prefWidth="301.0" BorderPane.alignment="CENTER">
+                                 <children>
+                                    <TabPane layoutY="4.0" prefHeight="485.0" prefWidth="784.0" tabClosingPolicy="UNAVAILABLE">
+                                      <tabs>
+                                        <Tab text="Notes">
+                                          <content>
+                                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="446.0" prefWidth="697.0">
+                                                   <children>
+                                                      <TextArea fx:id="noteArea" layoutX="14.0" layoutY="51.0" prefHeight="342.0" prefWidth="374.0" promptText="Enter notes here..." />
+                                                      <Label fx:id="noteDocDate" layoutX="14.0" layoutY="21.0" prefHeight="21.0" prefWidth="374.0" text="Recorded by doctor on date" />
+                                                      <Button fx:id="submitNote" layoutX="325.0" layoutY="401.0" mnemonicParsing="false" text="Submit" />
+                                                   </children></AnchorPane>
+                                          </content>
+                                        </Tab>
+                                        <Tab text="Documents">
+                                          <content>
+                                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                                          </content>
+                                        </Tab>
+                                          <Tab text="Test Results">
+                                            <content>
+                                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                                            </content>
+                                          </Tab>
+                                          <Tab text="Clinical Info">
+                                            <content>
+                                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                   <children>
+                                                      <Label layoutX="21.0" layoutY="21.0" text="Conditions" />
+                                                   </children>
+                                                </AnchorPane>
+                                            </content>
+                                          </Tab>
+                                      </tabs>
+                                    </TabPane>
+                                 </children></AnchorPane>
+                           </center>
                         </BorderPane>
+                        <AnchorPane fx:id="visitHistoryPane" layoutX="409.0" layoutY="190.0" prefHeight="176.0" prefWidth="374.0">
+                           <children>
+                              <Label text="Previous Visits" />
+                           </children>
+                        </AnchorPane>
                      </children>
                   </AnchorPane>
                   <AnchorPane fx:id="newAppointment" prefHeight="560.0" prefWidth="605.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
@@ -162,7 +195,7 @@
               <AnchorPane fx:id="MedicalAppCalendar" prefHeight="106.0" prefWidth="98.0" BorderPane.alignment="CENTER" />
          </right>
       </BorderPane>
-      <AnchorPane id="AnchorPane" fx:id="loginScreen" layoutX="297.0" layoutY="187.0" prefHeight="275.0" prefWidth="374.0">
+      <AnchorPane id="AnchorPane" fx:id="loginScreen" layoutX="297.0" layoutY="187.0" prefHeight="275.0" prefWidth="374.0" visible="false">
          <children>
             <Label fx:id="message" layoutX="73.0" layoutY="38.0" text="Clinical Management System">
                <font>
