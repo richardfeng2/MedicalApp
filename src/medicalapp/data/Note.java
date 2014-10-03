@@ -114,6 +114,25 @@ public class Note {
         }
         return note;
     }
+    public static Note getNoteByAppointment(int appID) {
+        Connection conn = DBConnection.getInstance().getConnection();
+
+        Note note = null;
+        try {
+            String query = "SELECT * FROM Note WHERE appointmentID = ?";
+            PreparedStatement stm = conn.prepareStatement(query);
+            stm.setInt(1, appID);
+
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                int noteID = rs.getInt("noteID");
+                note = getNote(noteID);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Note.class.getName()).log(Level.SEVERE, "Error getting note appID=" + appID, ex);
+        }
+        return note;
+    }
 
     //When inserting new records, increment the maximum ID by 1.
     public static int getNextID() {

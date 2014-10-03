@@ -143,6 +143,7 @@
                                                       <TextArea fx:id="noteArea" layoutX="14.0" layoutY="51.0" prefHeight="342.0" prefWidth="374.0" promptText="Enter notes here..." />
                                                       <Label fx:id="noteDocDate" layoutX="14.0" layoutY="21.0" prefHeight="21.0" prefWidth="374.0" text="Recorded by doctor on date" />
                                                       <Button fx:id="submitNote" layoutX="325.0" layoutY="401.0" mnemonicParsing="false" text="Submit" />
+                                                      <Button fx:id="viewNoteBtn" layoutX="676.0" layoutY="401.0" mnemonicParsing="false" onAction="#handleViewNoteBtn" text="View Note" />
                                                    </children></AnchorPane>
                                           </content>
                                         </Tab>

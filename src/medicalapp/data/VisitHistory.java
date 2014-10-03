@@ -13,12 +13,32 @@ import java.util.Date;
  * @author Richard
  */
 public class VisitHistory {
+    private int visitHistoryID;
+    private int appointmentID;
     private String date;
     private String doctorName;
 
-    public VisitHistory(String date, String doctorName) {
+    public VisitHistory(int visitHistoryID, int appointmentID, String date, String doctorName) {
+        this.visitHistoryID = visitHistoryID;
+        this.appointmentID = appointmentID;
         this.date = date;
         this.doctorName = doctorName;
+    }
+
+    public int getVisitHistoryID() {
+        return visitHistoryID;
+    }
+
+    public void setVisitHistoryID(int visitHistoryID) {
+        this.visitHistoryID = visitHistoryID;
+    }
+
+    public int getAppointmentID() {
+        return appointmentID;
+    }
+
+    public void setAppointmentID(int appointmentID) {
+        this.appointmentID = appointmentID;
     }
 
     public String getDate() {

@@ -33,6 +33,7 @@ public class Appointment {
     private String referringGP;
     private boolean expired; //back-end boolean to keep track of cancelled appointments
     private boolean finished; //back-end variable to check if appointment is finished
+    private String doctorName;
 
     public Appointment(int appointmentID, Date date, int patientID, int doctorID,
             String purpose, Duration duration, String referringGP, boolean expired, boolean finished) {
@@ -175,27 +176,10 @@ public class Appointment {
             ResultSet rs = stm.executeQuery();
             while (rs.next()) {
                 int appointmentID = rs.getInt("appointmentID");
-                Date date = rs.getTimestamp("date");
-                int patientID = rs.getInt("patientID");
-                int doctorID = rs.getInt("doctorID");
-                String purpose = rs.getString("purpose");
-                Duration duration = doubleToDuration(rs.getDouble("duration")); //DB stores duration as a double. Convert double -> long -> Duration (minutes)
-                String referringGP = rs.getString("referringGP");
-                Boolean expired = rs.getBoolean("expired");
-                Boolean finished = rs.getBoolean("finished");
-                appointment = new Appointment(appointmentID, date, patientID, doctorID, purpose,
-                        duration, referringGP, expired, finished);
+                appointment = getAppointment(appointmentID);
 
                 DateFormat timeFormat = new SimpleDateFormat("HH:mm");
                 DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-
-                System.out.println("Appointment ID" + "\t\t" + "Patient" + "\t\t" + "Doctor"
-                        + "\t\t" + "Time" + "\t" + "Date");
-                System.out.println("\t" + appointment.getAppointmentID() + "\t\t" + firstName + " " + lastName
-                        + "\t" + Doctor.getDoctor(doctorID).getFirstName()
-                        + " " + Doctor.getDoctor(doctorID).getLastName() + "\t"
-                        + timeFormat.format(date)
-                        + "\t" + dateFormat.format(date));
             }
 
         } catch (SQLException ex) {

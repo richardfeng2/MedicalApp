@@ -18,7 +18,7 @@ import javafx.stage.Stage;
  */
 public class GuiMain extends Application {
 
-    public static Stage stage;
+    public static Stage stage ;
 
     @Override
     public void start(Stage primaryStage) throws IOException {
@@ -29,11 +29,11 @@ public class GuiMain extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
     }
-        /**
-         * @param args the command line arguments
-         */
-        public static void main(String[] args) {
-            launch(args);
-        }
-    }
 
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+        launch(args);
+    }
+}

@@ -5,6 +5,7 @@
  */
 package medicalapp.guimain;
 
+import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -25,16 +26,21 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
@@ -46,6 +52,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -65,6 +72,9 @@ import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.util.Callback;
 import javafx.util.Duration;
 import javax.swing.event.ChangeEvent;
 import medicalapp.data.Appointment;
@@ -72,7 +82,9 @@ import static medicalapp.data.Appointment.getAppointment;
 import medicalapp.data.DBConnection;
 import medicalapp.data.Doctor;
 import static medicalapp.data.Doctor.getDoctor;
+import static medicalapp.data.Doctor.getDoctor;
 import medicalapp.data.Note;
+import static medicalapp.data.Note.getNoteByAppointment;
 import static medicalapp.data.Note.insertNote;
 import medicalapp.data.Patient;
 import static medicalapp.data.Patient.getPatient;
@@ -80,7 +92,6 @@ import static medicalapp.data.Patient.insertPatient;
 import static medicalapp.data.Patient.searchPatients;
 import medicalapp.data.Staff;
 import static medicalapp.data.Staff.getStaff;
-import medicalapp.data.VisitHistory;
 import org.controlsfx.dialog.Dialogs;
 
 /**
@@ -144,7 +155,7 @@ public class GuiMainController implements Initializable {
 
     private static HBox calDashBoard;
 
-    private static int currentAppointment;
+    private static Appointment currentAppointment;
     /**
      * Fields for timetable
      */
@@ -534,10 +545,10 @@ public class GuiMainController implements Initializable {
                                 @Override
                                 public void handle(MouseEvent event) {
                                     currentPatient = getPatient(a.getPatientID());
-                                    currentAppointment = a.getAppointmentID();
+                                    currentAppointment = a;
                                     timetableAnchorPanePlaceHolder.setVisible(false);
                                     patientFilePlaceHolder.setVisible(true);
-                                    
+
                                     refreshPatientFile();
                                 }
                             });
@@ -590,17 +601,29 @@ public class GuiMainController implements Initializable {
         pfDOB.setText("DOB:" + dateFormat.format(currentPatient.getDateOfBirth()));
         refreshVisitHistory();
 
+//    @Override
+//    public void changed(ObservableValue observableValue, Object oldValue, Object newValue) {
+//        //Check whether item is selected and set value of selected item to Label
+//        if(tableview.getSelectionModel().getSelectedItem() != null) 
+//        {    
+//           TableViewSelectionModel selectionModel = tableview.getSelectionModel();
+//           ObservableList selectedCells = selectionModel.getSelectedCells();
+//           TablePosition tablePosition = (TablePosition) selectedCells.get(0);
+//           Object val = tablePosition.getTableColumn().getCellData(newValue);
+//           System.out.println("Selected Value" + val);
+//         }
+//         }
     }
     @FXML
     Button submitNote;
     @FXML
     TextArea noteArea;
-    
-        //Event handler when add patient icon is clicked
+
+    //Event handler when add patient icon is clicked
     private void handleNoteAddButton(MouseEvent event) {
 
         //If fields are entered correctly
-        if (noteArea.getText().equals("")|| noteArea.getText().isEmpty()){
+        if (noteArea.getText().equals("") || noteArea.getText().isEmpty()) {
             Dialogs.create()
                     .owner(null)
                     .title("Submit Note Error")
@@ -611,7 +634,7 @@ public class GuiMainController implements Initializable {
             String note = noteArea.getText();
 
             //Connect to DB and insertNote
-            insertNote(new Note(1, currentAppointment, note, false, false));
+            insertNote(new Note(1, currentAppointment.getAppointmentID(), note, false, false));
             submitNote.setDisable(true);
         }
     }
@@ -624,8 +647,6 @@ public class GuiMainController implements Initializable {
     private void refreshVisitHistory() {
         try {
             final ObservableList data = FXCollections.observableArrayList();
-//        visitHistoryTable.setItems(data);
-
             Connection conn = DBConnection.getInstance().getConnection();
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
 
@@ -639,12 +660,15 @@ public class GuiMainController implements Initializable {
 
             ResultSet rs = stm.executeQuery();
             while (rs.next()) {
+                int id = rs.getInt(("appointmentID"));
                 Date date = rs.getTimestamp("date");
                 String firstName = rs.getString("firstName");
                 String lastName = rs.getString("lastName");
 
-                data.add(new VisitHistory(dateFormat.format(date), firstName + " " + lastName));
+                data.add(getAppointment(id));
+//                data.add(new VisitHistory(dateFormat.format(date), firstName + " " + lastName));
                 visitHistoryTable.setItems(data);
+
             }
         } catch (SQLException ex) {
             Logger.getLogger(GuiMainController.class.getName()).log(Level.SEVERE, null, ex);
@@ -653,18 +677,76 @@ public class GuiMainController implements Initializable {
 
     private TableView initVisitHistory() {
 
-        visitHistoryTable = new TableView<Appointment>();
+        visitHistoryTable = new TableView<>();
         visitDateCol.setCellValueFactory(
-                new PropertyValueFactory<VisitHistory, String>("date")
+                new PropertyValueFactory<>("date")
         );
         visitDoctorCol.setCellValueFactory(
-                new PropertyValueFactory<VisitHistory, String>("doctorName")
+                new PropertyValueFactory<>("doctorID")
         );
+
+        //Set doctor's name in column
+        visitDoctorCol.setCellValueFactory(new Callback<CellDataFeatures<Appointment, String>, ObservableValue<String>>() {
+            public ObservableValue<String> call(CellDataFeatures<Appointment, String> a) {
+                return new ReadOnlyObjectWrapper(getDoctor(a.getValue().getDoctorID()).getFirstName() + " "
+                        + getDoctor(a.getValue().getDoctorID()).getLastName());
+            }
+        });
         visitHistoryTable.getColumns().addAll(visitDateCol, visitDoctorCol);
         if (currentPatient != null) {
             refreshVisitHistory();
         }
+
+        visitHistoryTable.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+            @Override
+            public void changed(ObservableValue observableValue, Object oldValue, Object newValue) {
+                //Check whether item is selected and set value of selected item to Label
+                if (visitHistoryTable.getSelectionModel().getSelectedItem() != null) {
+                    Appointment a = (Appointment) visitHistoryTable.getSelectionModel().getSelectedItem();
+//                    selectedAppointment = a;
+                    System.out.println(a.getDoctorID());
+                }
+            }
+        });
+
+        visitHistoryTable.setMaxHeight(200);
         return visitHistoryTable;
+    }
+
+    public boolean showNoteDialog(Note note) {
+        try {
+            // Load the fxml file and create a new stage for the popup dialog.
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(GuiMain.class.getResource("NoteDialog.fxml"));
+            AnchorPane page = (AnchorPane) loader.load();
+
+            // Create the dialog Stage.
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("View Note");
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(null);
+            Scene scene = new Scene(page);
+            dialogStage.setScene(scene);
+
+            // Set the person into the controller.
+            NoteDialogController controller = loader.getController();
+            controller.setDialogStage(dialogStage);
+            controller.setNote(note);
+
+            // Show the dialog and wait until the user closes it
+            dialogStage.showAndWait();
+
+            return controller.isCancelClicked();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    @FXML
+    private void handleViewNoteBtn(){
+        Appointment selectedAppointment =(Appointment) visitHistoryTable.getSelectionModel().getSelectedItem();
+        showNoteDialog(getNoteByAppointment(selectedAppointment.getAppointmentID()));
     }
 
     /**
@@ -1293,9 +1375,9 @@ public class GuiMainController implements Initializable {
                 || "".equals(PatientAddAddressStreetNumber.getText()) || "".equals(PatientAddAddressStreetName.getText())
                 || "".equals(PatientAddAddressSuburb.getText()) || "".equals(PatientAddAddressPostcode.getText())
                 || "".equals(PatientAddPrimaryContactNumber.getText()) || PatientAddFirstName.getText().isEmpty() || PatientAddLastName.getText().isEmpty()
-                || PatientAddAddressStreetNumber.getText().isEmpty()|| PatientAddAddressStreetName.getText().isEmpty()
+                || PatientAddAddressStreetNumber.getText().isEmpty() || PatientAddAddressStreetName.getText().isEmpty()
                 || PatientAddAddressSuburb.getText().isEmpty() || PatientAddAddressPostcode.getText().isEmpty()
-                || PatientAddPrimaryContactNumber.getText().isEmpty()|| PatientAddDateOfBirth.getValue() == null) {
+                || PatientAddPrimaryContactNumber.getText().isEmpty() || PatientAddDateOfBirth.getValue() == null) {
 
             Dialogs.create()
                     .owner(null)
@@ -1361,7 +1443,7 @@ public class GuiMainController implements Initializable {
         calDashBoard = new HBox();
         calDashBoard.getChildren().add(initVisitHistory());
         visitHistoryPane.getChildren().add(calDashBoard);
-        
+
         submitNote.setOnMouseClicked(this::handleNoteAddButton);
     }
 }
