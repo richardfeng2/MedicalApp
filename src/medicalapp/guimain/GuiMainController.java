@@ -5,7 +5,12 @@
  */
 package medicalapp.guimain;
 
+import java.awt.Desktop;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -31,6 +36,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -41,6 +47,7 @@ import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
@@ -61,6 +68,7 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
@@ -72,10 +80,13 @@ import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.Duration;
+import javax.imageio.ImageIO;
 import javax.swing.event.ChangeEvent;
 import medicalapp.data.Appointment;
 import static medicalapp.data.Appointment.getAppointment;
@@ -83,6 +94,17 @@ import medicalapp.data.DBConnection;
 import medicalapp.data.Doctor;
 import static medicalapp.data.Doctor.getDoctor;
 import static medicalapp.data.Doctor.getDoctor;
+import static medicalapp.data.Doctor.getDoctor;
+import static medicalapp.data.Doctor.getDoctor;
+import static medicalapp.data.Doctor.getDoctor;
+import medicalapp.data.Document;
+import static medicalapp.data.Document.getDocument;
+import static medicalapp.data.Document.insertDocument;
+import static medicalapp.data.Document.insertDocument;
+import static medicalapp.data.Document.insertDocument;
+import static medicalapp.data.Document.insertDocument;
+import static medicalapp.data.Document.insertDocument;
+import static medicalapp.data.Document.insertDocument;
 import medicalapp.data.Note;
 import static medicalapp.data.Note.getNoteByAppointment;
 import static medicalapp.data.Note.insertNote;
@@ -175,7 +197,6 @@ public class GuiMainController implements Initializable {
     private TextField searchTextField;
     @FXML
     private ListView searchList;
-
     @FXML
     private AnchorPane MedicalAppMenu;
     @FXML
@@ -541,7 +562,6 @@ public class GuiMainController implements Initializable {
                         });
                         if (currentUser.isDoctor()) {
                             label.setOnMouseClicked(new EventHandler<MouseEvent>() {
-
                                 @Override
                                 public void handle(MouseEvent event) {
                                     currentPatient = getPatient(a.getPatientID());
@@ -594,26 +614,183 @@ public class GuiMainController implements Initializable {
         timetableScroll.setContent(timetableAnchor);
     }
 
+    private HBox weeklyTimetableLabelBox;
+    private AnchorPane weeklyTimetableScroll;
+
+    public AnchorPane initWeeklyTimetable() {
+        AnchorPane timetableBox = new AnchorPane();
+        weeklyTimetableScroll = new AnchorPane();
+        weeklyTimetableScroll.setPrefSize(1000, 2000);
+
+        weeklyTimetableLabelBox = new HBox();
+        weeklyTimetableLabelBox.setPrefWidth(weeklyTimetableScroll.getPrefWidth() - 19); //discount for scrollbar width
+        weeklyTimetableLabelBox.setPrefSize(weeklyTimetableScroll.getPrefWidth() -19, 49);
+        weeklyTimetableLabelBox.setStyle("-fx-background-color: rgba(157, 185, 245, 0.7);"); //4th rgba parameter sets opacity
+        Label timeLabel = new Label("Time");
+        timeLabel.setPrefWidth(50);
+        weeklyTimetableLabelBox.getChildren().add(timeLabel);
+
+        TilePane dayTile = new TilePane();
+        dayTile.setPrefColumns(7);
+        dayTile.setPrefTileWidth((weeklyTimetableLabelBox.getPrefWidth() - 50) / 7);
+        dayTile.getChildren().add(new Label("Sunday"));
+        dayTile.getChildren().add(new Label("Monday"));
+        dayTile.getChildren().add(new Label("Tuesday"));
+        dayTile.getChildren().add(new Label("Wednesday"));
+        dayTile.getChildren().add(new Label("Thursday"));
+        dayTile.getChildren().add(new Label("Friday"));
+        dayTile.getChildren().add(new Label("Saturday"));
+        weeklyTimetableLabelBox.getChildren().add(dayTile);
+
+        timetableBox.getChildren().add(weeklyTimetableScroll);
+        timetableBox.getChildren().add(weeklyTimetableLabelBox);
+
+        refreshWeeklyTimetable();
+
+        return timetableBox;
+    }
+
+    public void refreshWeeklyTimetable() {
+
+        AnchorPane timetableAnchor = new AnchorPane();
+
+        VBox timeBox = new VBox();
+        for (int i = 0; i < 48; i++) { //48 15 minute timeslots
+            //Set time for timeslot
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.HOUR, 8);
+            cal.set(Calendar.MINUTE, 45);
+            cal.set(Calendar.AM_PM, Calendar.AM);
+            cal.add(Calendar.MINUTE, 15 * i); //15 minute intervals
+
+            Date date = cal.getTime();
+            SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
+
+            Label timeLbl = new Label(timeFormat.format(date));
+            if (cal.get(Calendar.HOUR_OF_DAY) == 8) {
+                timeLbl.setText("");
+            }
+            timeLbl.prefWidthProperty().bind(timeBox.widthProperty());
+            timeLbl.prefHeightProperty().bind(timeBox.heightProperty());
+
+            timeLbl.setStyle("-fx-border-color: lightgrey; -fx-border-width: 0.25");
+            if (cal.get(Calendar.MINUTE) == 0) {
+                timeLbl.setStyle("-fx-border-color: lightgrey; -fx-border-width: 1 0.25 0.25 0.25");
+            }
+
+            timeLbl.setPadding(new Insets(0, 0, 25, 0));
+            timeBox.getChildren().add(timeLbl);
+        }
+        timetableAnchor.getChildren().add(timeBox);
+
+        ArrayList<Appointment> appointments = new ArrayList<>();
+        appointments.clear();
+        ArrayList<Doctor> doctors = new ArrayList<>();
+        doctors.clear();
+
+        timeBox.setPrefSize(weeklyTimetableLabelBox.getPrefWidth(), 48 * 50);
+        timeBox.setStyle("-fx-border-color: lightgrey; -fx-background-color: white;");
+
+        for (int i = 1; i <= Doctor.getMaxID(); i++) {
+            if (currentUser.isDoctor() && getDoctor(i).getStaffID() == currentUser.getStaffID()) {
+                doctors.add(Doctor.getDoctor(i));
+                break; //Doctor sees his own appointments only
+            }
+        }
+        for (Doctor doctor : doctors) {
+            try {
+                Connection conn = DBConnection.getInstance().getConnection();
+                String query = "SELECT * FROM Appointment "
+                        + "WHERE Appointment.doctorID = ? AND expired <> true ";
+                PreparedStatement stm = conn.prepareStatement(query);
+                stm.setInt(1, doctor.getDoctorID());
+
+                ResultSet rs = stm.executeQuery();
+                while (rs.next()) {
+                    int appointmentID = rs.getInt("appointmentID");
+                    appointments.add(getAppointment(appointmentID));
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(GuiMainController.class.getName()).log(Level.SEVERE, "Error getting appointments from doctor" + doctor.getDoctorID(), ex);
+            }
+            if (!appointments.isEmpty()) {
+                for (Appointment a : appointments) {
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(a.getDate());
+                    int day = cal.get(Calendar.DAY_OF_MONTH);
+                    int month = cal.get(Calendar.MONTH);
+                    int year = cal.get(Calendar.YEAR);
+                    int weekOfYear = cal.get(Calendar.WEEK_OF_YEAR);
+                    int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
+
+                    Calendar realCal = Calendar.getInstance();
+                    int realWeekOfYear = realCal.get(Calendar.WEEK_OF_YEAR);
+
+                    for (int i = 1; i <= 7; i++) { //days of week
+
+                        if (i == dayOfWeek && weekOfYear == realWeekOfYear && year == currentYear) {
+                            System.out.println("asdfdasfdas");
+
+                            Label label = new Label(Patient.getPatient(a.getPatientID()).getFirstName() + " "
+                                    + Patient.getPatient(a.getPatientID()).getLastName());
+
+                            Date date = a.getDate();
+                            DateFormat timeFormat = new SimpleDateFormat("HH:mm");
+                            String time = timeFormat.format(date);
+                            label.setLayoutY((toMins(time) - (8.75 * 60)) / 15 * 50); //(Time of appointment minus 9.00am) * height of 15 minute time labels
+                            label.prefHeightProperty().bind(timeBox.heightProperty().multiply(a.getDuration().toMinutes()).divide(15).divide(48));
+                            label.setPrefWidth((weeklyTimetableLabelBox.getPrefWidth() - 50) / 7 - 10);
+                            label.setLayoutX(i * ((weeklyTimetableLabelBox.getPrefWidth() - 50) / 7 - 10));
+                            label.setStyle("-fx-border-color: green; -fx-text-fill: green; "
+                                    + "-fx-background-color: lightgreen; -fx-opacity: 0.6;"
+                                    + "  -fx-border-radius: 10 10 10 10; -fx-background-radius: 10 10 10 10;");
+
+                            label.setPadding(new Insets(0, 0, 70, 0));
+                            timetableAnchor.getChildren().addAll(label);
+                        }
+                    }
+                }
+            }
+        }
+        weeklyTimetableScroll.getChildren().add(timetableAnchor);
+    }
+
+    @FXML
+    private AnchorPane weeklySchedule;
+
+    @FXML
+    private void handleWeeklyBtn() {
+        AnchorPane pane = new AnchorPane();
+        pane.getChildren().add(initWeeklyTimetable());
+        refreshWeeklyTimetable();
+        weeklySchedule.getChildren().add(pane);
+        weeklySchedule.setVisible(true);
+        saveAsPng(weeklySchedule);
+        weeklySchedule.setVisible(false);
+    }
+
+    public void saveAsPng(Node n) {
+        WritableImage image = n.snapshot(new SnapshotParameters(), null);
+
+        // TODO: probably use a file chooser here
+        File file = new File("chart.png");
+        try {
+            ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+        } catch (IOException e) {
+            // TODO: handle exception here
+        }
+        openFile(file);
+
+    }
+
     private void refreshPatientFile() {
         pfName.setText(currentPatient.getFirstName() + " " + currentPatient.getLastName());
         pfAddress.setText(currentPatient.getAddress());
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
         pfDOB.setText("DOB:" + dateFormat.format(currentPatient.getDateOfBirth()));
         refreshVisitHistory();
-
-//    @Override
-//    public void changed(ObservableValue observableValue, Object oldValue, Object newValue) {
-//        //Check whether item is selected and set value of selected item to Label
-//        if(tableview.getSelectionModel().getSelectedItem() != null) 
-//        {    
-//           TableViewSelectionModel selectionModel = tableview.getSelectionModel();
-//           ObservableList selectedCells = selectionModel.getSelectedCells();
-//           TablePosition tablePosition = (TablePosition) selectedCells.get(0);
-//           Object val = tablePosition.getTableColumn().getCellData(newValue);
-//           System.out.println("Selected Value" + val);
-//         }
-//         }
     }
+
     @FXML
     Button submitNote;
     @FXML
@@ -675,6 +852,8 @@ public class GuiMainController implements Initializable {
         }
     }
 
+    private Appointment selectedAppointment;
+
     private TableView initVisitHistory() {
 
         visitHistoryTable = new TableView<>();
@@ -697,15 +876,12 @@ public class GuiMainController implements Initializable {
             refreshVisitHistory();
         }
 
-        visitHistoryTable.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
-            @Override
-            public void changed(ObservableValue observableValue, Object oldValue, Object newValue) {
-                //Check whether item is selected and set value of selected item to Label
-                if (visitHistoryTable.getSelectionModel().getSelectedItem() != null) {
-                    Appointment a = (Appointment) visitHistoryTable.getSelectionModel().getSelectedItem();
-//                    selectedAppointment = a;
-                    System.out.println(a.getDoctorID());
-                }
+        visitHistoryTable.getSelectionModel().selectedItemProperty().addListener((observableValue, oldValue, newValue) -> {
+            //Check whether item is selected and set value of selected item to Label
+            if (visitHistoryTable.getSelectionModel().getSelectedItem() != null) {
+                selectedAppointment = (Appointment) visitHistoryTable.getSelectionModel().getSelectedItem();
+                refreshDocumentList();
+                System.out.println(selectedAppointment.getAppointmentID());
             }
         });
 
@@ -742,11 +918,118 @@ public class GuiMainController implements Initializable {
             return false;
         }
     }
-    
+
     @FXML
-    private void handleViewNoteBtn(){
-        Appointment selectedAppointment =(Appointment) visitHistoryTable.getSelectionModel().getSelectedItem();
+    private void handleViewNoteBtn() {
+        Appointment selectedAppointment = (Appointment) visitHistoryTable.getSelectionModel().getSelectedItem();
         showNoteDialog(getNoteByAppointment(selectedAppointment.getAppointmentID()));
+    }
+
+    private File selectedFile;
+
+    @FXML
+    private void handleChooseFileBtn() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open Resource File");
+        fileChooser.getExtensionFilters().addAll(
+                new ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif"),
+                new ExtensionFilter("Text Files", "*.pdf"),
+                new ExtensionFilter("All Files", "*.*"));
+        Stage dialogStage = new Stage();
+        dialogStage.setTitle("View Note");
+        dialogStage.initModality(Modality.WINDOW_MODAL);
+        dialogStage.initOwner(null);
+        selectedFile = fileChooser.showOpenDialog(dialogStage);
+        if (selectedFile != null) {
+            fileNameLabel.setText(selectedFile.getName());
+            fileTitleTextField.setText(selectedFile.getName());
+        }
+    }
+
+    @FXML
+    private void handlePreviewFileBtn() {
+        if (selectedFile != null) {
+            openFile(selectedFile);
+        }
+    }
+
+    @FXML
+    private TextField fileTitleTextField;
+
+    @FXML
+    private void handleSaveFileBtn() {
+        if (selectedFile != null) {
+            insertDocument(currentAppointment.getAppointmentID(), fileTitleTextField.getText(),
+                    true, selectedFile);
+            Dialogs.create()
+                    .owner(null)
+                    .title("File saved")
+                    .masthead(null)
+                    .message("File saved.")
+                    .showInformation();
+            fileNameLabel.setText("File saved to database)");
+            fileTitleTextField.setText("");
+            selectedFile = null;
+            refreshDocumentList();
+        } else {
+            Dialogs.create()
+                    .owner(null)
+                    .title("No file selected")
+                    .masthead(null)
+                    .message("No file selected, please select a file")
+                    .showInformation();
+        }
+    }
+
+    private void openFile(File file) {
+        Desktop desktop = Desktop.getDesktop();
+        try {
+            desktop.open(file);
+        } catch (IOException ex) {
+            Logger.getLogger(GuiMainController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @FXML
+    private ListView documentList;
+
+    private File selectedHistoricFile;
+
+    private void refreshDocumentList() {
+
+        ArrayList<Document> documents = new ArrayList<>();
+        for (int i = 1; i < Document.getNextID(); i++) {
+            if (getDocument(i).getAppointmentID() == selectedAppointment.getAppointmentID()) {
+                documents.add(getDocument(i));
+                System.out.println("App " + selectedAppointment.getAppointmentID() + " has"
+                        + getDocument(i).getTitle());
+            }
+        }
+        ObservableList<Label> documentItems = FXCollections.observableArrayList();
+        ArrayList<Label> labels = new ArrayList<>();
+        for (Document document : documents) {
+            if (documents != null) {
+                Label label = new Label(document.getTitle());
+                label.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                    @Override
+                    public void handle(MouseEvent event) {
+                        FileOutputStream fos = null;
+                        try {
+                            selectedHistoricFile = Document.getFile(document.getDocumentID());
+                            openFile(selectedHistoricFile);
+                        } catch (IOException ex) {
+                            Logger.getLogger(GuiMainController.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                });
+                documentItems.add(label);
+            }
+        }
+        if (!documentItems.isEmpty()) {
+            documentList.setItems(documentItems);
+        } else {
+            System.out.println("no docs");
+        }
     }
 
     /**

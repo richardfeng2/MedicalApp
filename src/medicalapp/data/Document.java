@@ -8,6 +8,8 @@ package medicalapp.data;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Blob;
 import java.sql.Connection;
@@ -62,6 +64,34 @@ public class Document {
             }
             stm.setBlob(4, inputStream);
             stm.setBoolean(5, document.isClinical());
+            stm.setBoolean(6, false);
+            stm.setBoolean(7, false);
+
+            stm.executeUpdate();
+
+        } catch (SQLException ex) {
+            Logger.getLogger(Document.class.getName()).log(Level.SEVERE, "Error inserting document", ex);
+        }
+    }
+
+    public static void insertDocument(int appointmentID, String title, Boolean isClinical, File file) {
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+
+            String query = "INSERT INTO Document VALUES (?,?,?,?,?,?,?)";
+
+            PreparedStatement stm = conn.prepareStatement(query);
+            stm.setInt(1, getNextID());
+            stm.setInt(2, appointmentID);
+            stm.setString(3, title);
+            InputStream inputStream = null;
+            try {
+                inputStream = new FileInputStream(file);
+            } catch (FileNotFoundException ex) {
+            }
+
+            stm.setBlob(4, inputStream);
+            stm.setBoolean(5, isClinical);
             stm.setBoolean(6, false);
             stm.setBoolean(7, false);
 
@@ -163,7 +193,7 @@ public class Document {
                 int appointmentID = rs.getInt("appointmentID");
                 String title = rs.getString("title");
                 Blob file = rs.getBlob("file");
-                Boolean isClinical = rs.getBoolean("file");
+                Boolean isClinical = rs.getBoolean("isClinical");
                 Boolean expired = rs.getBoolean("expired");
                 Boolean locked = rs.getBoolean("locked");
 
@@ -173,6 +203,39 @@ public class Document {
             Logger.getLogger(Document.class.getName()).log(Level.SEVERE, "Error getting document documentID=" + id, ex);
         }
         return document;
+    }
+
+    public static File getFile(int id) throws FileNotFoundException, IOException {
+
+        Connection conn = DBConnection.getInstance().getConnection();
+
+        File file = null;
+        try {
+            String query = "SELECT * FROM Document WHERE DocumentID = ?";
+            PreparedStatement stm = conn.prepareStatement(query);
+            stm.setInt(1, id);
+
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                String title = rs.getString("title");
+                file = new File(title);
+                FileOutputStream fos = new FileOutputStream(file);
+
+                byte[] buffer = new byte[1];
+                
+                //
+                // Get the binary stream of our BLOB data
+                //
+                InputStream is = rs.getBinaryStream("file");
+                while (is.read(buffer) > 0) {
+                    fos.write(buffer);
+                }
+                fos.close();
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Document.class.getName()).log(Level.SEVERE, "Error getting document documentID=" + id, ex);
+        }
+        return file;
     }
 
     public static int getNextID() {
