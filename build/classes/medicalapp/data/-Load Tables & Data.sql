@@ -52,17 +52,29 @@ conditions varchar(1000),
 PRIMARY KEY(patientID)
 );
 
-CREATE TABLE SA.PAYMENT
+CREATE TABLE SA.INVOICE
 (
-paymentID int,
+invoiceID int,
 appointmentID int,
-service varchar(255),
 isPaid boolean,
 dateIssued date,
 datePaid date,
 expired boolean,
-locked boolean,
-PRIMARY KEY(paymentID)
+PRIMARY KEY(invoiceID)
+);
+
+CREATE TABLE SA.INVOICE_SERVICE
+(
+invoiceID int,
+serviceID int
+);
+
+CREATE TABLE SA.SERVICE
+(
+serviceID int,
+description varchar(255),
+price double,
+PRIMARY KEY(serviceID)
 );
 
 CREATE TABLE SA.PERSON

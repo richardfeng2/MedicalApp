@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+
+<AnchorPane id="AnchorPane" fx:id="paymentsPane" prefHeight="434.0" prefWidth="647.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="medicalapp.guimain.PaymentsController">
+   <children>
+      <VBox alignment="CENTER" layoutX="59.0" layoutY="32.0" prefHeight="366.0" prefWidth="538.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <GridPane alignment="CENTER" prefHeight="211.0" prefWidth="600.0">
+              <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints maxHeight="48.0" minHeight="0.0" prefHeight="34.0" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="105.0" minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Label alignment="CENTER" text="Patient" GridPane.halignment="CENTER" />
+                  <Label alignment="CENTER" text="Status" GridPane.columnIndex="1" GridPane.halignment="CENTER" />
+                  <Label alignment="CENTER" text="Total Paid" GridPane.columnIndex="2" GridPane.halignment="CENTER" />
+                  <Label alignment="CENTER" text="Balance Due" GridPane.columnIndex="3" GridPane.halignment="CENTER" />
+                  <ComboBox fx:id="invoicePatientCombo" prefHeight="31.0" prefWidth="131.0" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                  <ComboBox fx:id="invoiceStatusCombo" prefHeight="31.0" prefWidth="134.0" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                  <TextField fx:id="totalPaidTF" alignment="CENTER_RIGHT" disable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="31.0" prefWidth="96.0" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                  <TextField fx:id="balanceDueTF" alignment="CENTER_RIGHT" disable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="31.0" prefWidth="96.0" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+               </children>
+               <padding>
+                  <Insets bottom="10.0" />
+               </padding>
+            </GridPane>
+            <TableView fx:id="invoiceTable" prefHeight="463.0" prefWidth="600.0">
+              <columns>
+                <TableColumn fx:id="invoiceIDCol" prefWidth="67.0" text="Invoice#" />
+                <TableColumn fx:id="invoicePatientCol" prefWidth="124.0" text="Patient" />
+                  <TableColumn fx:id="invoiceContactCol" prefWidth="134.0" text="Contact" />
+                  <TableColumn fx:id="invoiceDateIssuedCol" prefWidth="93.0" text="Date Issued" />
+                  <TableColumn fx:id="invoiceDatePaidCol" prefWidth="99.0" text="Date Paid" />
+                  <TableColumn fx:id="invoiceAmountCol" prefWidth="129.0" text="Amount" />
+              </columns>
+            </TableView>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>

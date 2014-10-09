@@ -36,6 +36,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -58,6 +60,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
@@ -80,6 +83,7 @@ import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Modality;
@@ -95,8 +99,6 @@ import medicalapp.data.Doctor;
 import static medicalapp.data.Doctor.getDoctor;
 import static medicalapp.data.Doctor.getDoctor;
 import static medicalapp.data.Doctor.getDoctor;
-import static medicalapp.data.Doctor.getDoctor;
-import static medicalapp.data.Doctor.getDoctor;
 import medicalapp.data.Document;
 import static medicalapp.data.Document.getDocument;
 import static medicalapp.data.Document.insertDocument;
@@ -105,6 +107,15 @@ import static medicalapp.data.Document.insertDocument;
 import static medicalapp.data.Document.insertDocument;
 import static medicalapp.data.Document.insertDocument;
 import static medicalapp.data.Document.insertDocument;
+import static medicalapp.data.Document.insertDocument;
+import static medicalapp.data.Document.insertDocument;
+import static medicalapp.data.Document.insertDocument;
+import static medicalapp.data.Document.insertDocument;
+import static medicalapp.data.Document.insertDocument;
+import static medicalapp.data.Document.insertDocument;
+import medicalapp.data.Invoice;
+import static medicalapp.data.Invoice.getInvoice;
+import medicalapp.data.InvoiceService;
 import medicalapp.data.Note;
 import static medicalapp.data.Note.getNoteByAppointment;
 import static medicalapp.data.Note.insertNote;
@@ -112,6 +123,8 @@ import medicalapp.data.Patient;
 import static medicalapp.data.Patient.getPatient;
 import static medicalapp.data.Patient.insertPatient;
 import static medicalapp.data.Patient.searchPatients;
+import medicalapp.data.Service;
+import static medicalapp.data.Service.getService;
 import medicalapp.data.Staff;
 import static medicalapp.data.Staff.getStaff;
 import org.controlsfx.dialog.Dialogs;
@@ -126,6 +139,8 @@ public class GuiMainController implements Initializable {
     /**
      * Fields for calendar.
      */
+    @FXML
+    private AnchorPane homePane;
     private static ArrayList<String> months = new ArrayList<>();
     private static int realDay;
     private static int realMonth;
@@ -293,6 +308,7 @@ public class GuiMainController implements Initializable {
                 loginErrorLabel.setVisible(false);
                 loginScreen.setVisible(false);
                 mainScreen.setVisible(true);
+                homePane.setVisible(true);
                 if (currentUser.isDoctor()) {
                     welcomeLabel.setText("Welcome,\n" + "Dr. " + currentUser.getFirstName() + " " + currentUser.getLastName());
                 } else {
@@ -307,12 +323,15 @@ public class GuiMainController implements Initializable {
         }
     }
 
+    @FXML
+    AnchorPane workSpace;
+
     private void handleAppointmentLabel(MouseEvent event) {
         patientFile.setVisible(true);
         timetableAnchorPane.setVisible(true);
     }
-//Event handler when add patient icon is clicked
 
+    //Event handler when add patient icon is clicked
     private void handleAddPatientMouse(MouseEvent event) {
         timetableAnchorPane.setVisible(false);
         MedicalAppNewPatient.setVisible(true);
@@ -322,6 +341,349 @@ public class GuiMainController implements Initializable {
     private void handleMenuHomeMouse(MouseEvent event) {
         timetableAnchorPane.setVisible(true);
         MedicalAppNewPatient.setVisible(false);
+    }
+
+    @FXML
+    private PaymentsController paymentsController;
+
+    @FXML
+    private void handleMenuPayments() {
+        paymentsPane.setVisible(true);
+    }
+    @FXML
+    private ComboBox invoicePatientCombo;
+    @FXML
+    private ComboBox invoiceStatusCombo;
+    @FXML
+    private TableView invoiceTable;
+    @FXML
+    private TableColumn invoiceIDCol;
+    @FXML
+    private TableColumn invoicePatientCol;
+    @FXML
+    private TableColumn invoiceAddressCol;
+    @FXML
+    private TableColumn invoiceDateIssuedCol;
+    @FXML
+    private TableColumn invoiceDatePaidCol;
+    @FXML
+    private TableColumn invoiceAmountCol;
+    @FXML
+    private TextField totalPaidTF;
+    @FXML
+    private TextField balanceDueTF;
+
+    public void initPayments() {
+        invoiceTable.setPlaceholder(new Text("No Invoices to be displayed"));
+        invoiceIDCol.setCellValueFactory(
+                new PropertyValueFactory<>("invoiceID")
+        );
+        //Set patients name in column
+        invoicePatientCol.setCellValueFactory(new Callback<CellDataFeatures<Invoice, String>, ObservableValue<String>>() {
+            public ObservableValue<String> call(CellDataFeatures<Invoice, String> i) {
+                return new ReadOnlyObjectWrapper(getPatient(getAppointment(i.getValue().getAppointmentID()).getPatientID()).getFirstName()
+                        + " " + getPatient(getAppointment(i.getValue().getAppointmentID()).getPatientID()).getLastName());
+            }
+        });
+        invoiceAddressCol.setCellValueFactory(
+                new PropertyValueFactory<>("Address")
+        );
+        invoiceDateIssuedCol.setCellValueFactory(
+                new PropertyValueFactory<>("dateIssued")
+        );
+        invoiceDatePaidCol.setCellValueFactory(new Callback<CellDataFeatures<Invoice, String>, ObservableValue<String>>() {
+            public ObservableValue<String> call(CellDataFeatures<Invoice, String> i) {
+                if (i.getValue().isPaid()) {
+                    return new ReadOnlyObjectWrapper("Yes");
+                } else {
+                    return new ReadOnlyObjectWrapper("No");
+                }
+            }
+        });
+        invoiceAmountCol.setCellValueFactory(new Callback<CellDataFeatures<Invoice, String>, ObservableValue<String>>() {
+            public ObservableValue<String> call(CellDataFeatures<Invoice, String> i) {
+                return new ReadOnlyObjectWrapper(String.valueOf(getTotalAmount(i.getValue())));
+            }
+        });
+        final ObservableList<Invoice> masterData = FXCollections.observableArrayList();
+
+        try {
+            invoicePatientTF.setText("All Patients");
+            Connection conn = DBConnection.getInstance().getConnection();
+
+            String query = "SELECT * FROM Invoice ";
+            PreparedStatement stm = conn.prepareStatement(query);
+
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                int id = rs.getInt(("InvoiceID"));
+
+                masterData.add(getInvoice(id));
+                invoiceTable.setItems(masterData);
+            }
+            refreshPayments();
+        } catch (SQLException ex) {
+            Logger.getLogger(GuiMainController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        //Populate status combo
+        invoiceStatusCombo.getItems().clear();
+        invoiceStatusCombo.getItems().add("All");
+        invoiceStatusCombo.getItems().add("Paid");
+        invoiceStatusCombo.getItems().add("In Arrears");
+        invoiceStatusCombo.setValue("All");
+
+//        invoiceStatusCombo.setOnAction(new EventHandler<ActionEvent>() {
+//            @Override
+//            public void handle(ActionEvent event) {
+//                if (invoiceTable != null) {
+//                    invoiceTable.getItems().clear();
+//                    System.out.println("asfdasfdas");
+//
+//                    String query = "SELECT * FROM Invoice ";
+//                    if (invoiceStatusCombo.getValue().equals("All")) {
+//                        query = "SELECT * FROM Invoice ";
+//                        ObservableList<Invoice> invoices = invoiceTable.getItems(); 
+//                        for (Invoice i : invoices) {
+//
+//                            invoiceTable.getItems().remove(i);
+//                        }
+//                    } else if (invoiceStatusCombo.getValue().equals("Paid")) {
+//                        query = "SELECT * FROM Invoice WHERE isPaid = true";
+//                    } else if (invoiceStatusCombo.getValue().equals("In Arrears")) {
+//                        query = "SELECT * FROM Invoice WHERE isPaid <> true";
+//                    }
+//                    try {
+//                        final ObservableList data = FXCollections.observableArrayList();
+//                        Connection conn = DBConnection.getInstance().getConnection();
+//                        PreparedStatement stm = conn.prepareStatement(query);
+//                        ResultSet rs = stm.executeQuery();
+//                        while (rs.next()) {
+//                            int id = rs.getInt(("InvoiceID"));
+//                            data.add(getInvoice(id));
+//                            invoiceTable.setItems(data);
+//                        }
+//                        refreshPayments();
+//                    } catch (SQLException ex) {
+//                        Logger.getLogger(GuiMainController.class.getName()).log(Level.SEVERE, null, ex);
+//                    }
+//                }
+//            }
+//        });
+        // 1. Wrap the ObservableList in a FilteredList (initially display all data).
+        FilteredList<Invoice> filteredData = new FilteredList<>(masterData, i -> true);
+
+        // 2. Set the filter Predicate whenever the filter changes.
+        invoiceStatusCombo.valueProperty().addListener((observable, oldValue, newValue) -> {
+            filteredData.setPredicate(invoice -> {
+                // If combo value is all, display all invoices.
+                if (newValue == "All" && "All Patients".equals(invoicePatientTF.getText())) {
+                    return true; // Filter all invoices with all patients
+                }
+
+                if (newValue == "In Arrears" && !invoice.isPaid() && "All Patients".equals(invoicePatientTF.getText())) {
+                    return true; // Filter in arrears and all patients.
+                } else if (newValue == "Paid" && invoice.isPaid() && !invoice.isPaid() && "All Patients".equals(invoicePatientTF.getText())) {
+                    return true; // Filter paid and all patients.
+                }
+
+                if (currentPatient != null) {
+                    if (newValue == "All" && invoicePatientTF.getText() != "All Patients" && (currentPatient.getPatientID()) == getAppointment(invoice.getAppointmentID()).getPatientID()) {
+                        return true; // Filter all invoices with currentPatient
+                    }
+                    if (newValue == "In Arrears" && !invoice.isPaid() && invoicePatientTF.getText() != "All Patients" && (currentPatient.getPatientID()) == getAppointment(invoice.getAppointmentID()).getPatientID()) {
+                        return true; // Filter in arrears and currentPatient.
+                    } else if (newValue == "Paid" && invoice.isPaid() && invoicePatientTF.getText() != "All Patients" && (currentPatient.getPatientID()) == getAppointment(invoice.getAppointmentID()).getPatientID()) {
+                        return true; // Filter paid and currentPatient.
+                    }
+                }
+                return false; // Does not match.
+            });
+        });
+        // 2. Set the filter Predicate whenever the patient textfield changes.
+        invoicePatientTF.textProperty().addListener((observable, oldValue, newValue) -> {
+            filteredData.setPredicate(invoice -> {
+                // If text is all patients, display all invoices.
+                if (newValue == "All Patients") {
+                    return true;
+                }
+                if (newValue != "All Patients" && (currentPatient.getPatientID()) == getAppointment(invoice.getAppointmentID()).getPatientID()) {
+                    return true; // Filter currentPatient's invoice.
+                }
+                return false; // Does not match.
+            });
+        });
+
+        // 3. Wrap the FilteredList in a SortedList. 
+        SortedList<Invoice> sortedData = new SortedList<>(filteredData);
+
+        // 4. Bind the SortedList comparator to the TableView comparator.
+        sortedData.comparatorProperty().bind(invoiceTable.comparatorProperty());
+
+        // 5. Add sorted (and filtered) data to the table.
+        invoiceTable.setItems(sortedData);
+    }
+
+    public void refreshPayments() {
+
+        //Populate totalpaid and balanceDue textfields
+        ObservableList<Invoice> list = invoiceTable.getSelectionModel().getTableView().getItems();
+        double totalPaid = 0;
+        double totalDue = 0;
+        for (Invoice i : list) {
+            System.out.println(getTotalAmount(i));
+            if (i.isPaid()) {
+                totalPaid += getTotalAmount(i);
+            } else {
+                totalDue += getTotalAmount(i);
+            }
+        }
+        totalPaidTF.setText(String.valueOf(totalPaid));
+        balanceDueTF.setText(String.valueOf(totalDue));
+        balanceDueTF.setStyle("-fx-text-fill: red");
+//
+//        visitHistoryTable.getSelectionModel().selectedItemProperty().addListener((observableValue, oldValue, newValue) -> {
+//            //Check whether item is selected and set value of selected item to Label
+//            if (visitHistoryTable.getSelectionModel().getSelectedItem() != null) {
+//                selectedAppointment = (Appointment) visitHistoryTable.getSelectionModel().getSelectedItem();
+//                refreshDocumentList();
+//                System.out.println(selectedAppointment.getAppointmentID());
+//            }
+//        });
+    }
+
+    public void refreshPayments(Patient patient) {
+        System.out.println("asdfdasf");
+
+        if (invoiceTable != null) {
+            invoiceTable.getItems().clear();
+        }
+        String query = "SELECT * FROM Invoice "
+                + "INNER JOIN Appointment ON Invoice.AppointmentID = Appointment.AppointmentID "
+                + "WHERE PatientID = ?";
+        try {
+            final ObservableList data = FXCollections.observableArrayList();
+            Connection conn = DBConnection.getInstance().getConnection();
+            PreparedStatement stm = conn.prepareStatement(query);
+            stm.setInt(1, patient.getPatientID());
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                int id = rs.getInt(("InvoiceID"));
+                data.add(getInvoice(id));
+                invoiceTable.setItems(data);
+            }
+//            refreshPayments();
+        } catch (SQLException ex) {
+            Logger.getLogger(GuiMainController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    //Return the total amount of services within an invoice
+    public double getTotalAmount(Invoice invoice) {
+        double totalAmount = 0;
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            String query = "SELECT * FROM Invoice_Service "
+                    + "INNER JOIN Service ON Invoice_Service.serviceID = Service.serviceID "
+                    + "WHERE InvoiceID = ?";
+            PreparedStatement stm = conn.prepareStatement(query);
+            stm.setInt(1, invoice.getInvoiceID());
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                int serviceID = rs.getInt("serviceID");
+                Service service = getService(serviceID);
+                totalAmount += service.getPrice();
+
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(GuiMainController.class
+                    .getName()).log(Level.SEVERE, null, ex);
+        }
+        if (getAppointment(invoice.getAppointmentID()).getDuration().toMinutes() == (15)) {
+            totalAmount += 50; // short appointent
+        }
+        if (getAppointment(invoice.getAppointmentID()).getDuration().toMinutes() == (30)) {
+            totalAmount += 100; // short appointent
+        }
+        return totalAmount;
+    }
+
+    @FXML
+    AnchorPane newInvoice;
+    @FXML
+    ListView servicesList;
+    @FXML
+    Button updateServicesButton;
+    @FXML
+    Button createInvoiceButton;
+    @FXML
+    Label newInvoicePatientLbl;
+    @FXML
+    Label newInvoiceAppLbl;
+
+    public void initNewInvoice(int appointmentID) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/YY  HH:mm:");
+
+        newInvoicePatientLbl.setText(getPatient(getAppointment(appointmentID).getPatientID()).getFirstName()
+                + " " + getPatient(getAppointment(appointmentID).getPatientID()).getLastName());
+        newInvoiceAppLbl.setText(dateFormat.format(getAppointment(appointmentID).getDate()));
+
+        Calendar cal = Calendar.getInstance();
+        Date date = cal.getTime();
+        Invoice currentInvoice = new Invoice(Invoice.getNextID(), appointmentID, false, date, null, false);
+
+        ObservableList<String> services = FXCollections.observableArrayList();
+        for (int i = 1; i < Service.getNextID(); i++) {
+            services.add(getService(i).getDescription());
+        }
+        servicesList.setItems(services);
+        servicesList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+//        updateServicesButton.setOnAction(new EventHandler<ActionEvent>() {
+//            @Override
+//            public void handle(ActionEvent e) {
+//
+//                ObservableList<String> selectedServiceDescriptions = servicesList.getSelectionModel().getSelectedItems();
+//                for (String description : selectedServiceDescriptions) {
+//                    Service service = getService(description);
+//                    selectedServices.add(service);
+//                }
+//            }
+//        });
+        createInvoiceButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                Invoice.insertInvoice(currentInvoice);
+                ArrayList<Service> selectedServices = new ArrayList<>();
+                ObservableList<String> selectedServiceDescriptions = servicesList.getSelectionModel().getSelectedItems();
+
+                if (!selectedServiceDescriptions.isEmpty()) {
+                    for (String description : selectedServiceDescriptions) {
+                        Service service = getService(description);
+                        selectedServices.add(service);
+                    }
+                }
+
+                if (!selectedServices.isEmpty()) {
+                    System.out.println("slected servuices not empty");
+                    for (Service s : selectedServices) { //Insert a number of services
+                        InvoiceService is = new InvoiceService(currentInvoice.getInvoiceID(), s.getServiceID());
+                        InvoiceService.insertInvoiceService(is);
+                        System.out.println(new InvoiceService(currentInvoice.getInvoiceID(), s.getServiceID()).getInvoiceID());
+                    }
+                }
+                initPayments();
+                Dialogs.create()
+                        .owner(null)
+                        .title("Invoice Created")
+                        .masthead(null)
+                        .message("Invoice successfully created.")
+                        .showInformation();
+                newInvoice.setVisible(false);
+                paymentsPane.setVisible(true);
+            }
+        });
     }
 
     private void handleSearchTextField(ChangeEvent event) {
@@ -368,6 +730,23 @@ public class GuiMainController implements Initializable {
                     HBox buttonBox = new HBox();
                     buttonBox.setAlignment(Pos.CENTER_RIGHT);
 
+                    Button paymentsButton = new Button("Payments");
+                    paymentsButton.setOnAction(new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent e) {
+                            searchList.setVisible(false);
+//                            timetableAnchorPane.setVisible(false);
+                            MedicalAppNewPatient.setVisible(false);
+                            paymentsPane.setVisible(true); //Set schedule visible false
+
+                            currentPatient = p; //set the selected patient corresponding to button
+                            currentPatientName.setText(p.getFirstName() + " " + p.getLastName());
+                            invoicePatientTF.setText(currentPatientName.getText());
+                            refreshPayments(p);
+
+                        }
+                    });
+                    buttonBox.getChildren().add(paymentsButton);
                     Button appointmentButton = new Button("Set Appointment");
                     appointmentButton.setOnAction(new EventHandler<ActionEvent>() {
                         @Override
@@ -379,6 +758,7 @@ public class GuiMainController implements Initializable {
 
                             currentPatient = p; //set the selected patient corresponding to button
                             currentPatientName.setText(p.getFirstName() + " " + p.getLastName());
+
                         }
                     });
                     buttonBox.getChildren().add(appointmentButton);
@@ -402,7 +782,12 @@ public class GuiMainController implements Initializable {
             searchList.setPrefHeight(0); //row height is 24 px by default
             searchList.setVisible(false);
         }
+
     }
+    @FXML
+    AnchorPane paymentsPane;
+    @FXML
+    TextField invoicePatientTF;
 
     static Date convertLocalDateToDate(LocalDate ld) {
         Instant instant = ld.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant();
@@ -508,9 +893,11 @@ public class GuiMainController implements Initializable {
                 while (rs.next()) {
                     int appointmentID = rs.getInt("appointmentID");
                     appointments.add(getAppointment(appointmentID));
+
                 }
             } catch (SQLException ex) {
-                Logger.getLogger(GuiMainController.class.getName()).log(Level.SEVERE, "Error getting appointments from doctor" + doctor.getDoctorID(), ex);
+                Logger.getLogger(GuiMainController.class
+                        .getName()).log(Level.SEVERE, "Error getting appointments from doctor" + doctor.getDoctorID(), ex);
             }
             if (!appointments.isEmpty()) {
                 for (Appointment a : appointments) {
@@ -545,21 +932,6 @@ public class GuiMainController implements Initializable {
                         tooltip.setText("Time: " + timeFormat.format(a.getDate())
                                 + "\n" + a.getPurpose());
 
-                        label.setOnMouseEntered(new EventHandler<MouseEvent>() {
-
-                            @Override
-                            public void handle(MouseEvent event) {
-                                Point2D p = label.localToScreen(label.getLayoutBounds().getMaxX(), label.getLayoutBounds().getMaxY()); //I position the tooltip at bottom right of the node (see below for explanation)  
-                                tooltip.show(label, p.getX(), p.getY());
-                            }
-                        });
-                        label.setOnMouseExited(new EventHandler<MouseEvent>() {
-
-                            @Override
-                            public void handle(MouseEvent event) {
-                                tooltip.hide();
-                            }
-                        });
                         if (currentUser.isDoctor()) {
                             label.setOnMouseClicked(new EventHandler<MouseEvent>() {
                                 @Override
@@ -573,7 +945,48 @@ public class GuiMainController implements Initializable {
                                 }
                             });
                         }
-                        timetableAnchor.getChildren().addAll(label);
+                        timetableAnchor.getChildren().add(label);
+
+                        Button button = new Button("Invoice");
+                        button.setVisible(false);
+
+                        button.setOnAction((ActionEvent event) -> {
+                            initNewInvoice(a.getAppointmentID());
+                            newInvoice.setVisible(true);
+                            homePane.setVisible(false);
+                        });
+
+                        timetableAnchor.getChildren().add(button);
+
+                        label.setOnMouseEntered(new EventHandler<MouseEvent>() {
+                            @Override
+                            public void handle(MouseEvent event) {
+                                currentAppointment = a; //init appointment when secretary creates invoice
+                                Point2D p = label.localToScreen(label.getLayoutBounds().getMaxX(), label.getLayoutBounds().getMaxY()); //I position the tooltip at bottom right of the node (see below for explanation)  
+                                tooltip.show(label, p.getX(), p.getY());
+                                button.setLayoutX(label.getLayoutX() + label.getWidth() - 75);
+                                button.setLayoutY(label.getLayoutY() + label.getHeight() - 50);
+                                button.setVisible(true);
+                            }
+                        });
+                        label.setOnMouseExited(new EventHandler<MouseEvent>() {
+
+                            @Override
+                            public void handle(MouseEvent event) {
+                                button.setVisible(false);
+                                tooltip.hide();
+//                                timetableAnchor.getChildren().remove(button);
+                            }
+
+                        });
+                        button.setOnMouseEntered(new EventHandler<MouseEvent>() {
+                            @Override
+                            public void handle(MouseEvent event) {
+//                                timetableAnchor.getChildren().add(button);
+                                button.setVisible(true);
+                            }
+                        });
+
                     }
                 }
             }
@@ -624,7 +1037,7 @@ public class GuiMainController implements Initializable {
 
         weeklyTimetableLabelBox = new HBox();
         weeklyTimetableLabelBox.setPrefWidth(weeklyTimetableScroll.getPrefWidth() - 19); //discount for scrollbar width
-        weeklyTimetableLabelBox.setPrefSize(weeklyTimetableScroll.getPrefWidth() -19, 49);
+        weeklyTimetableLabelBox.setPrefSize(weeklyTimetableScroll.getPrefWidth() - 19, 49);
         weeklyTimetableLabelBox.setStyle("-fx-background-color: rgba(157, 185, 245, 0.7);"); //4th rgba parameter sets opacity
         Label timeLabel = new Label("Time");
         timeLabel.setPrefWidth(50);
@@ -709,9 +1122,11 @@ public class GuiMainController implements Initializable {
                 while (rs.next()) {
                     int appointmentID = rs.getInt("appointmentID");
                     appointments.add(getAppointment(appointmentID));
+
                 }
             } catch (SQLException ex) {
-                Logger.getLogger(GuiMainController.class.getName()).log(Level.SEVERE, "Error getting appointments from doctor" + doctor.getDoctorID(), ex);
+                Logger.getLogger(GuiMainController.class
+                        .getName()).log(Level.SEVERE, "Error getting appointments from doctor" + doctor.getDoctorID(), ex);
             }
             if (!appointments.isEmpty()) {
                 for (Appointment a : appointments) {
@@ -848,7 +1263,8 @@ public class GuiMainController implements Initializable {
 
             }
         } catch (SQLException ex) {
-            Logger.getLogger(GuiMainController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(GuiMainController.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -893,20 +1309,29 @@ public class GuiMainController implements Initializable {
         try {
             // Load the fxml file and create a new stage for the popup dialog.
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(GuiMain.class.getResource("NoteDialog.fxml"));
+            loader
+                    .setLocation(GuiMain.class
+                            .getResource("NoteDialog.fxml"));
             AnchorPane page = (AnchorPane) loader.load();
 
             // Create the dialog Stage.
             Stage dialogStage = new Stage();
-            dialogStage.setTitle("View Note");
+
+            dialogStage.setTitle(
+                    "View Note");
             dialogStage.initModality(Modality.WINDOW_MODAL);
-            dialogStage.initOwner(null);
+
+            dialogStage.initOwner(
+                    null);
             Scene scene = new Scene(page);
+
             dialogStage.setScene(scene);
 
-            // Set the person into the controller.
+            // Set the note into the controller.
             NoteDialogController controller = loader.getController();
+
             controller.setDialogStage(dialogStage);
+
             controller.setNote(note);
 
             // Show the dialog and wait until the user closes it
@@ -985,8 +1410,10 @@ public class GuiMainController implements Initializable {
         Desktop desktop = Desktop.getDesktop();
         try {
             desktop.open(file);
+
         } catch (IOException ex) {
-            Logger.getLogger(GuiMainController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(GuiMainController.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -1017,8 +1444,10 @@ public class GuiMainController implements Initializable {
                         try {
                             selectedHistoricFile = Document.getFile(document.getDocumentID());
                             openFile(selectedHistoricFile);
+
                         } catch (IOException ex) {
-                            Logger.getLogger(GuiMainController.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(GuiMainController.class
+                                    .getName()).log(Level.SEVERE, null, ex);
                         }
                     }
                 });
@@ -1264,19 +1693,21 @@ public class GuiMainController implements Initializable {
                         if (!cellButton[x][y].getText().equals("") && Integer.parseInt(cellButton[x][y].getText()) > realDay && currentMonth
                                 == realMonth && currentYear >= realYear) {
                             cellButton[x][y].setDisable(false);
-                            cellButton[x][y].setStyle("-fx-font-size: 10; -fx-background-color: lightcyan; -fx-alignment: center;");
+                            cellButton[x][y].setStyle("-fx-font-size: 12; -fx-background-color: lightcyan; -fx-alignment: center;"
+                                    + " -fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
                         } else if (!cellButton[x][y].getText().equals("") && currentYear > realYear) {
                             cellButton[x][y].setDisable(false);
-                            cellButton[x][y].setStyle("-fx-font-size: 10; -fx-background-color: lightcyan; -fx-alignment: center;");
+                            cellButton[x][y].setStyle("-fx-font-size: 12; -fx-background-color: lightcyan; -fx-alignment: center; "
+                                    + "-fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
                         } //highlight future months in current year
                         else if (!cellButton[x][y].getText().equals("") && currentMonth > realMonth && currentYear == realYear) {
                             cellButton[x][y].setDisable(false);
-                            cellButton[x][y].setStyle("-fx-font-size: 10; -fx-background-color: lightcyan; -fx-alignment: center;");
+                            cellButton[x][y].setStyle("-fx-font-size: 12; -fx-background-color: lightcyan; -fx-alignment: center; -fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
                         } //highlight today's cell
                         else if (!cellButton[x][y].getText().equals("") && Integer.parseInt(cellButton[x][y].getText()) == realDay && currentMonth
                                 == realMonth && currentYear == realYear) { //Today
                             cellButton[x][y].setDisable(false);
-                            cellButton[x][y].setStyle("-fx-font-size: 10; -fx-background-color: lightsalmon; -fx-alignment: center;");
+                            cellButton[x][y].setStyle("-fx-font-size: 12; -fx-background-color: lightsalmon; -fx-alignment: center; -fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
 
                         } else if (cellButton[x][y].getText().isEmpty()) {
                             cellButton[x][y].setDisable(false); //purely for presentation purposes
@@ -1284,22 +1715,21 @@ public class GuiMainController implements Initializable {
                     }
                 }
                 //render selected cell
-                cellButton[column][row].setStyle("-fx-font-size: 10; -fx-background-color: cyan; -fx-alignment: center;");
+                cellButton[column][row].setStyle("-fx-font-size: 12; -fx-background-color: cyan; -fx-alignment: center; -fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
             });
             //highlight future days in month
-            if (Integer.parseInt(cellButton[column][row].getText()) > realDay && currentMonth
-                    == realMonth && currentYear >= realYear) { //Today
-                cellButton[column][row].setStyle("-fx-font-size: 10; -fx-background-color: lightcyan; -fx-alignment: center;");
+            if (Integer.parseInt(cellButton[column][row].getText()) > realDay && currentMonth == realMonth && currentYear >= realYear) { //Today
+                cellButton[column][row].setStyle("-fx-font-size: 12; -fx-background-color: lightcyan; -fx-alignment: center; -fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
             } //highlight all future years 
             else if (currentYear > realYear) {
-                cellButton[column][row].setStyle("-fx-font-size: 10; -fx-background-color: lightcyan; -fx-alignment: center;");
+                cellButton[column][row].setStyle("-fx-font-size: 12; -fx-background-color: lightcyan; -fx-alignment: center; -fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
             } //highlight future months in current year
             else if (currentMonth > realMonth && currentYear == realYear) {
-                cellButton[column][row].setStyle("-fx-font-size: 10; -fx-background-color: lightcyan; -fx-alignment: center;");
+                cellButton[column][row].setStyle("-fx-font-size: 12; -fx-background-color: lightcyan; -fx-alignment: center; -fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
             } //highlight today's cell
             else if (Integer.parseInt(cellButton[column][row].getText()) == realDay && currentMonth
                     == realMonth && currentYear == realYear) { //Today
-                cellButton[column][row].setStyle("-fx-font-size: 10; -fx-background-color: lightsalmon; -fx-alignment: center;");
+                cellButton[column][row].setStyle("-fx-font-size: 12; -fx-background-color: lightsalmon; -fx-alignment: center; -fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
                 currentDay = i; //initializes the schedule date label
             } else {
                 cellButton[column][row].setDisable(true);
@@ -1316,7 +1746,8 @@ public class GuiMainController implements Initializable {
             if (n instanceof Control) {
                 Control control = (Control) n;
                 control.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-                control.setStyle("-fx-font-size: 10; -fx-background-color: azure; -fx-alignment: center;");
+                control.setStyle("-fx-font-size: 12; -fx-background-color: azure; -fx-alignment: center;"
+                        + " -fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
             }
 
             if (n instanceof Pane) {
@@ -1692,6 +2123,7 @@ public class GuiMainController implements Initializable {
         loginScreen.setVisible(true);
         mainScreen.setVisible(false);
         patientFile.setVisible(false);
+        paymentsPane.setVisible(false);
         Calendar cal = new GregorianCalendar();
         cal.setTimeInMillis(System.currentTimeMillis());
 
@@ -1728,5 +2160,6 @@ public class GuiMainController implements Initializable {
         visitHistoryPane.getChildren().add(calDashBoard);
 
         submitNote.setOnMouseClicked(this::handleNoteAddButton);
+        initPayments();
     }
 }
