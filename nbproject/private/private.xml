@@ -5,17 +5,17 @@
             <url>src/medicalapp/guimain/GuiMainController.java</url>
             <bookmark id="1">
                 <name/>
-                <line>550</line>
+                <line>541</line>
                 <key/>
             </bookmark>
             <bookmark id="3">
                 <name/>
-                <line>1302</line>
+                <line>1367</line>
                 <key/>
             </bookmark>
             <bookmark id="2">
                 <name/>
-                <line>1656</line>
+                <line>1717</line>
                 <key/>
             </bookmark>
         </file>
@@ -25,10 +25,8 @@
             <file>file:/C:/Users/Richard/Documents/NetBeansProjects/MedicalApp/MedicalApp/src/medicalapp/data/InvoiceService.java</file>
             <file>file:/C:/Users/Richard/Documents/NetBeansProjects/MedicalApp/MedicalApp/src/medicalapp/data/Service.java</file>
             <file>file:/C:/Users/Richard/Documents/NetBeansProjects/MedicalApp/MedicalApp/src/medicalapp/guimain/GuiMainController.java</file>
-            <file>file:/C:/Users/Richard/Documents/NetBeansProjects/MedicalApp/MedicalApp/src/medicalapp/guimain/PaymentsController.java</file>
             <file>file:/C:/Users/Richard/Documents/NetBeansProjects/MedicalApp/MedicalApp/src/medicalapp/data/Invoice.java</file>
             <file>file:/C:/Users/Richard/Documents/NetBeansProjects/MedicalApp/MedicalApp/src/medicalapp/data/-Load%20Tables%20&amp;%20Data.sql</file>
-            <file>file:/C:/Users/Richard/Documents/NetBeansProjects/MedicalApp/MedicalApp/src/medicalapp/guimain/Payments.fxml</file>
         </group>
     </open-files>
 </project-private>

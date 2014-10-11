@@ -10,9 +10,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static medicalapp.data.Service.getService;
 
 /**
  *
@@ -56,7 +58,8 @@ public class InvoiceService {
         }
     }
 
-    public static InvoiceService getInvoiceService(int ID) {
+    public static ArrayList<Service> getInvoiceService(int ID) {
+        ArrayList<Service> services = new ArrayList<>();
         Connection conn = DBConnection.getInstance().getConnection();
 
         InvoiceService invoiceService = null;
@@ -67,13 +70,12 @@ public class InvoiceService {
 
             ResultSet rs = stm.executeQuery();
             while (rs.next()) {
-                int invoiceID = rs.getInt("invoiceID");
                 int serviceID = rs.getInt("serviceID");
-                invoiceService = new InvoiceService(invoiceID,serviceID);
+                services.add(getService(serviceID));
             }
         } catch (SQLException ex) {
         }
-        return invoiceService;
+        return services;
     }
 
     public int getInvoiceID() {

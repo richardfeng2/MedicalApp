@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.shape.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.effect.*?>
 <?import javafx.scene.text.*?>
@@ -218,9 +219,11 @@
                                     <TextField fx:id="totalPaidTF" alignment="CENTER_RIGHT" editable="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="31.0" prefWidth="96.0" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
                                     <TextField fx:id="balanceDueTF" alignment="CENTER_RIGHT" editable="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="31.0" prefWidth="96.0" GridPane.columnIndex="3" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
                                     <TextField fx:id="invoicePatientTF" editable="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="31.0" prefWidth="175.0" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
+                                    <Button fx:id="viewInvoiceBtn" mnemonicParsing="false" onAction="#handleViewInvoiceBtn" text="View Invoice" GridPane.columnIndex="4" GridPane.rowIndex="1" />
                                  </children>
                                  <columnConstraints>
-                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="205.0" minWidth="10.0" prefWidth="196.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="161.0" minWidth="10.0" prefWidth="161.0" />
                                     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -327,8 +330,9 @@
          <children>
             <GridPane layoutX="29.0" layoutY="49.0" prefHeight="103.0" prefWidth="711.0">
               <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" maxWidth="539.0" minWidth="10.0" prefWidth="513.0" />
-                <ColumnConstraints hgrow="SOMETIMES" maxWidth="350.0" minWidth="10.0" prefWidth="198.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="539.0" minWidth="10.0" prefWidth="463.0" />
+                  <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="350.0" minWidth="10.0" prefWidth="87.0" />
+                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="350.0" minWidth="10.0" prefWidth="183.0" />
               </columnConstraints>
               <rowConstraints>
                 <RowConstraints maxHeight="52.0" minHeight="10.0" prefHeight="28.0" vgrow="SOMETIMES" />
@@ -343,61 +347,101 @@
                   </Label>
                   <Label text="111 Anzac Parade Kensington, 2000      Ph: 9123 1234" GridPane.rowIndex="1" />
                   <Label GridPane.rowIndex="2" />
-                  <Label text="Date: " GridPane.columnIndex="1" GridPane.halignment="RIGHT">
-                     <GridPane.margin>
-                        <Insets right="50.0" />
-                     </GridPane.margin>
-                  </Label>
-                  <Label text="Invoice No: " GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
+                  <Label fx:id="invoiceCopyIDLbl" alignment="CENTER_RIGHT" prefHeight="21.0" prefWidth="160.0" text="asdfdas" textAlignment="RIGHT" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
                      <padding>
                         <Insets right="50.0" />
                      </padding>
                   </Label>
-                  <Label text="Patient: " GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="2">
-                     <GridPane.margin>
+                  <Label text="Date:" GridPane.columnIndex="1" />
+                  <Label text="Invoice No:" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Label text="Patient:" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <Label fx:id="invoiceCopyPatientLbl" alignment="CENTER_RIGHT" prefHeight="21.0" prefWidth="160.0" text="adfa" textAlignment="RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                     <padding>
                         <Insets right="50.0" />
-                     </GridPane.margin>
+                     </padding>
+                  </Label>
+                  <Label fx:id="invoiceCopyDateLbl" alignment="CENTER_RIGHT" prefHeight="21.0" prefWidth="160.0" text="adsfa" textAlignment="RIGHT" GridPane.columnIndex="2">
+                     <padding>
+                        <Insets right="50.0" />
+                     </padding>
                   </Label>
                </children>
             </GridPane>
-            <GridPane layoutX="33.0" layoutY="159.0" prefHeight="385.0" prefWidth="660.0">
+            <GridPane layoutX="33.0" layoutY="159.0" prefHeight="350.0" prefWidth="660.0">
               <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
               </columnConstraints>
               <rowConstraints>
                 <RowConstraints maxHeight="69.0" minHeight="10.0" prefHeight="11.0" vgrow="SOMETIMES" />
-                <RowConstraints maxHeight="146.0" minHeight="10.0" prefHeight="146.0" vgrow="SOMETIMES" />
-                <RowConstraints maxHeight="84.0" minHeight="10.0" prefHeight="84.0" vgrow="SOMETIMES" />
-                  <RowConstraints maxHeight="45.0" minHeight="4.0" prefHeight="4.0" vgrow="SOMETIMES" />
-                  <RowConstraints maxHeight="43.0" minHeight="10.0" prefHeight="11.0" vgrow="SOMETIMES" />
-                  <RowConstraints maxHeight="43.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints maxHeight="43.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="264.0" minHeight="10.0" prefHeight="153.0" vgrow="SOMETIMES" />
+                  <RowConstraints maxHeight="161.0" minHeight="4.0" prefHeight="107.0" vgrow="SOMETIMES" />
+                  <RowConstraints maxHeight="128.0" minHeight="10.0" prefHeight="27.0" vgrow="SOMETIMES" />
+                  <RowConstraints maxHeight="86.0" minHeight="0.0" prefHeight="21.0" vgrow="SOMETIMES" />
+                  <RowConstraints maxHeight="43.0" minHeight="0.0" prefHeight="17.0" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-                  <Label text="Service Items" />
-                  <ListView prefHeight="115.0" prefWidth="660.0" GridPane.rowIndex="1" />
-                  <GridPane prefHeight="70.0" prefWidth="660.0" GridPane.rowIndex="2">
+                  <Label text="Payment Methods: " GridPane.rowIndex="3" />
+                  <Label text="1) Direct Transfer: Bank Account: 123-123 123-123" GridPane.rowIndex="4" />
+                  <Label text="2) B-Pay: (Billing Code / Reference) -  12345 / 12345" GridPane.rowIndex="5" />
+                  <VBox prefHeight="146.0" prefWidth="494.0" GridPane.rowIndex="1">
+                     <children>
+                        <AnchorPane prefHeight="9.0" prefWidth="661.0" />
+                        <VBox fx:id="invoiceCopyServicesBox" prefHeight="28.0" prefWidth="660.0" />
+                        <GridPane prefHeight="83.0" prefWidth="660.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                            <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="23.0" minHeight="10.0" prefHeight="21.0" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="35.0" minHeight="10.0" prefHeight="35.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <Label text="Total Services" GridPane.rowIndex="1" />
+                              <Label fx:id="totalServicesLabel" text="services $" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                              <Label text="Healthfund Bulk Billing" GridPane.rowIndex="2" />
+                              <Label fx:id="deductionLabel" text="deduction $" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+                           </children>
+                        </GridPane>
+                        <AnchorPane prefHeight="1.0" prefWidth="660.0">
+                           <children>
+                              <Line endX="558.0" layoutX="101.0" layoutY="44.0" startX="-100.0" AnchorPane.topAnchor="0.0" />
+                           </children>
+                        </AnchorPane>
+                        <GridPane>
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                            <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <Label fx:id="amountPayableLabel" text="total" GridPane.columnIndex="1" />
+                              <Label text="Total Amount Payable" />
+                           </children>
+                        </GridPane>
+                     </children></VBox>
+                  <GridPane>
                     <columnConstraints>
                       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                     </columnConstraints>
                     <rowConstraints>
                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                      <children>
-                        <Label text="Total Services" />
-                        <Label text="services $" GridPane.columnIndex="1" GridPane.halignment="RIGHT" />
-                        <Label text="Healthfund Bulk Billing" GridPane.rowIndex="1" />
-                        <Label text="deduction $" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
-                        <Label text="Total Amount Payable" GridPane.rowIndex="2" />
-                        <Label text="total" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+                        <Label prefHeight="21.0" prefWidth="24.0" text="\$" GridPane.columnIndex="1" GridPane.halignment="RIGHT">
+                           <font>
+                              <Font name="System Bold" size="15.0" />
+                           </font></Label>
                      </children>
                   </GridPane>
-                  <Label text="Payment Methods" GridPane.rowIndex="4" />
-                  <Label text="1. Direct Transfer: Bank Account: 123-123 123-123" GridPane.rowIndex="5" />
-                  <Label text="2. B-Pay: Billing Code / Reference #: 12345 / 12345" GridPane.rowIndex="6" />
+                  <Label text="Service Items">
+                     <font>
+                        <Font name="System Bold Italic" size="15.0" />
+                     </font></Label>
                </children>
             </GridPane>
          </children>

@@ -11,12 +11,16 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import static java.lang.Math.round;
+import static java.lang.Math.round;
+import static java.lang.Math.round;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -35,12 +39,14 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -99,8 +105,15 @@ import medicalapp.data.Doctor;
 import static medicalapp.data.Doctor.getDoctor;
 import static medicalapp.data.Doctor.getDoctor;
 import static medicalapp.data.Doctor.getDoctor;
+import static medicalapp.data.Doctor.getDoctor;
+import static medicalapp.data.Doctor.getDoctor;
 import medicalapp.data.Document;
 import static medicalapp.data.Document.getDocument;
+import static medicalapp.data.Document.insertDocument;
+import static medicalapp.data.Document.insertDocument;
+import static medicalapp.data.Document.insertDocument;
+import static medicalapp.data.Document.insertDocument;
+import static medicalapp.data.Document.insertDocument;
 import static medicalapp.data.Document.insertDocument;
 import static medicalapp.data.Document.insertDocument;
 import static medicalapp.data.Document.insertDocument;
@@ -116,6 +129,7 @@ import static medicalapp.data.Document.insertDocument;
 import medicalapp.data.Invoice;
 import static medicalapp.data.Invoice.getInvoice;
 import medicalapp.data.InvoiceService;
+import static medicalapp.data.InvoiceService.getInvoiceService;
 import medicalapp.data.Note;
 import static medicalapp.data.Note.getNoteByAppointment;
 import static medicalapp.data.Note.insertNote;
@@ -124,6 +138,8 @@ import static medicalapp.data.Patient.getPatient;
 import static medicalapp.data.Patient.insertPatient;
 import static medicalapp.data.Patient.searchPatients;
 import medicalapp.data.Service;
+import static medicalapp.data.Service.getService;
+import static medicalapp.data.Service.getService;
 import static medicalapp.data.Service.getService;
 import medicalapp.data.Staff;
 import static medicalapp.data.Staff.getStaff;
@@ -349,6 +365,7 @@ public class GuiMainController implements Initializable {
     @FXML
     private void handleMenuPayments() {
         paymentsPane.setVisible(true);
+        homePane.setVisible(false);
     }
     @FXML
     private ComboBox invoicePatientCombo;
@@ -433,43 +450,6 @@ public class GuiMainController implements Initializable {
         invoiceStatusCombo.getItems().add("In Arrears");
         invoiceStatusCombo.setValue("All");
 
-//        invoiceStatusCombo.setOnAction(new EventHandler<ActionEvent>() {
-//            @Override
-//            public void handle(ActionEvent event) {
-//                if (invoiceTable != null) {
-//                    invoiceTable.getItems().clear();
-//                    System.out.println("asfdasfdas");
-//
-//                    String query = "SELECT * FROM Invoice ";
-//                    if (invoiceStatusCombo.getValue().equals("All")) {
-//                        query = "SELECT * FROM Invoice ";
-//                        ObservableList<Invoice> invoices = invoiceTable.getItems(); 
-//                        for (Invoice i : invoices) {
-//
-//                            invoiceTable.getItems().remove(i);
-//                        }
-//                    } else if (invoiceStatusCombo.getValue().equals("Paid")) {
-//                        query = "SELECT * FROM Invoice WHERE isPaid = true";
-//                    } else if (invoiceStatusCombo.getValue().equals("In Arrears")) {
-//                        query = "SELECT * FROM Invoice WHERE isPaid <> true";
-//                    }
-//                    try {
-//                        final ObservableList data = FXCollections.observableArrayList();
-//                        Connection conn = DBConnection.getInstance().getConnection();
-//                        PreparedStatement stm = conn.prepareStatement(query);
-//                        ResultSet rs = stm.executeQuery();
-//                        while (rs.next()) {
-//                            int id = rs.getInt(("InvoiceID"));
-//                            data.add(getInvoice(id));
-//                            invoiceTable.setItems(data);
-//                        }
-//                        refreshPayments();
-//                    } catch (SQLException ex) {
-//                        Logger.getLogger(GuiMainController.class.getName()).log(Level.SEVERE, null, ex);
-//                    }
-//                }
-//            }
-//        });
         // 1. Wrap the ObservableList in a FilteredList (initially display all data).
         FilteredList<Invoice> filteredData = new FilteredList<>(masterData, i -> true);
 
@@ -522,6 +502,24 @@ public class GuiMainController implements Initializable {
 
         // 5. Add sorted (and filtered) data to the table.
         invoiceTable.setItems(sortedData);
+
+//        invoiceTable.getSelectionModel().selectedItemProperty().addListener((observableValue, oldValue, newValue) -> {
+//            //Check whether item is selected and set value of selected item to Label
+//            if (visitHistoryTable.getSelectionModel().getSelectedItem() != null) {
+//                selectedAppointment = (Appointment) visitHistoryTable.getSelectionModel().getSelectedItem();
+//                refreshDocumentList();
+//                System.out.println(selectedAppointment.getAppointmentID());
+//            }
+//        });
+    }
+    @FXML
+    Button viewInvoiceBtn;
+
+    @FXML
+    private void handleViewInvoiceBtn() {
+        Invoice selectedInvoice = (Invoice) invoiceTable.getSelectionModel().getSelectedItem();
+        showInvoice(selectedInvoice);
+        paymentsPane.setVisible(false);
     }
 
     public void refreshPayments() {
@@ -531,7 +529,6 @@ public class GuiMainController implements Initializable {
         double totalPaid = 0;
         double totalDue = 0;
         for (Invoice i : list) {
-            System.out.println(getTotalAmount(i));
             if (i.isPaid()) {
                 totalPaid += getTotalAmount(i);
             } else {
@@ -553,7 +550,6 @@ public class GuiMainController implements Initializable {
     }
 
     public void refreshPayments(Patient patient) {
-        System.out.println("asdfdasf");
 
         if (invoiceTable != null) {
             invoiceTable.getItems().clear();
@@ -639,7 +635,7 @@ public class GuiMainController implements Initializable {
         }
         servicesList.setItems(services);
         servicesList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-
+        servicesList.getFocusModel().focus(0);
 //        updateServicesButton.setOnAction(new EventHandler<ActionEvent>() {
 //            @Override
 //            public void handle(ActionEvent e) {
@@ -666,11 +662,9 @@ public class GuiMainController implements Initializable {
                 }
 
                 if (!selectedServices.isEmpty()) {
-                    System.out.println("slected servuices not empty");
                     for (Service s : selectedServices) { //Insert a number of services
                         InvoiceService is = new InvoiceService(currentInvoice.getInvoiceID(), s.getServiceID());
                         InvoiceService.insertInvoiceService(is);
-                        System.out.println(new InvoiceService(currentInvoice.getInvoiceID(), s.getServiceID()).getInvoiceID());
                     }
                 }
                 initPayments();
@@ -684,6 +678,113 @@ public class GuiMainController implements Initializable {
                 paymentsPane.setVisible(true);
             }
         });
+    }
+
+    public void showInvoice(Invoice invoice) {
+        createInvoiceCopy(invoice);
+        invoiceCopy.setVisible(true);
+    }
+
+    @FXML
+    AnchorPane paymentsPane;
+    @FXML
+    TextField invoicePatientTF;
+    @FXML
+    AnchorPane invoiceCopy;
+    @FXML
+    VBox invoiceCopyServicesBox;
+    @FXML
+    Label invoiceCopyDateLbl;
+    @FXML
+    Label invoiceCopyIDLbl;
+    @FXML
+    Label invoiceCopyPatientLbl;
+    @FXML
+    Label totalServicesLabel;
+    @FXML
+    Label deductionLabel;
+    @FXML
+    Label amountPayableLabel;
+
+    public void createInvoiceCopy(Invoice invoice) {
+        if (!invoiceCopyServicesBox.getChildren().isEmpty()) {
+            invoiceCopyServicesBox.getChildren().clear();
+        }
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/YY");
+        invoiceCopyDateLbl.setText(dateFormat.format(invoice.getDateIssued()));
+        invoiceCopyIDLbl.setText(String.valueOf(invoice.getInvoiceID()));
+        invoiceCopyPatientLbl.setText(getPatient(getAppointment(invoice.getAppointmentID()).getPatientID()).getFirstName()
+                + " " + getPatient(getAppointment(invoice.getAppointmentID()).getPatientID()).getLastName());
+
+        //Get services from an invoice (if any)
+        ArrayList<Service> services = getInvoiceService(invoice.getInvoiceID());
+        double totalServicesAmount = 0;
+        
+        //Add base service (long/short appointment)
+        if ((double) getAppointment(invoice.getAppointmentID()).getDuration().toMinutes() == 30) {
+            StackPane pane = new StackPane();
+            HBox descBox = new HBox();
+            HBox priceBox = new HBox();
+            descBox.setAlignment(Pos.CENTER_LEFT);
+            priceBox.setAlignment(Pos.CENTER_RIGHT);
+
+            Label desc = new Label("Long Appointment (Base)");
+            desc.setAlignment(Pos.CENTER_LEFT);
+            Label price = new Label("100.00");
+            price.setAlignment(Pos.CENTER_RIGHT);
+
+            descBox.getChildren().add(desc);
+            priceBox.getChildren().add(price);
+            pane.getChildren().addAll(descBox, priceBox);
+
+            invoiceCopyServicesBox.getChildren().add(pane);
+            totalServicesAmount += 100;
+        } else {
+            StackPane pane = new StackPane();
+            HBox descBox = new HBox();
+            HBox priceBox = new HBox();
+            descBox.setAlignment(Pos.CENTER_LEFT);
+            priceBox.setAlignment(Pos.CENTER_RIGHT);
+
+            Label desc = new Label("Short Appointment (Base)");
+            desc.setAlignment(Pos.CENTER_LEFT);
+            Label price = new Label("50.00");
+            price.setAlignment(Pos.CENTER_RIGHT);
+
+            descBox.getChildren().add(desc);
+            priceBox.getChildren().add(price);
+            pane.getChildren().addAll(descBox, priceBox);
+
+            invoiceCopyServicesBox.getChildren().add(pane);
+            totalServicesAmount += 50;
+        }
+
+        if (!services.isEmpty()) {
+            for (Service s : services) {
+                StackPane pane = new StackPane();
+                HBox descBox = new HBox();
+                HBox priceBox = new HBox();
+                descBox.setAlignment(Pos.CENTER_LEFT);
+                priceBox.setAlignment(Pos.CENTER_RIGHT);
+
+                Label desc = new Label(s.getDescription());
+                desc.setAlignment(Pos.CENTER_LEFT);
+                Label price = new Label(String.format("%.2f",s.getPrice()));
+                price.setAlignment(Pos.CENTER_RIGHT);
+
+                descBox.getChildren().add(desc);
+                priceBox.getChildren().add(price);
+                pane.getChildren().addAll(descBox, priceBox);
+
+                invoiceCopyServicesBox.getChildren().add(pane);
+
+                totalServicesAmount += s.getPrice();
+            }
+        }
+        totalServicesLabel.setText(String.format("%.2f",totalServicesAmount));
+        deductionLabel.setText("- " + String.format("%.2f",totalServicesAmount / 2));  //assuming all healthfunds deduct 50%
+        amountPayableLabel.setText(String.format("%.2f",totalServicesAmount - totalServicesAmount / 2));
     }
 
     private void handleSearchTextField(ChangeEvent event) {
@@ -721,7 +822,6 @@ public class GuiMainController implements Initializable {
                 for (String term : splitTerm) {
                     if (!label.getText().toLowerCase().contains(term.toLowerCase())) {
                         match = false;
-                        System.out.println("false");
                     }
                 }
                 if (match) {
@@ -784,10 +884,6 @@ public class GuiMainController implements Initializable {
         }
 
     }
-    @FXML
-    AnchorPane paymentsPane;
-    @FXML
-    TextField invoicePatientTF;
 
     static Date convertLocalDateToDate(LocalDate ld) {
         Instant instant = ld.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant();
@@ -1007,7 +1103,6 @@ public class GuiMainController implements Initializable {
                 >= 0 && cal2.get(Calendar.DAY_OF_MONTH) == currentDay && cal2.get(Calendar.MONTH) == currentMonth
                 && cal2.get(Calendar.YEAR) == currentYear) {
             double y = timeBox.getPrefHeight() * ((cal2.getTimeInMillis() - cal1.getTimeInMillis()) / timeRange);
-            System.out.println("y: " + y);
             Line line = new Line();
             line.setStartX(0);
             line.setStartY(y);
@@ -1144,7 +1239,6 @@ public class GuiMainController implements Initializable {
                     for (int i = 1; i <= 7; i++) { //days of week
 
                         if (i == dayOfWeek && weekOfYear == realWeekOfYear && year == currentYear) {
-                            System.out.println("asdfdasfdas");
 
                             Label label = new Label(Patient.getPatient(a.getPatientID()).getFirstName() + " "
                                     + Patient.getPatient(a.getPatientID()).getLastName());
@@ -1297,7 +1391,6 @@ public class GuiMainController implements Initializable {
             if (visitHistoryTable.getSelectionModel().getSelectedItem() != null) {
                 selectedAppointment = (Appointment) visitHistoryTable.getSelectionModel().getSelectedItem();
                 refreshDocumentList();
-                System.out.println(selectedAppointment.getAppointmentID());
             }
         });
 
@@ -1309,20 +1402,16 @@ public class GuiMainController implements Initializable {
         try {
             // Load the fxml file and create a new stage for the popup dialog.
             FXMLLoader loader = new FXMLLoader();
-            loader
-                    .setLocation(GuiMain.class
-                            .getResource("NoteDialog.fxml"));
+            loader.setLocation(GuiMain.class.getResource("NoteDialog.fxml"));
             AnchorPane page = (AnchorPane) loader.load();
 
             // Create the dialog Stage.
             Stage dialogStage = new Stage();
 
-            dialogStage.setTitle(
-                    "View Note");
+            dialogStage.setTitle("View Note");
             dialogStage.initModality(Modality.WINDOW_MODAL);
 
-            dialogStage.initOwner(
-                    null);
+            dialogStage.initOwner(null);
             Scene scene = new Scene(page);
 
             dialogStage.setScene(scene);
@@ -1428,8 +1517,6 @@ public class GuiMainController implements Initializable {
         for (int i = 1; i < Document.getNextID(); i++) {
             if (getDocument(i).getAppointmentID() == selectedAppointment.getAppointmentID()) {
                 documents.add(getDocument(i));
-                System.out.println("App " + selectedAppointment.getAppointmentID() + " has"
-                        + getDocument(i).getTitle());
             }
         }
         ObservableList<Label> documentItems = FXCollections.observableArrayList();
@@ -1801,7 +1888,6 @@ public class GuiMainController implements Initializable {
                     String[] splitName = name.split("\\s+"); //split when at least one whitespace is identified
 
                     currentDoctor = getDoctor(splitName[1], splitName[2]);
-                    System.out.println(currentDoctor);
                     refreshSchedule(currentDay, currentMonth, currentYear, Doctor.getDoctor(splitName[1], splitName[2]));
                     refreshSchedule(currentDay, currentMonth, currentYear, currentDoctor);
 
@@ -1841,7 +1927,6 @@ public class GuiMainController implements Initializable {
                     SimpleDateFormat minuteFormat = new SimpleDateFormat("mm");
                     currentHour = Integer.parseInt(hourFormat.format(date));
                     currentMinute = Integer.parseInt(minuteFormat.format(date));
-                    System.out.println(currentHour + ":" + currentMinute);
                 }
             });
             scheduleTile.getChildren().add(timeBtn.get(i));
@@ -1902,16 +1987,10 @@ public class GuiMainController implements Initializable {
                 } else {
                     duration = 30;
                 }
-                System.out.println(currentPatient);
-                System.out.println(currentDoctor);
-                System.out.println(date);
-                System.out.println(duration);
-                System.out.println(purposeText.getText());
                 Appointment.insertAppointment(currentPatient, currentDoctor, date, duration, purposeText.getText());
                 refreshSchedule(currentDay, currentMonth, currentYear);
 
                 SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
-                System.out.println();
                 Dialogs.create()
                         .owner(null)
                         .title("Appointment Scheduled")
@@ -1949,7 +2028,6 @@ public class GuiMainController implements Initializable {
         nameBox.getChildren().add(name);
 
         controlsGrid.add(nameBox, 1, 0);
-        System.out.println(name);
 
         controlsGrid.add(radiosBox, 0, 0);
         controlsGrid.add(purposeBox, 0, 1);
@@ -2021,7 +2099,6 @@ public class GuiMainController implements Initializable {
         Appointment appointment;
         for (int i = 1; i <= Appointment.getMaxID(); i++) {
             appointment = Appointment.getAppointment(i);
-            System.out.println(appointment.getAppointmentID());
 
             //Get appointments only on dictated day, month, and year
             Calendar cal = Calendar.getInstance();
@@ -2041,7 +2118,6 @@ public class GuiMainController implements Initializable {
         //Populate a list of booked out times from existing appointments
         ArrayList<String> bookedTimes = new ArrayList<>();
         for (int i = 0; i < appointments.size(); i++) {
-            System.out.println(timeFormat.format(appointments.get(i).getDate()));
             bookedTimes.add(timeFormat.format(appointments.get(i).getDate()));
         }
         for (int i = 0; i < 48; i++) {//Scan time slots for any booked appointments, then disable
@@ -2161,5 +2237,7 @@ public class GuiMainController implements Initializable {
 
         submitNote.setOnMouseClicked(this::handleNoteAddButton);
         initPayments();
+        invoiceCopy.setVisible(false);
+
     }
 }
