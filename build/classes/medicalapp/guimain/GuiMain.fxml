@@ -385,7 +385,7 @@
                   <Label text="2) B-Pay: (Billing Code / Reference) -  12345 / 12345" GridPane.rowIndex="5" />
                   <VBox prefHeight="146.0" prefWidth="494.0" GridPane.rowIndex="1">
                      <children>
-                        <AnchorPane prefHeight="28.0" prefWidth="664.0" />
+                        <AnchorPane prefHeight="9.0" prefWidth="661.0" />
                         <VBox fx:id="invoiceCopyServicesBox" prefHeight="28.0" prefWidth="660.0" />
                         <GridPane prefHeight="83.0" prefWidth="660.0">
                           <columnConstraints>

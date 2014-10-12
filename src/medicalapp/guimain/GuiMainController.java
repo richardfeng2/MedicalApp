@@ -5,6 +5,11 @@
  */
 package medicalapp.guimain;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.codec.PngImage;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -107,25 +112,25 @@ import static medicalapp.data.Doctor.getDoctor;
 import static medicalapp.data.Doctor.getDoctor;
 import static medicalapp.data.Doctor.getDoctor;
 import static medicalapp.data.Doctor.getDoctor;
-import medicalapp.data.Document;
-import static medicalapp.data.Document.getDocument;
-import static medicalapp.data.Document.insertDocument;
-import static medicalapp.data.Document.insertDocument;
-import static medicalapp.data.Document.insertDocument;
-import static medicalapp.data.Document.insertDocument;
-import static medicalapp.data.Document.insertDocument;
-import static medicalapp.data.Document.insertDocument;
-import static medicalapp.data.Document.insertDocument;
-import static medicalapp.data.Document.insertDocument;
-import static medicalapp.data.Document.insertDocument;
-import static medicalapp.data.Document.insertDocument;
-import static medicalapp.data.Document.insertDocument;
-import static medicalapp.data.Document.insertDocument;
-import static medicalapp.data.Document.insertDocument;
-import static medicalapp.data.Document.insertDocument;
-import static medicalapp.data.Document.insertDocument;
-import static medicalapp.data.Document.insertDocument;
-import static medicalapp.data.Document.insertDocument;
+import medicalapp.data.Docos;
+import static medicalapp.data.Docos.getDocument;
+import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
 import medicalapp.data.Invoice;
 import static medicalapp.data.Invoice.getInvoice;
 import medicalapp.data.InvoiceService;
@@ -519,7 +524,9 @@ public class GuiMainController implements Initializable {
     private void handleViewInvoiceBtn() {
         Invoice selectedInvoice = (Invoice) invoiceTable.getSelectionModel().getSelectedItem();
         showInvoice(selectedInvoice);
-        paymentsPane.setVisible(false);
+//        paymentsPane.setVisible(false);
+        saveAsPng(invoiceCopy, true);
+        invoiceCopy.setVisible(false);
     }
 
     public void refreshPayments() {
@@ -720,7 +727,7 @@ public class GuiMainController implements Initializable {
         //Get services from an invoice (if any)
         ArrayList<Service> services = getInvoiceService(invoice.getInvoiceID());
         double totalServicesAmount = 0;
-        
+
         //Add base service (long/short appointment)
         if ((double) getAppointment(invoice.getAppointmentID()).getDuration().toMinutes() == 30) {
             StackPane pane = new StackPane();
@@ -770,7 +777,7 @@ public class GuiMainController implements Initializable {
 
                 Label desc = new Label(s.getDescription());
                 desc.setAlignment(Pos.CENTER_LEFT);
-                Label price = new Label(String.format("%.2f",s.getPrice()));
+                Label price = new Label(String.format("%.2f", s.getPrice()));
                 price.setAlignment(Pos.CENTER_RIGHT);
 
                 descBox.getChildren().add(desc);
@@ -782,9 +789,9 @@ public class GuiMainController implements Initializable {
                 totalServicesAmount += s.getPrice();
             }
         }
-        totalServicesLabel.setText(String.format("%.2f",totalServicesAmount));
-        deductionLabel.setText("- " + String.format("%.2f",totalServicesAmount / 2));  //assuming all healthfunds deduct 50%
-        amountPayableLabel.setText(String.format("%.2f",totalServicesAmount - totalServicesAmount / 2));
+        totalServicesLabel.setText(String.format("%.2f", totalServicesAmount));
+        deductionLabel.setText("- " + String.format("%.2f", totalServicesAmount / 2));  //assuming all healthfunds deduct 50%
+        amountPayableLabel.setText(String.format("%.2f", totalServicesAmount - totalServicesAmount / 2));
     }
 
     private void handleSearchTextField(ChangeEvent event) {
@@ -1274,11 +1281,11 @@ public class GuiMainController implements Initializable {
         refreshWeeklyTimetable();
         weeklySchedule.getChildren().add(pane);
         weeklySchedule.setVisible(true);
-        saveAsPng(weeklySchedule);
+        saveAsPng(weeklySchedule, false);
         weeklySchedule.setVisible(false);
     }
 
-    public void saveAsPng(Node n) {
+    public void saveAsPng(Node n, Boolean isInvoice) {
         WritableImage image = n.snapshot(new SnapshotParameters(), null);
 
         // TODO: probably use a file chooser here
@@ -1286,10 +1293,39 @@ public class GuiMainController implements Initializable {
         try {
             ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
         } catch (IOException e) {
-            // TODO: handle exception here
         }
-        openFile(file);
+//        openFile(file);
+        imageToPDF(file, isInvoice);
 
+    }
+
+    public void imageToPDF(File file, Boolean isInvoice) {
+        Document document = new Document();
+        String path = "";
+        try {
+            if (isInvoice) {
+                path = "Invoice.pdf";
+            } else {
+                path = "Timetable.pdf";
+            }
+            FileOutputStream fos = new FileOutputStream(path);
+            PdfWriter writer = PdfWriter.getInstance(document, fos);
+            writer.open();
+            document.open();
+            Image img = Image.getInstance(file.getPath());
+            if (!isInvoice) {
+                img.scalePercent(33);
+            } else {
+                img.scalePercent(70);
+            }
+            document.add(img);
+            document.close();
+            writer.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        File myFile = new File(path);
+        openFile(myFile);
     }
 
     private void refreshPatientFile() {
@@ -1513,15 +1549,15 @@ public class GuiMainController implements Initializable {
 
     private void refreshDocumentList() {
 
-        ArrayList<Document> documents = new ArrayList<>();
-        for (int i = 1; i < Document.getNextID(); i++) {
+        ArrayList<Docos> documents = new ArrayList<>();
+        for (int i = 1; i < Docos.getNextID(); i++) {
             if (getDocument(i).getAppointmentID() == selectedAppointment.getAppointmentID()) {
                 documents.add(getDocument(i));
             }
         }
         ObservableList<Label> documentItems = FXCollections.observableArrayList();
         ArrayList<Label> labels = new ArrayList<>();
-        for (Document document : documents) {
+        for (Docos document : documents) {
             if (documents != null) {
                 Label label = new Label(document.getTitle());
                 label.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -1529,7 +1565,7 @@ public class GuiMainController implements Initializable {
                     public void handle(MouseEvent event) {
                         FileOutputStream fos = null;
                         try {
-                            selectedHistoricFile = Document.getFile(document.getDocumentID());
+                            selectedHistoricFile = Docos.getFile(document.getDocumentID());
                             openFile(selectedHistoricFile);
 
                         } catch (IOException ex) {

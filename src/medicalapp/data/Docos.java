@@ -24,7 +24,7 @@ import java.util.logging.Logger;
  *
  * @author Richard
  */
-public class Document {
+public class Docos {
 
     private int documentID;
     private int appointmentID;
@@ -34,7 +34,7 @@ public class Document {
     private boolean expired;
     private boolean locked;
 
-    public Document(int documentID, int appointmentID, String title, Blob file,
+    public Docos(int documentID, int appointmentID, String title, Blob file,
             boolean isClinical, boolean expired, boolean locked) {
         this.documentID = documentID;
         this.appointmentID = appointmentID;
@@ -45,7 +45,7 @@ public class Document {
         this.locked = locked;
     }
 
-    public static void insertDocument(Document document, String filePath) {
+    public static void insertDocument(Docos document, String filePath) {
         try {
             Connection conn = DBConnection.getInstance().getConnection();
 
@@ -60,7 +60,7 @@ public class Document {
             try {
                 inputStream = new FileInputStream(new File(filePath));
             } catch (FileNotFoundException ex) {
-                Logger.getLogger(Document.class.getName()).log(Level.SEVERE, "File not found at " + filePath, ex);
+                Logger.getLogger(Docos.class.getName()).log(Level.SEVERE, "File not found at " + filePath, ex);
             }
             stm.setBlob(4, inputStream);
             stm.setBoolean(5, document.isClinical());
@@ -70,7 +70,7 @@ public class Document {
             stm.executeUpdate();
 
         } catch (SQLException ex) {
-            Logger.getLogger(Document.class.getName()).log(Level.SEVERE, "Error inserting document", ex);
+            Logger.getLogger(Docos.class.getName()).log(Level.SEVERE, "Error inserting document", ex);
         }
     }
 
@@ -98,11 +98,11 @@ public class Document {
             stm.executeUpdate();
 
         } catch (SQLException ex) {
-            Logger.getLogger(Document.class.getName()).log(Level.SEVERE, "Error inserting document", ex);
+            Logger.getLogger(Docos.class.getName()).log(Level.SEVERE, "Error inserting document", ex);
         }
     }
 
-    public static void updateDocument(Document document, String filePath) {
+    public static void updateDocument(Docos document, String filePath) {
 
         Connection conn = DBConnection.getInstance().getConnection();
 
@@ -118,7 +118,7 @@ public class Document {
                 try {
                     inputStream = new FileInputStream(new File(filePath));
                 } catch (FileNotFoundException ex) {
-                    Logger.getLogger(Document.class.getName()).log(Level.SEVERE, "File not found at " + filePath, ex);
+                    Logger.getLogger(Docos.class.getName()).log(Level.SEVERE, "File not found at " + filePath, ex);
                 }
 
                 PreparedStatement stm = conn.prepareStatement(query);
@@ -134,7 +134,7 @@ public class Document {
                 stm.executeUpdate();
 
             } catch (SQLException ex) {
-                Logger.getLogger(Document.class.getName()).log(Level.SEVERE, "Error updating document", ex);
+                Logger.getLogger(Docos.class.getName()).log(Level.SEVERE, "Error updating document", ex);
             }
         } else {
             try {
@@ -154,12 +154,12 @@ public class Document {
 
                 stm.executeUpdate();
             } catch (SQLException ex) {
-                Logger.getLogger(Document.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(Docos.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
 
-    public static void deleteDocument(Document document) {
+    public static void deleteDocument(Docos document) {
         deleteDocument(document.getDocumentID());
     }
 
@@ -173,15 +173,15 @@ public class Document {
 
             stm.executeUpdate();
         } catch (SQLException ex) {
-            Logger.getLogger(Document.class.getName()).log(Level.SEVERE, "Error deleting document documentID=" + documentID, ex);
+            Logger.getLogger(Docos.class.getName()).log(Level.SEVERE, "Error deleting document documentID=" + documentID, ex);
         }
     }
 
-    public static Document getDocument(int id) {
+    public static Docos getDocument(int id) {
 
         Connection conn = DBConnection.getInstance().getConnection();
 
-        Document document = null;
+        Docos document = null;
         try {
             String query = "SELECT * FROM Document WHERE DocumentID = ?";
             PreparedStatement stm = conn.prepareStatement(query);
@@ -197,10 +197,10 @@ public class Document {
                 Boolean expired = rs.getBoolean("expired");
                 Boolean locked = rs.getBoolean("locked");
 
-                document = new Document(documentID, appointmentID, title, file, isClinical, expired, locked);
+                document = new Docos(documentID, appointmentID, title, file, isClinical, expired, locked);
             }
         } catch (SQLException ex) {
-            Logger.getLogger(Document.class.getName()).log(Level.SEVERE, "Error getting document documentID=" + id, ex);
+            Logger.getLogger(Docos.class.getName()).log(Level.SEVERE, "Error getting document documentID=" + id, ex);
         }
         return document;
     }
@@ -233,7 +233,7 @@ public class Document {
                 fos.close();
             }
         } catch (SQLException ex) {
-            Logger.getLogger(Document.class.getName()).log(Level.SEVERE, "Error getting document documentID=" + id, ex);
+            Logger.getLogger(Docos.class.getName()).log(Level.SEVERE, "Error getting document documentID=" + id, ex);
         }
         return file;
     }
@@ -249,7 +249,7 @@ public class Document {
                 nextID = rs.getInt("nextID");
             }
         } catch (SQLException ex) {
-            Logger.getLogger(Document.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Docos.class.getName()).log(Level.SEVERE, null, ex);
         }
         if (nextID == 0) {
             nextID++;
