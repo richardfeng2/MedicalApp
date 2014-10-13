@@ -255,12 +255,13 @@ public class Patient extends Person {
                 String query = "SELECT * FROM Patient INNER JOIN Person "
                         + "ON Patient.personID = Person.personID "
                         + "WHERE LCASE(firstName) LIKE ? OR LCASE(lastName) LIKE ? "
-                        + " OR LCASE(address) LIKE ?"
+                        + " OR LCASE(address) LIKE ? OR LCASE(billingInfo) LIKE ?"
                         + " AND expired <> true";
                 PreparedStatement stm = conn.prepareStatement(query);
                 stm.setString(1, "%" + word + "%");
                 stm.setString(2, "%" + word + "%");
                 stm.setString(3, "%" + word + "%");
+                stm.setString(4, "%" + word + "%");
 
                 ResultSet rs = stm.executeQuery();
                 while (rs.next()) {

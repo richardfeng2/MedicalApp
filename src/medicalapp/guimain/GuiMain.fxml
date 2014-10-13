@@ -49,7 +49,7 @@
                               <Cursor fx:constant="HAND" />
                           </cursor>
                       </ImageView>
-                      <ImageView fx:id="MenuPatientDocuments" fitHeight="64.0" fitWidth="64.0" layoutX="25.0" layoutY="394.0">
+                      <ImageView fx:id="MenuChangeLog" fitHeight="64.0" fitWidth="64.0" layoutX="25.0" layoutY="394.0">
                           <image>
                               <Image url="@../resources/documents_folder_badged.png" />
                           </image>
@@ -240,10 +240,10 @@
                                  <columns>
                                     <TableColumn fx:id="invoiceIDCol" prefWidth="67.0" text="Invoice#" />
                                     <TableColumn fx:id="invoicePatientCol" prefWidth="124.0" text="Patient" />
-                                    <TableColumn fx:id="invoiceAddressCol" prefWidth="134.0" text="Address" />
-                                    <TableColumn fx:id="invoiceDateIssuedCol" prefWidth="93.0" text="Date Issued" />
-                                    <TableColumn fx:id="invoiceDatePaidCol" prefWidth="99.0" text="Paid" />
-                                    <TableColumn fx:id="invoiceAmountCol" prefWidth="129.0" text="Amount" />
+                                    <TableColumn fx:id="invoiceAddressCol" prefWidth="262.0" text="Address" />
+                                    <TableColumn fx:id="invoiceDateIssuedCol" prefWidth="97.0" text="Date Issued" />
+                                    <TableColumn fx:id="invoiceAmountCol" prefWidth="99.0" text="Amount" />
+                                    <TableColumn fx:id="invoiceDatePaidCol" prefWidth="116.0" text="Paid" />
                                  </columns>
                               </TableView>
                            </children>
@@ -291,6 +291,29 @@
                         </BorderPane>
                      </children>
                   </AnchorPane>
+                  <AnchorPane fx:id="changeLogPane" prefHeight="476.0" prefWidth="681.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <top>
+                              <Label text="Change Log" BorderPane.alignment="TOP_LEFT">
+                                 <font>
+                                    <Font size="36.0" />
+                                 </font>
+                              </Label>
+                           </top>
+                           <center>
+                              <TableView fx:id="changeLogTable" prefHeight="478.0" prefWidth="763.0" BorderPane.alignment="CENTER">
+                                <columns>
+                                  <TableColumn fx:id="changeLogDateCol" prefWidth="130.0" text="Date" />
+                                    <TableColumn fx:id="changeLogTypeCol" prefWidth="104.0" text="Type" />
+                                    <TableColumn fx:id="changeLogDescCol" prefWidth="418.0" text="Description" />
+                                    <TableColumn fx:id="changeLogStaffCol" minWidth="0.0" prefWidth="132.0" text="Staff" />
+                                </columns>
+                              </TableView>
+                           </center>
+                        </BorderPane>
+                     </children>
+                  </AnchorPane>
                </children>
             </AnchorPane>
          </center>
@@ -326,7 +349,7 @@
          </children>
       </AnchorPane>
       <AnchorPane fx:id="weeklySchedule" prefHeight="200.0" prefWidth="200.0" visible="false" />
-      <AnchorPane fx:id="invoiceCopy" layoutX="106.0" layoutY="57.0" prefHeight="585.0" prefWidth="783.0">
+      <AnchorPane fx:id="invoiceCopy" layoutX="106.0" layoutY="57.0" prefHeight="585.0" prefWidth="783.0" visible="false">
          <children>
             <GridPane layoutX="29.0" layoutY="49.0" prefHeight="103.0" prefWidth="711.0">
               <columnConstraints>

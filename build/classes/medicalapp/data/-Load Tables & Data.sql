@@ -14,6 +14,16 @@ finished boolean,
 PRIMARY KEY(appointmentID)
 );
 
+CREATE TABLE SA.CHANGELOG
+(
+changelogID int,
+date timestamp,
+type varchar(20),
+description varchar(255),
+staffID int,
+PRIMARY KEY(changelogID)
+);
+
 CREATE TABLE SA.DOCTOR
 (
 doctorID int,

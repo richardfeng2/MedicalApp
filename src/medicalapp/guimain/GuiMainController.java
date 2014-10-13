@@ -8,7 +8,6 @@ package medicalapp.guimain;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Image;
 import com.itextpdf.text.pdf.PdfWriter;
-import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.pdf.codec.PngImage;
 import java.awt.Desktop;
 import java.io.File;
@@ -58,6 +57,7 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
@@ -72,6 +72,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
@@ -105,13 +106,9 @@ import javax.imageio.ImageIO;
 import javax.swing.event.ChangeEvent;
 import medicalapp.data.Appointment;
 import static medicalapp.data.Appointment.getAppointment;
+import medicalapp.data.ChangeLog;
+import static medicalapp.data.ChangeLog.getChangeLog;
 import medicalapp.data.DBConnection;
-import medicalapp.data.Doctor;
-import static medicalapp.data.Doctor.getDoctor;
-import static medicalapp.data.Doctor.getDoctor;
-import static medicalapp.data.Doctor.getDoctor;
-import static medicalapp.data.Doctor.getDoctor;
-import static medicalapp.data.Doctor.getDoctor;
 import medicalapp.data.Docos;
 import static medicalapp.data.Docos.getDocument;
 import static medicalapp.data.Docos.insertDocument;
@@ -131,6 +128,16 @@ import static medicalapp.data.Docos.insertDocument;
 import static medicalapp.data.Docos.insertDocument;
 import static medicalapp.data.Docos.insertDocument;
 import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
+import medicalapp.data.Doctor;
+import static medicalapp.data.Doctor.getDoctor;
+import static medicalapp.data.Doctor.getDoctor;
+import static medicalapp.data.Doctor.getDoctor;
 import medicalapp.data.Invoice;
 import static medicalapp.data.Invoice.getInvoice;
 import medicalapp.data.InvoiceService;
@@ -145,9 +152,10 @@ import static medicalapp.data.Patient.searchPatients;
 import medicalapp.data.Service;
 import static medicalapp.data.Service.getService;
 import static medicalapp.data.Service.getService;
-import static medicalapp.data.Service.getService;
 import medicalapp.data.Staff;
 import static medicalapp.data.Staff.getStaff;
+import org.controlsfx.control.action.Action;
+import org.controlsfx.dialog.Dialog;
 import org.controlsfx.dialog.Dialogs;
 
 /**
@@ -354,14 +362,26 @@ public class GuiMainController implements Initializable {
 
     //Event handler when add patient icon is clicked
     private void handleAddPatientMouse(MouseEvent event) {
-        timetableAnchorPane.setVisible(false);
+        setAllInvisible();
         MedicalAppNewPatient.setVisible(true);
     }
 
     //Event handler when add patient icon is clicked
     private void handleMenuHomeMouse(MouseEvent event) {
-        timetableAnchorPane.setVisible(true);
-        MedicalAppNewPatient.setVisible(false);
+        setAllInvisible();
+
+        /**
+         * Refresh calendar dashboard
+         */
+        currentDay = realDay;
+        currentMonth = realMonth;
+        currentYear = realYear;
+        HBox calDashBoard = new HBox();
+        calDashBoard.getChildren().add(initCalendar());
+        MedicalAppCalendar.getChildren().clear();
+        MedicalAppCalendar.getChildren().add(calDashBoard);
+
+        homePane.setVisible(true);
     }
 
     @FXML
@@ -369,8 +389,9 @@ public class GuiMainController implements Initializable {
 
     @FXML
     private void handleMenuPayments() {
+        setAllInvisible();
+        initPayments();
         paymentsPane.setVisible(true);
-        homePane.setVisible(false);
     }
     @FXML
     private ComboBox invoicePatientCombo;
@@ -407,21 +428,108 @@ public class GuiMainController implements Initializable {
                         + " " + getPatient(getAppointment(i.getValue().getAppointmentID()).getPatientID()).getLastName());
             }
         });
-        invoiceAddressCol.setCellValueFactory(
-                new PropertyValueFactory<>("Address")
-        );
+        invoiceAddressCol.setCellValueFactory(new Callback<CellDataFeatures<Invoice, String>, ObservableValue<String>>() {
+            public ObservableValue<String> call(CellDataFeatures<Invoice, String> i) {
+                return new ReadOnlyObjectWrapper(getPatient(getAppointment(i.getValue().getAppointmentID()).getPatientID()).getAddress());
+            }
+        });
+
+//        invoiceDatePaidCol.setCellValueFactory(
+//                new PropertyValueFactory<>("isPaid")
+//        );
         invoiceDateIssuedCol.setCellValueFactory(
                 new PropertyValueFactory<>("dateIssued")
         );
-        invoiceDatePaidCol.setCellValueFactory(new Callback<CellDataFeatures<Invoice, String>, ObservableValue<String>>() {
-            public ObservableValue<String> call(CellDataFeatures<Invoice, String> i) {
-                if (i.getValue().isPaid()) {
-                    return new ReadOnlyObjectWrapper("Yes");
-                } else {
-                    return new ReadOnlyObjectWrapper("No");
-                }
+
+        invoiceDatePaidCol.setCellValueFactory(new Callback<CellDataFeatures<Invoice, Invoice>, ObservableValue<Invoice>>() {
+            @Override
+            public ObservableValue<Invoice> call(CellDataFeatures<Invoice, Invoice> features) {
+                return new ReadOnlyObjectWrapper(features.getValue());
             }
         });
+
+        invoiceDatePaidCol.setCellFactory(new Callback<TableColumn<Invoice, Invoice>, TableCell<Invoice, Invoice>>() {
+            @Override
+            public TableCell<Invoice, Invoice> call(TableColumn<Invoice, Invoice> btnCol) {
+                return new TableCell<Invoice, Invoice>() {
+                    final ImageView buttonGraphic = new ImageView();
+                    final Button button = new Button();
+
+                    {
+                        button.setGraphic(buttonGraphic);
+                        button.setMinWidth(70);
+                    }
+                    final Label label = new Label();
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yy");
+
+                    @Override
+                    public void updateItem(final Invoice invoice, boolean empty) {
+                        super.updateItem(invoice, empty);
+                        if (invoice != null) {
+                            if (invoice.isPaid()) {
+                                label.setText(sdf.format(invoice.getDatePaid()));
+                                setGraphic(label);
+//                      buttonGraphic.setImage(fruitImage);
+                            } else {
+                                button.setText("Pay Now");
+                                setGraphic(button);
+
+//                      buttonGraphic.setImage(coffeeImage);
+                            }
+
+                            button.setOnAction(new EventHandler<ActionEvent>() {
+                                @Override
+                                public void handle(ActionEvent event) {
+                                    Calendar cal = Calendar.getInstance();
+                                    Date date = cal.getTime();
+                                    //Update invoice with isPaid & datePaid
+                                    Invoice i = new Invoice(invoice.getInvoiceID(), invoice.getAppointmentID(),
+                                            true, invoice.getDateIssued(), date, false);
+
+                                    Action response = Dialogs.create()
+                                            .owner(null)
+                                            .title("Confirm Dialog")
+                                            .masthead("Look, a Confirm Dialog")
+                                            .message("Do you want to continue?")
+                                            .showConfirm();
+
+                                    if (response == Dialog.Actions.YES) {
+                                        Invoice.updateInvoice(i);
+//                                        button.setText("Paid");
+//                                        button.setDisable(true);
+                                        label.setText(sdf.format(invoice.getDatePaid()));
+                                        setGraphic(label);
+                                        ChangeLog.insertChangeLog(new ChangeLog(1, date, "Payment", "InvoiceID: " + invoice.getInvoiceID() + " - payment "
+                                                + "has been confirmed", currentUser.getStaffID()));
+                                    } else {
+                                        // ... user chose NO, CANCEL, or closed the dialog
+                                    }
+                                }
+                            });
+                        } else {
+                            setGraphic(null);
+                        }
+                    }
+                };
+            }
+        });
+
+//        invoiceDatePaidCol.setCellValueFactory(new Callback<CellDataFeatures<Invoice, Boolean>, ObservableValue<Boolean>>() {
+//            public ObservableValue<Boolean> call(CellDataFeatures<Invoice, Boolean> i) {
+//                if (i.getValue().isPaid()) {
+//                    return new ReadOnlyObjectWrapper("Yes");
+//                } else {
+//                    invoiceDatePaidCol.setCellFactory(
+//                            new Callback<TableColumn<Invoice, Boolean>, TableCell<Invoice, Boolean>>() {
+//                                @Override
+//                                public TableCell<Invoice, Boolean> call(TableColumn<Invoice, Boolean> p) {
+//                                    return new ButtonCell();
+//                                }
+//                            });
+//                }
+//                return null;
+//            }
+//        });
         invoiceAmountCol.setCellValueFactory(new Callback<CellDataFeatures<Invoice, String>, ObservableValue<String>>() {
             public ObservableValue<String> call(CellDataFeatures<Invoice, String> i) {
                 return new ReadOnlyObjectWrapper(String.valueOf(getTotalAmount(i.getValue())));
@@ -484,6 +592,7 @@ public class GuiMainController implements Initializable {
                 }
                 return false; // Does not match.
             });
+            refreshPayments();
         });
         // 2. Set the filter Predicate whenever the patient textfield changes.
         invoicePatientTF.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -558,9 +667,6 @@ public class GuiMainController implements Initializable {
 
     public void refreshPayments(Patient patient) {
 
-        if (invoiceTable != null) {
-            invoiceTable.getItems().clear();
-        }
         String query = "SELECT * FROM Invoice "
                 + "INNER JOIN Appointment ON Invoice.AppointmentID = Appointment.AppointmentID "
                 + "WHERE PatientID = ?";
@@ -575,7 +681,7 @@ public class GuiMainController implements Initializable {
                 data.add(getInvoice(id));
                 invoiceTable.setItems(data);
             }
-//            refreshPayments();
+            refreshPayments();
         } catch (SQLException ex) {
             Logger.getLogger(GuiMainController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -681,6 +787,10 @@ public class GuiMainController implements Initializable {
                         .masthead(null)
                         .message("Invoice successfully created.")
                         .showInformation();
+
+                ChangeLog.insertChangeLog(new ChangeLog(1, date, "Payment", "InvoiceID: " + currentInvoice.getInvoiceID() + " - invoice "
+                        + "has been created", currentUser.getStaffID()));
+
                 newInvoice.setVisible(false);
                 paymentsPane.setVisible(true);
             }
@@ -816,7 +926,6 @@ public class GuiMainController implements Initializable {
         ArrayList<Label> labels = new ArrayList<>();
         if (patients != null || !patients.isEmpty()) {
             for (Patient p : patients) {
-
                 Label label = new Label(p.getFirstName() + " " + p.getLastName() + "\t" + p.getAddress());
                 labels.add(label);
                 StackPane itemPane = new StackPane();
@@ -834,6 +943,11 @@ public class GuiMainController implements Initializable {
                 if (match) {
                     labelBox.getChildren().add(label);
 
+                    HBox healthFundBox = new HBox();
+                    Label healthFundLabel = new Label(p.getBillingInfo());
+                    healthFundBox.getChildren().add(healthFundLabel);
+                    healthFundBox.setAlignment(Pos.CENTER);
+
                     HBox buttonBox = new HBox();
                     buttonBox.setAlignment(Pos.CENTER_RIGHT);
 
@@ -841,16 +955,13 @@ public class GuiMainController implements Initializable {
                     paymentsButton.setOnAction(new EventHandler<ActionEvent>() {
                         @Override
                         public void handle(ActionEvent e) {
-                            searchList.setVisible(false);
-//                            timetableAnchorPane.setVisible(false);
-                            MedicalAppNewPatient.setVisible(false);
+                            setAllInvisible();
                             paymentsPane.setVisible(true); //Set schedule visible false
 
                             currentPatient = p; //set the selected patient corresponding to button
                             currentPatientName.setText(p.getFirstName() + " " + p.getLastName());
                             invoicePatientTF.setText(currentPatientName.getText());
                             refreshPayments(p);
-
                         }
                     });
                     buttonBox.getChildren().add(paymentsButton);
@@ -858,9 +969,7 @@ public class GuiMainController implements Initializable {
                     appointmentButton.setOnAction(new EventHandler<ActionEvent>() {
                         @Override
                         public void handle(ActionEvent e) {
-                            searchList.setVisible(false);
-                            timetableAnchorPane.setVisible(false);
-                            MedicalAppNewPatient.setVisible(false);
+                            setAllInvisible();
                             newAppointment.setVisible(true); //Set schedule visible false
 
                             currentPatient = p; //set the selected patient corresponding to button
@@ -870,6 +979,7 @@ public class GuiMainController implements Initializable {
                     });
                     buttonBox.getChildren().add(appointmentButton);
                     itemPane.getChildren().add(labelBox);
+                    itemPane.getChildren().add(healthFundBox);
                     itemPane.getChildren().add(buttonBox);
                     searchResultItems.add(itemPane);
                 }
@@ -1113,7 +1223,7 @@ public class GuiMainController implements Initializable {
             Line line = new Line();
             line.setStartX(0);
             line.setStartY(y);
-            line.setEndX(timeBox.getPrefWidth());
+            line.setEndX(timeBox.getPrefWidth() - 1);
             line.setEndY(y);
             line.setStroke(Color.DODGERBLUE);
 
@@ -1272,6 +1382,72 @@ public class GuiMainController implements Initializable {
     }
 
     @FXML
+    TableView changeLogTable;
+    @FXML
+    TableColumn changeLogDateCol;
+    @FXML
+    TableColumn changeLogTypeCol;
+    @FXML
+    TableColumn changeLogDescCol;
+    @FXML
+    TableColumn changeLogStaffCol;
+    @FXML
+    ImageView MenuChangeLog;
+    @FXML
+    AnchorPane changeLogPane;
+
+    public void initChangeLog() {
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/YY HH:mm");
+
+        changeLogDateCol.setCellValueFactory(new Callback<CellDataFeatures<ChangeLog, String>, ObservableValue<String>>() {
+            public ObservableValue<String> call(CellDataFeatures<ChangeLog, String> i) {
+                return new ReadOnlyObjectWrapper(sdf.format(i.getValue().getDate()));
+            }
+        });
+
+        changeLogTypeCol.setCellValueFactory(
+                new PropertyValueFactory<>("type")
+        );
+        changeLogDescCol.setCellValueFactory(
+                new PropertyValueFactory<>("description")
+        );
+        changeLogStaffCol.setCellValueFactory(new Callback<CellDataFeatures<ChangeLog, String>, ObservableValue<String>>() {
+            public ObservableValue<String> call(CellDataFeatures<ChangeLog, String> i) {
+                return new ReadOnlyObjectWrapper(getStaff(i.getValue().getStaffID()).getFirstName()
+                        + " " + getStaff(i.getValue().getStaffID()).getLastName());
+            }
+        });
+
+        final ObservableList<ChangeLog> masterData = FXCollections.observableArrayList();
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+
+            String query = "SELECT * FROM ChangeLog";
+            PreparedStatement stm = conn.prepareStatement(query);
+
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                int id = rs.getInt(("changeLogID"));
+                masterData.add(getChangeLog(id));
+                changeLogTable.setItems(masterData);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(GuiMainController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        changeLogTable.setPlaceholder(new Text("No changes to be displayed"));
+
+        //Handle icon mouse action
+        MenuChangeLog.setOnMouseClicked(this::handleChangeLogMouse);
+    }
+
+    private void handleChangeLogMouse(MouseEvent event) {
+        setAllInvisible();
+        changeLogPane.setVisible(true);
+        initChangeLog();
+    }
+
+    @FXML
     private AnchorPane weeklySchedule;
 
     @FXML
@@ -1358,6 +1534,11 @@ public class GuiMainController implements Initializable {
             //Connect to DB and insertNote
             insertNote(new Note(1, currentAppointment.getAppointmentID(), note, false, false));
             submitNote.setDisable(true);
+
+            Date changeLogDate = Calendar.getInstance().getTime();
+            ChangeLog.insertChangeLog(new ChangeLog(1, changeLogDate, "Note", "Note added for Appointment at "
+                    + currentAppointment.getDate() + ", Patient: " + getPatient(currentAppointment.getPatientID()).getFirstName()
+                    + " " + getPatient(currentAppointment.getPatientID()).getLastName(), currentUser.getStaffID()));
         }
     }
 
@@ -1519,6 +1700,12 @@ public class GuiMainController implements Initializable {
                     .showInformation();
             fileNameLabel.setText("File saved to database)");
             fileTitleTextField.setText("");
+
+            Date changeLogDate = Calendar.getInstance().getTime();
+            ChangeLog.insertChangeLog(new ChangeLog(1, changeLogDate, "Document", "File: " + selectedFile.getName() + ", added for Appointment at "
+                    + currentAppointment.getDate() + ", Patient: " + getPatient(currentAppointment.getPatientID()).getFirstName()
+                    + " " + getPatient(currentAppointment.getPatientID()).getLastName(), currentUser.getStaffID()));
+
             selectedFile = null;
             refreshDocumentList();
         } else {
@@ -2034,9 +2221,15 @@ public class GuiMainController implements Initializable {
                         .message("Appointment for " + currentPatient.getFirstName()
                                 + " " + currentPatient.getLastName() + " with"
                                 + " Dr. " + currentDoctor.getLastName() + " at " + dateFormat.format(date)
-                                + " " + currentHour + ":" + currentMinute + " (" + duration
+                                + " "+" (" + duration
                                 + " mins) has been successfully scheduled.")
                         .showInformation();
+
+                Date changeLogDate = Calendar.getInstance().getTime();
+                ChangeLog.insertChangeLog(new ChangeLog(1, changeLogDate, "Appointment", "Appointment for " + currentPatient.getFirstName()
+                        + " " + currentPatient.getLastName() + " with"
+                        + " Dr. " + currentDoctor.getLastName() + " has been scheduled", 
+                        currentUser.getStaffID()));
 
                 newAppointment.setVisible(false);
                 timetableAnchorPane.setVisible(true);
@@ -2225,20 +2418,36 @@ public class GuiMainController implements Initializable {
             //Connect to DB and insertPatient
             insertPatient(new Patient(1, null, null, 1, firstName, lastName,
                     true, false, address, dateOfBirth, contactNumber, false));
-            PatientAddSubmit.getParent().setVisible(false);
-            timetableAnchorPane.setVisible(true);
+
+            Date changeLogDate = Calendar.getInstance().getTime();
+            ChangeLog.insertChangeLog(new ChangeLog(1, changeLogDate, "Patient", "Patient: " + firstName + " "
+                    + lastName + " created and stored to system", currentUser.getStaffID()));
+
+            setAllInvisible();
+            homePane.setVisible(true);
         }
+    }
+
+    public void setAllInvisible() {
+        MedicalAppNewPatient.setVisible(false);
+        patientFile.setVisible(false);
+        newAppointment.setVisible(false);
+        homePane.setVisible(false);
+        paymentsPane.setVisible(false);
+        newInvoice.setVisible(false);
+        searchList.setVisible(false);
+        changeLogPane.setVisible(false);
     }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         loginScreen.setVisible(true);
         mainScreen.setVisible(false);
-        patientFile.setVisible(false);
-        paymentsPane.setVisible(false);
+
+        setAllInvisible();
+
         Calendar cal = new GregorianCalendar();
         cal.setTimeInMillis(System.currentTimeMillis());
-
         currentYear = cal.get(Calendar.YEAR);
         currentMonth = cal.get(Calendar.MONTH);
         currentDay = cal.get(Calendar.DAY_OF_MONTH);
@@ -2251,21 +2460,14 @@ public class GuiMainController implements Initializable {
         MedicalAppCalendar.getChildren().add(calDashBoard);
 
         MenuPatientAdd.setOnMouseClicked(this::handleAddPatientMouse);
-
         MenuHome.setOnMouseClicked(this::handleMenuHomeMouse);
+        PatientAddSubmit.setOnMouseClicked(this::handleAddPatientButton);
 
         searchTextField.textProperty().addListener((observable, oldValue, newValue) -> {
             refreshSearchList();
         });
 
-        //placeholders to change visibility in static context
-        patientFilePlaceHolder.setVisible(false);
-        patientFile.visibleProperty().bind(patientFilePlaceHolder.visibleProperty());
-        timetableAnchorPane.visibleProperty().bind(timetableAnchorPanePlaceHolder.visibleProperty());
-
         MedicalAppSearch.setMinSize(0, 0);
-
-        PatientAddSubmit.setOnMouseClicked(this::handleAddPatientButton);
 
         calDashBoard = new HBox();
         calDashBoard.getChildren().add(initVisitHistory());
@@ -2273,7 +2475,6 @@ public class GuiMainController implements Initializable {
 
         submitNote.setOnMouseClicked(this::handleNoteAddButton);
         initPayments();
-        invoiceCopy.setVisible(false);
-
+        initChangeLog();
     }
 }
