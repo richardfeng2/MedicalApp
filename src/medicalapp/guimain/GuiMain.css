@@ -1,0 +1,49 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 18/10/2014, 3:40:42 PM
+    Author     : Richard
+*/
+.root{
+   -style1-color: rgb(119, 192, 75, .9);
+    -fx-font-size: 12pt;
+    -fx-font-family: "Arial";
+    -fx-base: rgb(255, 244, 163);
+    -fx-background: rgb(225, 228, 203);
+}
+
+.button{
+    -fx-text-fill: #006464;
+    -fx-background-color: derive(-style1-color, 50%);
+    -fx-border-radius: 20;
+    -fx-background-radius: 20;
+    -fx-padding: 5;
+}
+
+#usernameTF{
+	-fx-background-image:url('https://cdn0.iconfinder.com/data/icons/duesseldorf/32/user.png');
+	-fx-background-size: 18 18;
+	-fx-background-repeat: no-repeat;
+	-fx-background-position: right center;
+}
+
+#loginScreen{
+	-fx-background-image:url("res/timber.jpg");
+	-fx-background-repeat: stretch;   
+    -fx-background-position: center center;
+}
+
+#mainScreen{
+	-fx-background-image:url("res/timber.jpg");
+	-fx-background-repeat: stretch;   
+    -fx-background-position: center center;
+}
+
+#workSpace{
+	-fx-background-color: rgba(255, 255, 245, 0.8);
+    -fx-background-radius: 15 15 15 15;
+}
+

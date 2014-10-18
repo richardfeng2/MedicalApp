@@ -10,6 +10,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 /**
@@ -18,13 +19,11 @@ import javafx.stage.Stage;
  */
 public class GuiMain extends Application {
 
-    public static Stage stage ;
-
     @Override
     public void start(Stage primaryStage) throws IOException {
-        stage = primaryStage;
         Parent root = FXMLLoader.load(getClass().getResource("GuiMain.fxml"));
         primaryStage.setTitle("MedicalApp");
+        primaryStage.getIcons().add(new Image("file:res/lungs-icon.png"));
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.show();

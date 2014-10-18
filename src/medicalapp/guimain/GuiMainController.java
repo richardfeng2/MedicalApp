@@ -39,7 +39,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -134,8 +136,9 @@ import static medicalapp.data.Docos.insertDocument;
 import static medicalapp.data.Docos.insertDocument;
 import static medicalapp.data.Docos.insertDocument;
 import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
 import medicalapp.data.Doctor;
-import static medicalapp.data.Doctor.getDoctor;
 import static medicalapp.data.Doctor.getDoctor;
 import static medicalapp.data.Doctor.getDoctor;
 import medicalapp.data.Invoice;
@@ -150,7 +153,6 @@ import static medicalapp.data.Patient.getPatient;
 import static medicalapp.data.Patient.insertPatient;
 import static medicalapp.data.Patient.searchPatients;
 import medicalapp.data.Service;
-import static medicalapp.data.Service.getService;
 import static medicalapp.data.Service.getService;
 import medicalapp.data.Staff;
 import static medicalapp.data.Staff.getStaff;
@@ -189,8 +191,6 @@ public class GuiMainController implements Initializable {
      */
     @FXML
     private AnchorPane patientFile;
-    private static AnchorPane patientFilePlaceHolder = new AnchorPane(); //placeholder used to bind visible properties from static context
-    private static AnchorPane timetableAnchorPanePlaceHolder = new AnchorPane(); //placeholder used to bind visible properties from static context
     @FXML
     private Label pfName;
     @FXML
@@ -347,6 +347,9 @@ public class GuiMainController implements Initializable {
                 loginErrorLabel.setVisible(true);
             }
             timetableAnchorPane.getChildren().add(initTimetable());
+            timetableAnchorPane.setTopAnchor(timetableAnchorPane.getChildren().get(0), 10.0);
+            timetableAnchorPane.setLeftAnchor(timetableAnchorPane.getChildren().get(0), 10.0);
+            timetableAnchorPane.setRightAnchor(timetableAnchorPane.getChildren().get(0), 10.0);
         } catch (SQLException ex) {
             Logger.getLogger(GuiMainController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -392,6 +395,7 @@ public class GuiMainController implements Initializable {
         setAllInvisible();
         initPayments();
         paymentsPane.setVisible(true);
+        currentPatient = null;
     }
     @FXML
     private ComboBox invoicePatientCombo;
@@ -569,26 +573,31 @@ public class GuiMainController implements Initializable {
         // 2. Set the filter Predicate whenever the filter changes.
         invoiceStatusCombo.valueProperty().addListener((observable, oldValue, newValue) -> {
             filteredData.setPredicate(invoice -> {
-                // If combo value is all, display all invoices.
-                if (newValue == "All" && "All Patients".equals(invoicePatientTF.getText())) {
-                    return true; // Filter all invoices with all patients
-                }
 
-                if (newValue == "In Arrears" && !invoice.isPaid() && "All Patients".equals(invoicePatientTF.getText())) {
-                    return true; // Filter in arrears and all patients.
-                } else if (newValue == "Paid" && invoice.isPaid() && !invoice.isPaid() && "All Patients".equals(invoicePatientTF.getText())) {
-                    return true; // Filter paid and all patients.
-                }
+                if (currentPatient == null || invoicePatientTF.getText().equals("All Patients")) {
+                    if (newValue == "All") {
+                        return true; // Filter all invoices with all patient
+                    }
+                    if (newValue == "In Arrears" && !invoice.isPaid()) {
 
-                if (currentPatient != null) {
-                    if (newValue == "All" && invoicePatientTF.getText() != "All Patients" && (currentPatient.getPatientID()) == getAppointment(invoice.getAppointmentID()).getPatientID()) {
-                        return true; // Filter all invoices with currentPatient
+                        return true; // Filter in arrears and all patients
+                    } else if (newValue == "Paid" && invoice.isPaid()) {
+                        return true; // Filter paid all patients
                     }
-                    if (newValue == "In Arrears" && !invoice.isPaid() && invoicePatientTF.getText() != "All Patients" && (currentPatient.getPatientID()) == getAppointment(invoice.getAppointmentID()).getPatientID()) {
-                        return true; // Filter in arrears and currentPatient.
-                    } else if (newValue == "Paid" && invoice.isPaid() && invoicePatientTF.getText() != "All Patients" && (currentPatient.getPatientID()) == getAppointment(invoice.getAppointmentID()).getPatientID()) {
-                        return true; // Filter paid and currentPatient.
+                } else if ((currentPatient.getPatientID()) == getAppointment(invoice.getAppointmentID()).getPatientID()) {
+                    if (newValue == "All") {
+                        System.out.println("All");
+
+                        return true; // Filter all invoices with all patients
                     }
+                    if (newValue == "In Arrears" && !invoice.isPaid()) {
+                        System.out.println("not paid");
+                        return true; // Filter in arrears and all patients.
+                    } else if (newValue == "Paid" && invoice.isPaid()) {
+                        System.out.println("paid");
+                        return true; // Filter paid and all patients.
+                    }
+
                 }
                 return false; // Does not match.
             });
@@ -634,8 +643,7 @@ public class GuiMainController implements Initializable {
         Invoice selectedInvoice = (Invoice) invoiceTable.getSelectionModel().getSelectedItem();
         showInvoice(selectedInvoice);
 //        paymentsPane.setVisible(false);
-        saveAsPng(invoiceCopy, true);
-        invoiceCopy.setVisible(false);
+//        invoiceCopy.setVisible(false);
     }
 
     public void refreshPayments() {
@@ -796,10 +804,24 @@ public class GuiMainController implements Initializable {
             }
         });
     }
+    @FXML
+    AnchorPane pdfPreviewPane;
 
     public void showInvoice(Invoice invoice) {
         createInvoiceCopy(invoice);
+        pdfPreviewPane.setVisible(true);
         invoiceCopy.setVisible(true);
+        invoiceCopy.setStyle("-fx-background-color: white ;");
+        pdfPreviewPane.setStyle("-fx-background-color: rgba(0, 100, 100, 0.5) ; -fx-background-radius: 10 ;");
+    }
+
+    public void handleClosePreviewButton(ActionEvent event) {
+        pdfPreviewPane.setVisible(false);
+    }
+
+    public void handleExportButton(ActionEvent event) {
+        saveAsPng(invoiceCopy, true);
+        pdfPreviewPane.setVisible(false);
     }
 
     @FXML
@@ -876,7 +898,6 @@ public class GuiMainController implements Initializable {
             invoiceCopyServicesBox.getChildren().add(pane);
             totalServicesAmount += 50;
         }
-
         if (!services.isEmpty()) {
             for (Service s : services) {
                 StackPane pane = new StackPane();
@@ -895,7 +916,6 @@ public class GuiMainController implements Initializable {
                 pane.getChildren().addAll(descBox, priceBox);
 
                 invoiceCopyServicesBox.getChildren().add(pane);
-
                 totalServicesAmount += s.getPrice();
             }
         }
@@ -910,6 +930,7 @@ public class GuiMainController implements Initializable {
 
     private void refreshSearchList() {
         searchList.setVisible(true);
+        searchList.setPrefWidth(searchTextField.getWidth());
         String searchTerm = searchTextField.getText().toLowerCase();
         String[] splitTerm = searchTerm.split("\\s+");
 
@@ -928,6 +949,10 @@ public class GuiMainController implements Initializable {
             for (Patient p : patients) {
                 Label label = new Label(p.getFirstName() + " " + p.getLastName() + "\t" + p.getAddress());
                 labels.add(label);
+
+                HBox healthFundBox = new HBox();
+                Label healthFundLabel = new Label(p.getBillingInfo());
+
                 StackPane itemPane = new StackPane();
 
                 HBox labelBox = new HBox();
@@ -936,19 +961,18 @@ public class GuiMainController implements Initializable {
                 boolean match = true; //all search terms match patient fields
 
                 for (String term : splitTerm) {
-                    if (!label.getText().toLowerCase().contains(term.toLowerCase())) {
+                    if (!label.getText().toLowerCase().contains(term.toLowerCase())
+                            && !healthFundLabel.getText().toLowerCase().contains(term)) {
                         match = false;
                     }
                 }
                 if (match) {
                     labelBox.getChildren().add(label);
 
-                    HBox healthFundBox = new HBox();
-                    Label healthFundLabel = new Label(p.getBillingInfo());
                     healthFundBox.getChildren().add(healthFundLabel);
                     healthFundBox.setAlignment(Pos.CENTER);
 
-                    HBox buttonBox = new HBox();
+                    HBox buttonBox = new HBox(5);
                     buttonBox.setAlignment(Pos.CENTER_RIGHT);
 
                     Button paymentsButton = new Button("Payments");
@@ -961,7 +985,7 @@ public class GuiMainController implements Initializable {
                             currentPatient = p; //set the selected patient corresponding to button
                             currentPatientName.setText(p.getFirstName() + " " + p.getLastName());
                             invoicePatientTF.setText(currentPatientName.getText());
-                            refreshPayments(p);
+//                            refreshPayments(p);
                         }
                     });
                     buttonBox.getChildren().add(paymentsButton);
@@ -974,9 +998,9 @@ public class GuiMainController implements Initializable {
 
                             currentPatient = p; //set the selected patient corresponding to button
                             currentPatientName.setText(p.getFirstName() + " " + p.getLastName());
-
                         }
                     });
+
                     buttonBox.getChildren().add(appointmentButton);
                     itemPane.getChildren().add(labelBox);
                     itemPane.getChildren().add(healthFundBox);
@@ -1012,6 +1036,7 @@ public class GuiMainController implements Initializable {
         AnchorPane timetableBox = new AnchorPane();
         timetableScroll = new ScrollPane();
         timetableScroll.setPrefSize(700, 550);
+        timetableScroll.setPrefWidth(searchTextField.getWidth());
 
         timetableLabelBox = new HBox();
         timetableLabelBox.setPrefWidth(timetableScroll.getPrefWidth() - 19); //discount for scrollbar width
@@ -1046,6 +1071,9 @@ public class GuiMainController implements Initializable {
         }), new KeyFrame(Duration.seconds(10)));
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
+        timetableBox.setOpacity(0.95);
+        timetableBox.setMaxHeight(Double.MAX_VALUE);
+        timetableBox.setMaxWidth(Double.MAX_VALUE);
         return timetableBox;
     }
 
@@ -1151,8 +1179,8 @@ public class GuiMainController implements Initializable {
                                 public void handle(MouseEvent event) {
                                     currentPatient = getPatient(a.getPatientID());
                                     currentAppointment = a;
-                                    timetableAnchorPanePlaceHolder.setVisible(false);
-                                    patientFilePlaceHolder.setVisible(true);
+                                    setAllInvisible();
+                                    patientFile.setVisible(true);
 
                                     refreshPatientFile();
                                 }
@@ -1470,9 +1498,7 @@ public class GuiMainController implements Initializable {
             ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
         } catch (IOException e) {
         }
-//        openFile(file);
         imageToPDF(file, isInvoice);
-
     }
 
     public void imageToPDF(File file, Boolean isInvoice) {
@@ -1987,7 +2013,7 @@ public class GuiMainController implements Initializable {
                 refreshTimetable();
 
                 //refresh schedule
-                if (doctorCombo.getValue() != "All doctors" && !doctorCombo.getValue().toString().isEmpty()) {
+                if (doctorCombo.getValue() != "Select doctor" && !doctorCombo.getValue().toString().isEmpty()) {
                     String name = doctorCombo.getValue().toString();
                     String[] splitName = name.split("\\s+"); //split when at least one whitespace is identified
 
@@ -2081,7 +2107,7 @@ public class GuiMainController implements Initializable {
      */
     public VBox initSchedule() {
         VBox scheduleBox = new VBox();
-        HBox scheduleTitlePane = new HBox();
+        HBox scheduleTitlePane = new HBox(10);
         //scheduleTitlePane.setPrefColumns(3);
 
         scheduleLabel = new Label("Times for: ");
@@ -2092,21 +2118,29 @@ public class GuiMainController implements Initializable {
 
         //Populate doctor combobox
         doctorCombo = new ComboBox();
-        doctorCombo.getItems().add("All doctors");
-        doctorCombo.setValue("All doctors");
+//        doctorCombo.getItems().add("All doctors");
+//        doctorCombo.setValue("All doctors");
 
         ArrayList<Doctor> doctors = new ArrayList<>();
         for (int i = 1; i <= Doctor.getMaxID(); i++) {
             doctors.add(Doctor.getDoctor(i));
         }
+
+        doctorCombo.setValue("Select doctor");
+
         for (Doctor doctor : doctors) {
             doctorCombo.getItems().add("Dr. " + doctor.getFirstName() + " "
                     + doctor.getLastName());
         }
+        ScrollPane scheduleScroll = new ScrollPane();
+        scheduleTile = new TilePane();
+        scheduleTile.setPrefColumns(4);
+        scheduleTile.setDisable(true);
         doctorCombo.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                if (doctorCombo.getValue() != "All doctors" && !doctorCombo.getValue().toString().isEmpty()) {
+                if (doctorCombo.getValue() != "Select doctor" && !doctorCombo.getValue().toString().isEmpty()) {
+                    scheduleTile.setDisable(false);
                     String name = doctorCombo.getValue().toString();
                     String[] splitName = name.split("\\s+"); //split when at least one whitespace is identified
 
@@ -2114,14 +2148,14 @@ public class GuiMainController implements Initializable {
                     refreshSchedule(currentDay, currentMonth, currentYear, Doctor.getDoctor(splitName[1], splitName[2]));
                     refreshSchedule(currentDay, currentMonth, currentYear, currentDoctor);
 
-                } else if (doctorCombo.getValue() == "All doctors") {
-                    //Check all timeslots & render.
+                    if (timeBtnGroup.getSelectedToggle() != null) {
+                        timeBtnGroup.getSelectedToggle().setSelected(false);
+                    }
+                } else if (doctorCombo.getValue() == "Select doctor") {
+                    scheduleTile.setDisable(true);
                 }
             }
         });
-        ScrollPane scheduleScroll = new ScrollPane();
-        scheduleTile = new TilePane();
-        scheduleTile.setPrefColumns(4);
 
         timeBtn = new ArrayList<>();
         //Create times 9-4.45pm, 15 min intervals
@@ -2150,10 +2184,13 @@ public class GuiMainController implements Initializable {
                     SimpleDateFormat minuteFormat = new SimpleDateFormat("mm");
                     currentHour = Integer.parseInt(hourFormat.format(date));
                     currentMinute = Integer.parseInt(minuteFormat.format(date));
+
                 }
             });
             scheduleTile.getChildren().add(timeBtn.get(i));
         }
+        scheduleTile.setHgap(2.5);
+        scheduleTile.setVgap(2.5);
 
         scheduleScroll.setPrefSize(380, 300);
         scheduleScroll.setContent(scheduleTile);
@@ -2203,6 +2240,7 @@ public class GuiMainController implements Initializable {
                 Calendar cal = new GregorianCalendar();
                 cal.set(currentYear, currentMonth, currentDay, currentHour, currentMinute);
                 Date date = cal.getTime();
+                System.out.println(date);
                 int duration = 15;
 
                 if (shortRadioBtn.isSelected()) {
@@ -2213,7 +2251,7 @@ public class GuiMainController implements Initializable {
                 Appointment.insertAppointment(currentPatient, currentDoctor, date, duration, purposeText.getText());
                 refreshSchedule(currentDay, currentMonth, currentYear);
 
-                SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy HH:MM");
                 Dialogs.create()
                         .owner(null)
                         .title("Appointment Scheduled")
@@ -2221,14 +2259,14 @@ public class GuiMainController implements Initializable {
                         .message("Appointment for " + currentPatient.getFirstName()
                                 + " " + currentPatient.getLastName() + " with"
                                 + " Dr. " + currentDoctor.getLastName() + " at " + dateFormat.format(date)
-                                + " "+" (" + duration
+                                + " " + " (" + duration
                                 + " mins) has been successfully scheduled.")
                         .showInformation();
 
                 Date changeLogDate = Calendar.getInstance().getTime();
                 ChangeLog.insertChangeLog(new ChangeLog(1, changeLogDate, "Appointment", "Appointment for " + currentPatient.getFirstName()
                         + " " + currentPatient.getLastName() + " with"
-                        + " Dr. " + currentDoctor.getLastName() + " has been scheduled", 
+                        + " Dr. " + currentDoctor.getLastName() + " has been scheduled",
                         currentUser.getStaffID()));
 
                 newAppointment.setVisible(false);
@@ -2428,6 +2466,71 @@ public class GuiMainController implements Initializable {
         }
     }
 
+    private static final class DragContext {
+
+        public double mouseAnchorX;
+        public double mouseAnchorY;
+        public double initialTranslateX;
+        public double initialTranslateY;
+    }
+
+    private final BooleanProperty dragModeActiveProperty
+            = new SimpleBooleanProperty(this, "dragModeActive", true);
+
+    private Node makeDraggable(final Node node) {
+        final DragContext dragContext = new DragContext();
+        final Group wrapGroup = new Group(node);
+
+        wrapGroup.addEventFilter(
+                MouseEvent.ANY,
+                new EventHandler<MouseEvent>() {
+                    public void handle(final MouseEvent mouseEvent) {
+                        if (dragModeActiveProperty.get()) {
+                            // disable mouse events for all children
+                            mouseEvent.consume();
+                        }
+                    }
+                });
+
+        wrapGroup.addEventFilter(
+                MouseEvent.MOUSE_PRESSED,
+                new EventHandler<MouseEvent>() {
+                    public void handle(final MouseEvent mouseEvent) {
+                        if (dragModeActiveProperty.get()) {
+                            // remember initial mouse cursor coordinates
+                            // and node position
+                            dragContext.mouseAnchorX = mouseEvent.getX();
+                            dragContext.mouseAnchorY = mouseEvent.getY();
+                            dragContext.initialTranslateX
+                            = node.getTranslateX();
+                            dragContext.initialTranslateY
+                            = node.getTranslateY();
+                        }
+                    }
+                });
+
+        wrapGroup.addEventFilter(
+                MouseEvent.MOUSE_DRAGGED,
+                new EventHandler<MouseEvent>() {
+                    public void handle(final MouseEvent mouseEvent) {
+                        if (dragModeActiveProperty.get()) {
+                            // shift node from its initial position by delta
+                            // calculated from mouse cursor movement
+                            node.setTranslateX(
+                                    dragContext.initialTranslateX
+                                    + mouseEvent.getX()
+                                    - dragContext.mouseAnchorX);
+                            node.setTranslateY(
+                                    dragContext.initialTranslateY
+                                    + mouseEvent.getY()
+                                    - dragContext.mouseAnchorY);
+                        }
+                    }
+                });
+
+        return wrapGroup;
+    }
+
     public void setAllInvisible() {
         MedicalAppNewPatient.setVisible(false);
         patientFile.setVisible(false);
@@ -2437,6 +2540,7 @@ public class GuiMainController implements Initializable {
         newInvoice.setVisible(false);
         searchList.setVisible(false);
         changeLogPane.setVisible(false);
+        pdfPreviewPane.setVisible(false);
     }
 
     @Override
