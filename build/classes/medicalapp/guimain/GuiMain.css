@@ -8,13 +8,11 @@ and open the template in the editor.
     Author     : Richard
 */
 .root{
-   -style1-color: rgb(119, 192, 75, .9);
+    -style1-color: rgb(119, 192, 75, .9);
     -fx-font-size: 12pt;
     -fx-font-family: "Arial";
     -fx-base: rgb(255, 244, 163);
     -fx-background: rgb(225, 228, 203);
-	
-	
 }
 
 .button{
@@ -26,26 +24,86 @@ and open the template in the editor.
 }
 
 #usernameTF{
-	-fx-background-image:url('https://cdn0.iconfinder.com/data/icons/duesseldorf/32/user.png');
-	-fx-background-size: 18 18;
-	-fx-background-repeat: no-repeat;
-	-fx-background-position: right center;
+    -fx-background-image:url('https://cdn0.iconfinder.com/data/icons/duesseldorf/32/user.png');
+    -fx-background-size: 18 18;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: right center;
 }
 
 #loginScreen{
-	-fx-background-image:url("res/timber.jpg");
-	-fx-background-repeat: stretch;   
+    -fx-background-image:url("res/loginbackground.jpg");
+    -fx-background-repeat: stretch;   
+    -fx-background-size: contain;
+    -fx-background-radius: 20;
     -fx-background-position: center center;
 }
 
 #mainScreen{
-	-fx-background-image:url("res/timber.jpg");
-	-fx-background-repeat: stretch;   
+/*    -fx-background-image:url("res/mainBackground2.png");
+    -fx-background-repeat: stretch;   
+    -fx-background-size: cover;
+    -fx-background-position: center center;*/
+}
+#menuBar{
+    -fx-background-image:url("res/menuBarBG.png");
+/*    -fx-background-repeat: stretch;   */
+    -fx-background-size: cover;
+    -fx-background-position: center center;
+}
+#titleArea{
+    -fx-background-image:url("res/titleBG.png");
+/*    -fx-background-repeat: stretch;   */
+    -fx-background-size: cover;
     -fx-background-position: center center;
 }
 
 #workSpace{
-	-fx-background-color: rgba(255, 255, 245, 0.8);
-    -fx-background-radius: 15 15 15 15;
+    -fx-background-image:url("res/workspaceBG.png");
+/*    -fx-background-repeat: stretch;   */
+    -fx-background-size: cover;
+    -fx-background-position: center center;
+}
+#dashBoard{
+    -fx-background-image:url("res/workspaceBG.png");
+/*    -fx-background-repeat: stretch;   */
+    -fx-background-size: cover;
+    -fx-background-position: center center;
 }
 
+#footer{
+    -fx-background-image:url("res/footer.png");
+/*    -fx-background-repeat: stretch;   */
+    -fx-background-size: cover;
+    -fx-background-position: center center;
+}
+
+.iconHomeW{
+    -fx-image: url('res/home_icon_w.png');
+}
+.iconHomeY{
+    -fx-image: url('res/home_icon_y.png');
+}
+.iconAddPatientW{
+    -fx-image: url('res/addPatient_icon_w.png');
+}
+.iconAddPatientY{
+    -fx-image: url('res/addPatient_icon_y.png');
+}
+.iconPaymentW{
+    -fx-image: url('res/payment_icon_w.png');
+}
+.iconPaymentY{
+    -fx-image: url('res/payment_icon_y.png');
+}
+.iconChatW{
+    -fx-image: url('res/chat_icon_w.png');
+}
+.iconChatY{
+    -fx-image: url('res/chat_icon_y.png');
+}
+.iconSettingsW{
+    -fx-image: url('res/settings_icon_w.png');
+}
+.iconSettingsY{
+    -fx-image: url('res/settings_icon_y.png');
+}

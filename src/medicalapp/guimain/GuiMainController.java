@@ -8,23 +8,16 @@ package medicalapp.guimain;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Image;
 import com.itextpdf.text.pdf.PdfWriter;
-import com.itextpdf.text.pdf.codec.PngImage;
 import java.awt.Desktop;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import static java.lang.Math.round;
-import static java.lang.Math.round;
-import static java.lang.Math.round;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -39,13 +32,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
@@ -59,6 +51,7 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
+import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -84,6 +77,12 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.effect.Blend;
+import javafx.scene.effect.BlendMode;
+import javafx.scene.effect.ColorAdjust;
+import javafx.scene.effect.ColorInput;
+import javafx.scene.effect.Effect;
+import javafx.scene.effect.Glow;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
@@ -122,23 +121,8 @@ import static medicalapp.data.Docos.insertDocument;
 import static medicalapp.data.Docos.insertDocument;
 import static medicalapp.data.Docos.insertDocument;
 import static medicalapp.data.Docos.insertDocument;
-import static medicalapp.data.Docos.insertDocument;
-import static medicalapp.data.Docos.insertDocument;
-import static medicalapp.data.Docos.insertDocument;
-import static medicalapp.data.Docos.insertDocument;
-import static medicalapp.data.Docos.insertDocument;
-import static medicalapp.data.Docos.insertDocument;
-import static medicalapp.data.Docos.insertDocument;
-import static medicalapp.data.Docos.insertDocument;
-import static medicalapp.data.Docos.insertDocument;
-import static medicalapp.data.Docos.insertDocument;
-import static medicalapp.data.Docos.insertDocument;
-import static medicalapp.data.Docos.insertDocument;
-import static medicalapp.data.Docos.insertDocument;
-import static medicalapp.data.Docos.insertDocument;
-import static medicalapp.data.Docos.insertDocument;
-import static medicalapp.data.Docos.insertDocument;
 import medicalapp.data.Doctor;
+import static medicalapp.data.Doctor.getDoctor;
 import static medicalapp.data.Doctor.getDoctor;
 import static medicalapp.data.Doctor.getDoctor;
 import medicalapp.data.Invoice;
@@ -347,8 +331,8 @@ public class GuiMainController implements Initializable {
                 loginErrorLabel.setVisible(true);
             }
             timetableAnchorPane.getChildren().add(initTimetable());
-            timetableAnchorPane.setTopAnchor(timetableAnchorPane.getChildren().get(0), 10.0);
-            timetableAnchorPane.setLeftAnchor(timetableAnchorPane.getChildren().get(0), 10.0);
+            timetableAnchorPane.setTopAnchor(timetableAnchorPane.getChildren().get(0), 20.0);
+            timetableAnchorPane.setLeftAnchor(timetableAnchorPane.getChildren().get(0), 100.0);
             timetableAnchorPane.setRightAnchor(timetableAnchorPane.getChildren().get(0), 10.0);
         } catch (SQLException ex) {
             Logger.getLogger(GuiMainController.class.getName()).log(Level.SEVERE, null, ex);
@@ -367,11 +351,23 @@ public class GuiMainController implements Initializable {
     private void handleAddPatientMouse(MouseEvent event) {
         setAllInvisible();
         MedicalAppNewPatient.setVisible(true);
+        MenuPatientAdd.effectProperty().bind(
+                Bindings
+                .when(MedicalAppNewPatient.visibleProperty())
+                .then((Effect) new Glow(1.0))
+                .otherwise((Effect) new Glow(0))
+        );
     }
 
     //Event handler when add patient icon is clicked
     private void handleMenuHomeMouse(MouseEvent event) {
         setAllInvisible();
+        MenuHome.effectProperty().bind(
+                Bindings
+                .when(homePane.visibleProperty())
+                .then((Effect) new Glow(1.0))
+                .otherwise((Effect) new Glow(0))
+        );
 
         /**
          * Refresh calendar dashboard
@@ -1810,6 +1806,7 @@ public class GuiMainController implements Initializable {
     }
 
     private VBox initCalendar() {
+
         //Controls
         monthLabel = new Label("Januray");
 //        monthLabel.setPrefSize(50, 20);
@@ -2531,6 +2528,12 @@ public class GuiMainController implements Initializable {
         return wrapGroup;
     }
 
+    @FXML
+    private AnchorPane searchPane;
+
+    @FXML
+    private ImageView MenuPayments;
+
     public void setAllInvisible() {
         MedicalAppNewPatient.setVisible(false);
         patientFile.setVisible(false);
@@ -2541,6 +2544,104 @@ public class GuiMainController implements Initializable {
         searchList.setVisible(false);
         changeLogPane.setVisible(false);
         pdfPreviewPane.setVisible(false);
+//        searchPane.setVisible(false);
+
+        MenuHome.effectProperty().bind(
+                Bindings
+                .when(MenuHome.hoverProperty())
+                .then((Effect) new Glow(1.0))
+                .otherwise((Effect) new Glow(0))
+        );
+
+        MenuHome.imageProperty().bind(
+                Bindings
+                .when(homePane.visibleProperty())
+                .then(new javafx.scene.image.Image("medicalapp/guimain/res/home_icon_y.png"))
+                .otherwise(new javafx.scene.image.Image("medicalapp/guimain/res/home_icon_w.png"))
+        );
+        MenuPatientAdd.effectProperty().bind(
+                Bindings
+                .when(MenuPatientAdd.hoverProperty())
+                .then((Effect) new Glow(1.0))
+                .otherwise((Effect) new Glow(0))
+        );
+
+        MenuPatientAdd.imageProperty().bind(
+                Bindings
+                .when(MedicalAppNewPatient.visibleProperty())
+                .then(new javafx.scene.image.Image("medicalapp/guimain/res/addPatient_icon_y.png"))
+                .otherwise(new javafx.scene.image.Image("medicalapp/guimain/res/addPatient_icon_w.png"))
+        );
+        MenuMessenger.effectProperty().bind(
+                Bindings
+                .when(MenuMessenger.hoverProperty())
+                .then((Effect) new Glow(1.0))
+                .otherwise((Effect) new Glow(0))
+        );
+//        MenuPatientDocuments.effectProperty().bind(
+//                Bindings
+//                    .when(MenuPatientDocuments.hoverProperty())
+//                        .then((Effect) new Glow(1.0))
+//                        .otherwise((Effect) new Glow(0))
+//        );
+        MenuSettings.effectProperty().bind(
+                Bindings
+                .when(MenuSettings.hoverProperty())
+                .then((Effect) new Glow(1.0))
+                .otherwise((Effect) new Glow(0))
+        );
+
+        /**
+         * Set hover glows
+         */
+//        MenuHome.setOnMouseEntered(new EventHandler<MouseEvent>() {
+//            @Override
+//            public void handle(MouseEvent event) {
+//                MenuHome.setEffect(new Glow(1.0));
+//            }
+//        });
+//        MenuHome.setOnMouseExited(new EventHandler<MouseEvent>() {
+//            @Override
+//            public void handle(MouseEvent event) {
+//                MenuHome.setEffect(new Glow(0));
+//            }
+//        });
+//        MenuPatientAdd.setOnMouseEntered(new EventHandler<MouseEvent>() {
+//            @Override
+//            public void handle(MouseEvent event) {
+//                MenuHome.setEffect(new Glow(1.0));
+//            }
+//        });
+//        MenuPatientAdd.setOnMouseExited(new EventHandler<MouseEvent>() {
+//            @Override
+//            public void handle(MouseEvent event) {
+//                MenuHome.setEffect(new Glow(0));
+//            }
+//        });
+//        MenuMessenger.setOnMouseEntered(new EventHandler<MouseEvent>() {
+//            @Override
+//            public void handle(MouseEvent event) {
+//                MenuHome.setEffect(new Glow(1.0));
+//            }
+//        });
+//        MenuMessenger.setOnMouseExited(new EventHandler<MouseEvent>() {
+//            @Override
+//            public void handle(MouseEvent event) {
+//                MenuHome.setEffect(new Glow(0));
+//            }
+//        });
+//        MenuSettings.setOnMouseEntered(new EventHandler<MouseEvent>() {
+//            @Override
+//            public void handle(MouseEvent event) {
+//                MenuHome.setEffect(new Glow(1.0));
+//            }
+//        });
+//        MenuSettings.setOnMouseExited(new EventHandler<MouseEvent>() {
+//            @Override
+//            public void handle(MouseEvent event) {
+//                MenuHome.setEffect(new Glow(0));
+//            }
+//        });
     }
 
     @Override

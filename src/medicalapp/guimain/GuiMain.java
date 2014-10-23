@@ -7,10 +7,12 @@ package medicalapp.guimain;
 
 import java.io.IOException;
 import javafx.application.Application;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
 /**
@@ -27,6 +29,7 @@ public class GuiMain extends Application {
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.show();
+
     }
 
     /**
@@ -34,5 +37,32 @@ public class GuiMain extends Application {
      */
     public static void main(String[] args) {
         launch(args);
+
     }
+
+    //FXMLs for the QuickLinks NAV MENU
+    @FXML
+    private ImageView MenuHome;
+    @FXML
+    private ImageView MenuPatientAdd;
+    @FXML
+    private ImageView MenuAppointmentAdd;
+    @FXML
+    private ImageView MenuMessenger;
+    @FXML
+    private ImageView MenuPatientDocuments;
+    @FXML
+    private ImageView MenuSettings;
+
+    public  void initWhiteIcons() {
+        Image image = new Image("medicalapp/guimain/res/home_icon_y.png");
+
+        MenuHome.setImage(image);
+//        MenuPatientAdd;
+//        MenuAppointmentAdd;
+//        MenuMessenger;
+//        MenuPatientDocuments;
+//        MenuSettings;
+    }
+
 }
