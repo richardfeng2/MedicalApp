@@ -13,6 +13,15 @@ expired boolean,
 finished boolean,
 PRIMARY KEY(appointmentID)
 );
+CREATE TABLE SA.ADDENDUM
+(
+addendumID int,
+noteID int,
+text varchar(255),
+date timestamp,
+doctorID int,
+PRIMARY KEY(addendumID)
+);
 
 CREATE TABLE SA.CHANGELOG
 (

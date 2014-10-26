@@ -6,13 +6,22 @@
 package medicalapp.guimain;
 
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
+import medicalapp.data.Addendum;
+import static medicalapp.data.Addendum.insertAddendum;
+import static medicalapp.data.Appointment.getAppointment;
+import medicalapp.data.ChangeLog;
 import medicalapp.data.Note;
+import static medicalapp.data.Patient.getPatient;
+import medicalapp.data.Staff;
 
 /**
  * FXML Controller class
@@ -29,11 +38,10 @@ public class NoteDialogController implements Initializable {
     @FXML
     private Button cancelNoteBtn;
     @FXML
-    private Button previousNoteBtn;
-    @FXML
-    private Button nextNoteBtn;
+    private Button submitAddendum;
 
     private Note note;
+    private Staff user;
     private Stage dialogStage;
     private boolean cancelClicked = false;
 
@@ -44,7 +52,10 @@ public class NoteDialogController implements Initializable {
 
     public void setNote(Note note) {
         this.note = note;
-        noteTextArea.setText(note.getText());
+    }
+
+    public void setUser(Staff user) {
+        this.user = user;
     }
 
     /**
@@ -64,21 +75,16 @@ public class NoteDialogController implements Initializable {
         dialogStage.close();
     }
 
-    /**
-     * Called when the user clicks previous.
-     */
     @FXML
-    private void handlePreviousNote() {
-        Note currentNote = note;
-
-    }
-
-    /**
-     * Called when the user clicks next.
-     */
-    @FXML
-    private void handleNextNote() {
-
+    private void handleSubmitAddendum() {
+        Addendum addendum = new Addendum(0, note.getNoteID(), noteTextArea.getText(), null, user.getStaffID());
+        insertAddendum(addendum);
+        Date changeLogDate = Calendar.getInstance().getTime();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/YY, HH:mm");
+        ChangeLog.insertChangeLog(new ChangeLog(1, changeLogDate, "Note", "Note addendum created for Appointment: "
+                + sdf.format(getAppointment(note.getAppointmentID()).getDate()) + ", Patient: " + getPatient(getAppointment(note.getAppointmentID()).getPatientID()).getFirstName()
+                + " " + getPatient(getAppointment(note.getAppointmentID()).getPatientID()).getLastName(), user.getStaffID()));
+        dialogStage.close();
     }
 
     /**

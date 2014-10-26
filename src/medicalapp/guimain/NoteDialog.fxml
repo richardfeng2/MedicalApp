@@ -6,12 +6,10 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-
-<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="medicalapp.guimain.NoteDialogController">
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" stylesheets="@GuiMain.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="medicalapp.guimain.NoteDialogController">
    <children>
       <TextArea fx:id="noteTextArea" layoutX="58.0" layoutY="60.0" prefHeight="269.0" prefWidth="482.0" />
       <Button fx:id="cancelNoteBtn" layoutX="475.0" layoutY="346.0" mnemonicParsing="false" onAction="#handleCancel" prefHeight="28.0" prefWidth="75.0" text="Cancel" />
-      <Button fx:id="previousNoteBtn" layoutX="299.0" layoutY="346.0" mnemonicParsing="false" onAction="#handlePreviousNote" text="Previous" />
-      <Button fx:id="nextNoteBtn" layoutX="388.0" layoutY="346.0" mnemonicParsing="false" onAction="#handleNextNote" prefHeight="31.0" prefWidth="76.0" text="Next" />
+      <Button fx:id="submitAddendum" layoutX="388.0" layoutY="346.0" mnemonicParsing="false" onAction="#handleSubmitAddendum" prefHeight="31.0" prefWidth="76.0" text="Submit" />
    </children>
 </AnchorPane>

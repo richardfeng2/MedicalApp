@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package medicalapp.data;
 
 import java.sql.Connection;
@@ -11,71 +10,48 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static medicalapp.data.Appointment.convertJavaDateToSqlTimestamp;
 
 /**
  *
  * @author Richard
  */
-public class Addendum {     
+public class Addendum {
+
     private int addendumID;
     private int noteID;
     private String text;
+    private Date date;
+    private int staffID;
 
-    public Addendum(int addendumID, int noteID, String text) {
+    public Addendum(int addendumID, int noteID, String text, Date date, int staffID) {
         this.addendumID = addendumID;
         this.noteID = noteID;
         this.text = text;
+        this.date = date;
+        this.staffID = staffID;
     }
 
     public static void insertAddendum(Addendum addendum) {
         try {
             Connection conn = DBConnection.getInstance().getConnection();
 
-            String query = "INSERT INTO Addendum VALUES (?,?,?)";
+            String query = "INSERT INTO Addendum VALUES (?,?,?,?,?)";
             PreparedStatement stm = conn.prepareStatement(query);
             stm.setInt(1, getNextID());
             stm.setInt(2, addendum.getNoteID());
             stm.setString(3, addendum.getText());
-
+            Date date = Calendar.getInstance().getTime();
+            stm.setTimestamp(4, convertJavaDateToSqlTimestamp(date));
+            stm.setInt(5, addendum.getStaffID());
             stm.executeUpdate();
         } catch (SQLException ex) {
             Logger.getLogger(Addendum.class.getName()).log(Level.SEVERE, "Error inserting addendum", ex);
-        }
-    }
-
-    public static void updateAddendum(Addendum addendum) {
-        try {
-            Connection conn = DBConnection.getInstance().getConnection();
-
-            String query = "UPDATE Addendum SET text = ? WHERE addendumID = ?";
-
-            PreparedStatement stm = conn.prepareStatement(query);
-
-            stm.setString(1, addendum.getText());
-            stm.setInt(2, addendum.getAddendumID());
-            stm.executeUpdate();
-        } catch (SQLException ex) {
-            Logger.getLogger(Addendum.class.getName()).log(Level.SEVERE, "Error updating addendum", ex);
-        }
-    }
-
-    public static void deleteAddendum(Addendum addendum) {
-        deleteAddendum(addendum.getAddendumID());
-    }
-
-    public static void deleteAddendum(int addendumID) {
-        Connection conn = DBConnection.getInstance().getConnection();
-
-        try {
-            String query = "UPDATE Addendum SET expired = true WHERE AddendumID = ?";
-            PreparedStatement stm = conn.prepareStatement(query);
-            stm.setInt(1, addendumID);
-
-            stm.executeUpdate();
-        } catch (SQLException ex) {
-            Logger.getLogger(Addendum.class.getName()).log(Level.SEVERE, "Error deleting addendum addendumID=" + addendumID, ex);
         }
     }
 
@@ -93,14 +69,16 @@ public class Addendum {
                 int addendumID = rs.getInt("addendumID");
                 int noteID = rs.getInt("noteID");
                 String text = rs.getString("text");
-
-                addendum = new Addendum(addendumID, noteID, text);
+                Date date = rs.getTimestamp("date");
+                int staffID = rs.getInt("staffID");
+                addendum = new Addendum(addendumID, noteID, text, date, staffID);
             }
         } catch (SQLException ex) {
             Logger.getLogger(Addendum.class.getName()).log(Level.SEVERE, "Error getting addendum addendumID=" + ID, ex);
         }
         return addendum;
     }
+
     public static Addendum getAddendumByNote(int appID) {
         Connection conn = DBConnection.getInstance().getConnection();
 
@@ -139,13 +117,21 @@ public class Addendum {
         }
         return (nextID);
     }
-    
+
     public int getAddendumID() {
         return addendumID;
     }
 
     public void setAddendumID(int addendumID) {
         this.addendumID = addendumID;
+    }
+
+    public int getStaffID() {
+        return staffID;
+    }
+
+    public void setStaffID(int staffID) {
+        this.staffID = staffID;
     }
 
     public int getNoteID() {
@@ -163,5 +149,13 @@ public class Addendum {
     public void setText(String text) {
         this.text = text;
     }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
 }
- 

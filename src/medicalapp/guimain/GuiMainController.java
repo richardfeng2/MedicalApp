@@ -105,6 +105,8 @@ import javafx.util.Callback;
 import javafx.util.Duration;
 import javax.imageio.ImageIO;
 import javax.swing.event.ChangeEvent;
+import medicalapp.data.Addendum;
+import static medicalapp.data.Addendum.getAddendum;
 import medicalapp.data.Appointment;
 import static medicalapp.data.Appointment.getAppointment;
 import medicalapp.data.ChangeLog;
@@ -121,7 +123,14 @@ import static medicalapp.data.Docos.insertDocument;
 import static medicalapp.data.Docos.insertDocument;
 import static medicalapp.data.Docos.insertDocument;
 import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
 import medicalapp.data.Doctor;
+import static medicalapp.data.Doctor.getDoctor;
+import static medicalapp.data.Doctor.getDoctor;
 import static medicalapp.data.Doctor.getDoctor;
 import static medicalapp.data.Doctor.getDoctor;
 import static medicalapp.data.Doctor.getDoctor;
@@ -130,6 +139,7 @@ import static medicalapp.data.Invoice.getInvoice;
 import medicalapp.data.InvoiceService;
 import static medicalapp.data.InvoiceService.getInvoiceService;
 import medicalapp.data.Note;
+import static medicalapp.data.Note.getNote;
 import static medicalapp.data.Note.getNoteByAppointment;
 import static medicalapp.data.Note.insertNote;
 import medicalapp.data.Patient;
@@ -140,9 +150,14 @@ import medicalapp.data.Service;
 import static medicalapp.data.Service.getService;
 import medicalapp.data.Staff;
 import static medicalapp.data.Staff.getStaff;
+import medicalapp.data.TestResult;
+import static medicalapp.data.TestResult.getTestResult;
+import static medicalapp.data.TestResult.insertTestResult;
+import static medicalapp.data.TestResult.updateTestResult;
 import org.controlsfx.control.action.Action;
 import org.controlsfx.dialog.Dialog;
 import org.controlsfx.dialog.Dialogs;
+import org.fxmisc.richtext.*;
 
 /**
  * FXML Controller class
@@ -182,14 +197,16 @@ public class GuiMainController implements Initializable {
     @FXML
     private Label pfAddress;
 
-    //@FXML
-    private static TableView visitHistoryTable;
+    @FXML
+    private TableView visitHistoryTable;
     @FXML
     private Label fileNameLabel;
     @FXML
     private AnchorPane visitHistoryPane;
-    private static TableColumn visitDateCol = new TableColumn("Date");
-    private static TableColumn visitDoctorCol = new TableColumn("Recorded by:");
+    @FXML
+    private TableColumn visitDateCol;
+    @FXML
+    private TableColumn visitDoctorCol;
     /**
      * Fields for schedule
      */
@@ -249,8 +266,6 @@ public class GuiMainController implements Initializable {
     private ImageView MenuMessenger;
     @FXML
     private ImageView MenuPatientDocuments;
-    @FXML
-    private ImageView MenuSettings;
 
     //FXMLs for the ADD PATIENT Screen
     @FXML
@@ -392,6 +407,12 @@ public class GuiMainController implements Initializable {
         initPayments();
         paymentsPane.setVisible(true);
         currentPatient = null;
+        MenuPayments.effectProperty().bind(
+                Bindings
+                .when(MenuPayments.visibleProperty())
+                .then((Effect) new Glow(1.0))
+                .otherwise((Effect) new Glow(0))
+        );
     }
     @FXML
     private ComboBox invoicePatientCombo;
@@ -638,8 +659,6 @@ public class GuiMainController implements Initializable {
     private void handleViewInvoiceBtn() {
         Invoice selectedInvoice = (Invoice) invoiceTable.getSelectionModel().getSelectedItem();
         showInvoice(selectedInvoice);
-//        paymentsPane.setVisible(false);
-//        invoiceCopy.setVisible(false);
     }
 
     public void refreshPayments() {
@@ -658,15 +677,6 @@ public class GuiMainController implements Initializable {
         totalPaidTF.setText(String.valueOf(totalPaid));
         balanceDueTF.setText(String.valueOf(totalDue));
         balanceDueTF.setStyle("-fx-text-fill: red");
-//
-//        visitHistoryTable.getSelectionModel().selectedItemProperty().addListener((observableValue, oldValue, newValue) -> {
-//            //Check whether item is selected and set value of selected item to Label
-//            if (visitHistoryTable.getSelectionModel().getSelectedItem() != null) {
-//                selectedAppointment = (Appointment) visitHistoryTable.getSelectionModel().getSelectedItem();
-//                refreshDocumentList();
-//                System.out.println(selectedAppointment.getAppointmentID());
-//            }
-//        });
     }
 
     public void refreshPayments(Patient patient) {
@@ -982,6 +992,12 @@ public class GuiMainController implements Initializable {
                             currentPatientName.setText(p.getFirstName() + " " + p.getLastName());
                             invoicePatientTF.setText(currentPatientName.getText());
 //                            refreshPayments(p);
+                            MenuPayments.effectProperty().bind(
+                                    Bindings
+                                    .when(MenuPayments.visibleProperty())
+                                    .then((Effect) new Glow(1.0))
+                                    .otherwise((Effect) new Glow(0))
+                            );
                         }
                     });
                     buttonBox.getChildren().add(paymentsButton);
@@ -1469,6 +1485,12 @@ public class GuiMainController implements Initializable {
         setAllInvisible();
         changeLogPane.setVisible(true);
         initChangeLog();
+        MenuChangeLog.effectProperty().bind(
+                Bindings
+                .when(changeLogPane.visibleProperty())
+                .then((Effect) new Glow(1.0))
+                .otherwise((Effect) new Glow(0))
+        );
     }
 
     @FXML
@@ -1542,25 +1564,29 @@ public class GuiMainController implements Initializable {
     //Event handler when add patient icon is clicked
     private void handleNoteAddButton(MouseEvent event) {
 
-        //If fields are entered correctly
-        if (noteArea.getText().equals("") || noteArea.getText().isEmpty()) {
-            Dialogs.create()
-                    .owner(null)
-                    .title("Submit Note Error")
-                    .masthead(null)
-                    .message("Please enter text in the note area provided.")
-                    .showInformation();
-        } else {
-            String note = noteArea.getText();
+        if (submitNote.getText().contains("Submit")) {
+            //If fields are entered correctly
+            if (noteArea.getText().equals("") || noteArea.getText().isEmpty()) {
+                Dialogs.create()
+                        .owner(null)
+                        .title("Submit Note Error")
+                        .masthead(null)
+                        .message("Please enter text in the note area provided.")
+                        .showInformation();
+            } else {
+                String note = noteArea.getText();
 
-            //Connect to DB and insertNote
-            insertNote(new Note(1, currentAppointment.getAppointmentID(), note, false, false));
-            submitNote.setDisable(true);
+                //Connect to DB and insertNote
+                insertNote(new Note(1, currentAppointment.getAppointmentID(), note, false, false));
+                submitNote.setDisable(true);
 
-            Date changeLogDate = Calendar.getInstance().getTime();
-            ChangeLog.insertChangeLog(new ChangeLog(1, changeLogDate, "Note", "Note added for Appointment at "
-                    + currentAppointment.getDate() + ", Patient: " + getPatient(currentAppointment.getPatientID()).getFirstName()
-                    + " " + getPatient(currentAppointment.getPatientID()).getLastName(), currentUser.getStaffID()));
+                Date changeLogDate = Calendar.getInstance().getTime();
+                ChangeLog.insertChangeLog(new ChangeLog(1, changeLogDate, "Note", "Note added for Appointment at "
+                        + currentAppointment.getDate() + ", Patient: " + getPatient(currentAppointment.getPatientID()).getFirstName()
+                        + " " + getPatient(currentAppointment.getPatientID()).getLastName(), currentUser.getStaffID()));
+            }
+        } else { //bring up addendum dialog
+            showNoteDialog(getNoteByAppointment(selectedAppointment.getAppointmentID()));
         }
     }
 
@@ -1574,7 +1600,6 @@ public class GuiMainController implements Initializable {
             final ObservableList data = FXCollections.observableArrayList();
             Connection conn = DBConnection.getInstance().getConnection();
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
-
             String query = "SELECT * FROM Appointment "
                     + " INNER JOIN Doctor ON Appointment.doctorID = Doctor.doctorID"
                     + " INNER JOIN Staff ON Staff.StaffID = Doctor.StaffID"
@@ -1582,37 +1607,36 @@ public class GuiMainController implements Initializable {
                     + " WHERE patientID = ?";
             PreparedStatement stm = conn.prepareStatement(query);
             stm.setInt(1, currentPatient.getPatientID());
-
             ResultSet rs = stm.executeQuery();
             while (rs.next()) {
                 int id = rs.getInt(("appointmentID"));
                 Date date = rs.getTimestamp("date");
                 String firstName = rs.getString("firstName");
                 String lastName = rs.getString("lastName");
-
                 data.add(getAppointment(id));
-//                data.add(new VisitHistory(dateFormat.format(date), firstName + " " + lastName));
                 visitHistoryTable.setItems(data);
-
             }
         } catch (SQLException ex) {
-            Logger.getLogger(GuiMainController.class
-                    .getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(GuiMainController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     private Appointment selectedAppointment;
 
-    private TableView initVisitHistory() {
-
-        visitHistoryTable = new TableView<>();
+    private void initVisitHistory() {
         visitDateCol.setCellValueFactory(
                 new PropertyValueFactory<>("date")
         );
         visitDoctorCol.setCellValueFactory(
                 new PropertyValueFactory<>("doctorID")
         );
-
+        //Set date
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/YY HH:mm");
+        visitDateCol.setCellValueFactory(new Callback<CellDataFeatures<Appointment, String>, ObservableValue<String>>() {
+            public ObservableValue<String> call(CellDataFeatures<Appointment, String> a) {
+                return new ReadOnlyObjectWrapper(sdf.format(a.getValue().getDate()));
+            }
+        });
         //Set doctor's name in column
         visitDoctorCol.setCellValueFactory(new Callback<CellDataFeatures<Appointment, String>, ObservableValue<String>>() {
             public ObservableValue<String> call(CellDataFeatures<Appointment, String> a) {
@@ -1620,21 +1644,146 @@ public class GuiMainController implements Initializable {
                         + getDoctor(a.getValue().getDoctorID()).getLastName());
             }
         });
-        visitHistoryTable.getColumns().addAll(visitDateCol, visitDoctorCol);
         if (currentPatient != null) {
             refreshVisitHistory();
         }
-
         visitHistoryTable.getSelectionModel().selectedItemProperty().addListener((observableValue, oldValue, newValue) -> {
             //Check whether item is selected and set value of selected item to Label
             if (visitHistoryTable.getSelectionModel().getSelectedItem() != null) {
                 selectedAppointment = (Appointment) visitHistoryTable.getSelectionModel().getSelectedItem();
                 refreshDocumentList();
+                refreshTestResult();
+                refreshNote();
             }
         });
-
         visitHistoryTable.setMaxHeight(200);
-        return visitHistoryTable;
+    }
+
+    public void refreshNote() {
+        noteArea.setText(null);
+        ArrayList<Note> notes = new ArrayList<>();
+        for (int i = 1; i < Note.getNextID(); i++) {
+            notes.add(getNote(i));
+        }
+        ArrayList<Addendum> addendums = new ArrayList<>();
+        for (int i = 1; i < Addendum.getNextID(); i++) {
+            addendums.add(getAddendum(i));
+        }
+        if (selectedAppointment.getAppointmentID() == currentAppointment.getAppointmentID()) { //Notes for current appointment
+            if (!notes.isEmpty()) {
+                for (Note note : notes) {
+                    if (note.getAppointmentID() == selectedAppointment.getAppointmentID()) { //A note exists already for current appt
+                        String text = note.getText();
+
+                        for (Addendum a : addendums) {
+                            if (a.getNoteID() == note.getNoteID()) {
+                                text += "\n\nAddendum: ";
+                                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+                                text += sdf.format(a.getDate());
+                                text += "\tDr. " + getStaff(a.getStaffID()).getFirstName() + " " + getStaff(a.getStaffID()).getLastName();
+                                text += "\n" + a.getText();
+
+                            }
+                        }
+                        noteArea.setText(text);
+                        noteArea.setEditable(false);
+                        submitNote.setText("Update");
+                        submitNote.setVisible(true);
+                        break;
+                    } else {
+                        noteArea.setText(null);
+                        noteArea.setEditable(true);
+                        submitNote.setText("Submit");
+                        submitTestBtn.setVisible(true);
+                    }
+                }
+            }
+        } else {     //Notes for selected (not current) appointment
+            if (!notes.isEmpty()) {
+                for (Note note : notes) {
+                    if (note.getAppointmentID() == selectedAppointment.getAppointmentID()) {
+                        String text = note.getText();
+                        for (Addendum a : addendums) {
+                            if (a.getNoteID() == note.getNoteID()) {
+                                text += "\n\nAddendum: ";
+                                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+                                text += sdf.format(a.getDate());
+                                text += "\tDr. " + getStaff(a.getStaffID()).getFirstName() + " " + getStaff(a.getStaffID()).getLastName();
+                                text += "\n" + a.getText();
+                            }
+                        }
+                        noteArea.setText(text);
+                        noteArea.setEditable(false);
+                        submitNote.setText("Update");
+                        submitNote.setVisible(true);
+                        break;
+                    } else {
+                        noteArea.setText("No notes taken");
+                        noteArea.setEditable(false);
+                        submitNote.setVisible(false);
+                    }
+                }
+            }
+        }
+    }
+
+    public void refreshTestResult() {
+        weightTF.clear();
+        bloodTF1.clear();
+        bloodTF2.clear();
+        heartTF.clear();
+        oxygenLevelTF.clear();
+        lungTF.clear();
+        oxygenUptakeTF.clear();
+        ArrayList<TestResult> results = new ArrayList<>();
+        for (int i = 1; i < TestResult.getNextID(); i++) {
+            if (getTestResult(i).getAppointmentID() == selectedAppointment.getAppointmentID()) {
+                results.add(getTestResult(i));
+            }
+        }
+        if (selectedAppointment.getAppointmentID() == currentAppointment.getAppointmentID()) {
+            if (!results.isEmpty()) {
+
+                for (TestResult result : results) {
+                    if (result.getAppointmentID() == selectedAppointment.getAppointmentID()) {
+                        weightTF.setText(String.valueOf(result.getWeight()));
+                        String s = result.getBloodPressure();
+                        String[] bloodPressure = s.split("/");
+                        bloodTF1.setText(bloodPressure[0]);
+                        bloodTF2.setText(bloodPressure[1]);
+                        heartTF.setText(String.valueOf(result.getHeartRate()));
+                        oxygenLevelTF.setText(String.valueOf(result.getOxygenLevel()));
+                        lungTF.setText(String.valueOf(result.getLungCapacity()));
+                        oxygenUptakeTF.setText(String.valueOf(result.getOxygenUptake()));
+
+                        submitTestBtn.setVisible(true);
+                        submitTestBtn.setText("Update");
+                    }
+                }
+            } else {
+                submitTestBtn.setVisible(true);
+            }
+        } else {
+            if (!results.isEmpty()) {
+                for (TestResult result : results) {
+                    if (result.getAppointmentID() == selectedAppointment.getAppointmentID()) {
+                        weightTF.setText(String.valueOf(result.getWeight()));
+                        String s = result.getBloodPressure();
+                        String[] bloodPressure = s.split("/");
+                        bloodTF1.setText(bloodPressure[0]);
+                        bloodTF2.setText(bloodPressure[1]);
+                        heartTF.setText(String.valueOf(result.getHeartRate()));
+                        oxygenLevelTF.setText(String.valueOf(result.getOxygenLevel()));
+                        lungTF.setText(String.valueOf(result.getLungCapacity()));
+                        oxygenUptakeTF.setText(String.valueOf(result.getOxygenUptake()));
+
+                        submitTestBtn.setVisible(false);
+                    }
+                }
+            } else {
+                submitTestBtn.setVisible(false);
+            }
+        }
     }
 
     public boolean showNoteDialog(Note note) {
@@ -1647,7 +1796,7 @@ public class GuiMainController implements Initializable {
             // Create the dialog Stage.
             Stage dialogStage = new Stage();
 
-            dialogStage.setTitle("View Note");
+            dialogStage.setTitle("New Addendum");
             dialogStage.initModality(Modality.WINDOW_MODAL);
 
             dialogStage.initOwner(null);
@@ -1661,6 +1810,7 @@ public class GuiMainController implements Initializable {
             controller.setDialogStage(dialogStage);
 
             controller.setNote(note);
+            controller.setUser(currentUser);
 
             // Show the dialog and wait until the user closes it
             dialogStage.showAndWait();
@@ -1672,12 +1822,11 @@ public class GuiMainController implements Initializable {
         }
     }
 
-    @FXML
-    private void handleViewNoteBtn() {
-        Appointment selectedAppointment = (Appointment) visitHistoryTable.getSelectionModel().getSelectedItem();
-        showNoteDialog(getNoteByAppointment(selectedAppointment.getAppointmentID()));
-    }
-
+//    @FXML
+//    private void handleViewNoteBtn() {
+//        Appointment selectedAppointment = (Appointment) visitHistoryTable.getSelectionModel().getSelectedItem();
+//        showNoteDialog(getNoteByAppointment(selectedAppointment.getAppointmentID()));
+//    }
     private File selectedFile;
 
     @FXML
@@ -1753,6 +1902,8 @@ public class GuiMainController implements Initializable {
 
     @FXML
     private ListView documentList;
+    @FXML
+    private Label noDocsLabel;
 
     private File selectedHistoricFile;
 
@@ -1787,9 +1938,10 @@ public class GuiMainController implements Initializable {
             }
         }
         if (!documentItems.isEmpty()) {
+            noDocsLabel.setVisible(false);
             documentList.setItems(documentItems);
         } else {
-            System.out.println("no docs");
+            noDocsLabel.setVisible(true);
         }
     }
 
@@ -2267,7 +2419,7 @@ public class GuiMainController implements Initializable {
                         currentUser.getStaffID()));
 
                 newAppointment.setVisible(false);
-                timetableAnchorPane.setVisible(true);
+                homePane.setVisible(true);
             }
         });
         createButton.setAlignment(Pos.CENTER_RIGHT);
@@ -2275,7 +2427,8 @@ public class GuiMainController implements Initializable {
         cancelButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-
+                newAppointment.setVisible(false);
+                homePane.setVisible(true);
             }
         });
         cancelButton.setAlignment(Pos.CENTER_RIGHT);
@@ -2529,6 +2682,104 @@ public class GuiMainController implements Initializable {
     }
 
     @FXML
+    private TextField weightTF;
+    @FXML
+    private TextField bloodTF1;
+    @FXML
+    private TextField bloodTF2;
+    @FXML
+    private TextField heartTF;
+    @FXML
+    private TextField oxygenLevelTF;
+    @FXML
+    private TextField lungTF;
+    @FXML
+    private TextField oxygenUptakeTF;
+    @FXML
+    private Button submitTestBtn;
+
+    @FXML
+    private void handleSubmitTestBtn() {
+//        
+//        insertTestResult(int appointmentID, double weight, String bloodPressure,
+//            int heartRate, double oxygenLevel, double lungCapacity, double oxygenUptake) 
+
+        if (!weightTF.getText().isEmpty()
+                && !bloodTF1.getText().isEmpty()
+                && !bloodTF2.getText().isEmpty()
+                && !heartTF.getText().isEmpty()
+                && !oxygenLevelTF.getText().isEmpty()
+                && !lungTF.getText().isEmpty()
+                && !oxygenUptakeTF.getText().isEmpty()
+                && isNumeric(weightTF.getText())
+                && isNumeric(bloodTF1.getText())
+                && isNumeric(bloodTF2.getText())
+                && isNumeric(heartTF.getText())
+                && isNumeric(oxygenLevelTF.getText())
+                && isNumeric(lungTF.getText())
+                && isNumeric(oxygenUptakeTF.getText())) {
+
+            int appointmentID = currentAppointment.getAppointmentID();
+            double weight = Double.valueOf(weightTF.getText());
+            String bloodPressure = bloodTF1.getText() + "/" + bloodTF2.getText();
+            int heartRate = Integer.valueOf(heartTF.getText());
+            double oxygenLevel = Double.valueOf(oxygenLevelTF.getText());
+            double lungCapacity = Double.valueOf(lungTF.getText());
+            double oxygenUptake = Double.valueOf(oxygenUptakeTF.getText());
+
+            if (submitTestBtn.getText().contains("Update")) {
+                int testID = 0;
+                for (int i = 1; i < TestResult.getNextID(); i++) {
+                    if (getTestResult(i).getAppointmentID() == currentAppointment.getAppointmentID()) {
+                        testID = getTestResult(i).getTestResultID();
+                    }
+                }
+                TestResult updatedResult = new TestResult(testID, weight, bloodPressure, heartRate, oxygenLevel, lungCapacity, oxygenUptake, appointmentID, false, false);
+                updateTestResult(updatedResult);
+                Dialogs.create()
+                        .owner(null)
+                        .title("Update Successful")
+                        .masthead(null)
+                        .message("Test data has been updated.")
+                        .showInformation();
+                Date changeLogDate = Calendar.getInstance().getTime();
+                ChangeLog.insertChangeLog(new ChangeLog(1, changeLogDate, "Test", "Test results updated for appointment at "
+                        + currentAppointment.getDate() + ", Patient: " + getPatient(currentAppointment.getPatientID()).getFirstName()
+                        + " " + getPatient(currentAppointment.getPatientID()).getLastName(), currentUser.getStaffID()));
+
+            } else {
+                insertTestResult(appointmentID, weight, bloodPressure, heartRate, oxygenLevel, lungCapacity, oxygenUptake);
+
+                Date changeLogDate = Calendar.getInstance().getTime();
+                ChangeLog.insertChangeLog(new ChangeLog(1, changeLogDate, "Test", "Test added for appointment at "
+                        + currentAppointment.getDate() + ", Patient: " + getPatient(currentAppointment.getPatientID()).getFirstName()
+                        + " " + getPatient(currentAppointment.getPatientID()).getLastName(), currentUser.getStaffID()));
+
+                submitTestBtn.setDisable(true);
+                submitTestBtn.setText("Update");
+            }
+            refreshTestResult();
+
+        } else {
+            Dialogs.create()
+                    .owner(null)
+                    .title("Submit Test Error")
+                    .masthead(null)
+                    .message("Please enter numeric values in all text fields provided.")
+                    .showInformation();
+        }
+    }
+
+    public static boolean isNumeric(String str) {
+        try {
+            double d = Double.parseDouble(str);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
+    }
+
+    @FXML
     private AnchorPane searchPane;
 
     @FXML
@@ -2556,8 +2807,8 @@ public class GuiMainController implements Initializable {
         MenuHome.imageProperty().bind(
                 Bindings
                 .when(homePane.visibleProperty())
-                .then(new javafx.scene.image.Image("medicalapp/guimain/res/home_icon_y.png"))
-                .otherwise(new javafx.scene.image.Image("medicalapp/guimain/res/home_icon_w.png"))
+                .then(new javafx.scene.image.Image("medicalapp/guimain/res/calendar_icon_y.png"))
+                .otherwise(new javafx.scene.image.Image("medicalapp/guimain/res/calendar_icon_w.png"))
         );
         MenuPatientAdd.effectProperty().bind(
                 Bindings
@@ -2572,76 +2823,37 @@ public class GuiMainController implements Initializable {
                 .then(new javafx.scene.image.Image("medicalapp/guimain/res/addPatient_icon_y.png"))
                 .otherwise(new javafx.scene.image.Image("medicalapp/guimain/res/addPatient_icon_w.png"))
         );
+        MenuPayments.effectProperty().bind(
+                Bindings
+                .when(MenuPayments.hoverProperty())
+                .then((Effect) new Glow(1.0))
+                .otherwise((Effect) new Glow(0))
+        );
+
+        MenuPayments.imageProperty().bind(
+                Bindings
+                .when(paymentsPane.visibleProperty())
+                .then(new javafx.scene.image.Image("medicalapp/guimain/res/payment_icon_y.png"))
+                .otherwise(new javafx.scene.image.Image("medicalapp/guimain/res/payment_icon_w.png"))
+        );
         MenuMessenger.effectProperty().bind(
                 Bindings
                 .when(MenuMessenger.hoverProperty())
                 .then((Effect) new Glow(1.0))
                 .otherwise((Effect) new Glow(0))
         );
-//        MenuPatientDocuments.effectProperty().bind(
-//                Bindings
-//                    .when(MenuPatientDocuments.hoverProperty())
-//                        .then((Effect) new Glow(1.0))
-//                        .otherwise((Effect) new Glow(0))
-//        );
-        MenuSettings.effectProperty().bind(
+        MenuChangeLog.effectProperty().bind(
                 Bindings
-                .when(MenuSettings.hoverProperty())
+                .when(MenuChangeLog.hoverProperty())
                 .then((Effect) new Glow(1.0))
                 .otherwise((Effect) new Glow(0))
         );
-
-        /**
-         * Set hover glows
-         */
-//        MenuHome.setOnMouseEntered(new EventHandler<MouseEvent>() {
-//            @Override
-//            public void handle(MouseEvent event) {
-//                MenuHome.setEffect(new Glow(1.0));
-//            }
-//        });
-//        MenuHome.setOnMouseExited(new EventHandler<MouseEvent>() {
-//            @Override
-//            public void handle(MouseEvent event) {
-//                MenuHome.setEffect(new Glow(0));
-//            }
-//        });
-//        MenuPatientAdd.setOnMouseEntered(new EventHandler<MouseEvent>() {
-//            @Override
-//            public void handle(MouseEvent event) {
-//                MenuHome.setEffect(new Glow(1.0));
-//            }
-//        });
-//        MenuPatientAdd.setOnMouseExited(new EventHandler<MouseEvent>() {
-//            @Override
-//            public void handle(MouseEvent event) {
-//                MenuHome.setEffect(new Glow(0));
-//            }
-//        });
-//        MenuMessenger.setOnMouseEntered(new EventHandler<MouseEvent>() {
-//            @Override
-//            public void handle(MouseEvent event) {
-//                MenuHome.setEffect(new Glow(1.0));
-//            }
-//        });
-//        MenuMessenger.setOnMouseExited(new EventHandler<MouseEvent>() {
-//            @Override
-//            public void handle(MouseEvent event) {
-//                MenuHome.setEffect(new Glow(0));
-//            }
-//        });
-//        MenuSettings.setOnMouseEntered(new EventHandler<MouseEvent>() {
-//            @Override
-//            public void handle(MouseEvent event) {
-//                MenuHome.setEffect(new Glow(1.0));
-//            }
-//        });
-//        MenuSettings.setOnMouseExited(new EventHandler<MouseEvent>() {
-//            @Override
-//            public void handle(MouseEvent event) {
-//                MenuHome.setEffect(new Glow(0));
-//            }
-//        });
+        MenuChangeLog.imageProperty().bind(
+                Bindings
+                .when(changeLogPane.visibleProperty())
+                .then(new javafx.scene.image.Image("medicalapp/guimain/res/settings_icon_y.png"))
+                .otherwise(new javafx.scene.image.Image("medicalapp/guimain/res/settings_icon_w.png"))
+        );
     }
 
     @Override
@@ -2671,15 +2883,20 @@ public class GuiMainController implements Initializable {
         searchTextField.textProperty().addListener((observable, oldValue, newValue) -> {
             refreshSearchList();
         });
+        calDashBoard.requestFocus();
 
         MedicalAppSearch.setMinSize(0, 0);
-
-        calDashBoard = new HBox();
-        calDashBoard.getChildren().add(initVisitHistory());
-        visitHistoryPane.getChildren().add(calDashBoard);
 
         submitNote.setOnMouseClicked(this::handleNoteAddButton);
         initPayments();
         initChangeLog();
+        initVisitHistory();
+
+        MenuHome.effectProperty().bind(
+                Bindings
+                .when(MenuHome.visibleProperty())
+                .then((Effect) new Glow(1.0))
+                .otherwise((Effect) new Glow(0))
+        );
     }
 }
