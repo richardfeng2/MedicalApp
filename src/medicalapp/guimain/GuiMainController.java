@@ -57,6 +57,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Control;
@@ -67,6 +68,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
@@ -128,11 +130,9 @@ import static medicalapp.data.Docos.insertDocument;
 import static medicalapp.data.Docos.insertDocument;
 import static medicalapp.data.Docos.insertDocument;
 import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
+import static medicalapp.data.Docos.insertDocument;
 import medicalapp.data.Doctor;
-import static medicalapp.data.Doctor.getDoctor;
-import static medicalapp.data.Doctor.getDoctor;
-import static medicalapp.data.Doctor.getDoctor;
-import static medicalapp.data.Doctor.getDoctor;
 import static medicalapp.data.Doctor.getDoctor;
 import medicalapp.data.Invoice;
 import static medicalapp.data.Invoice.getInvoice;
@@ -146,7 +146,12 @@ import medicalapp.data.Patient;
 import static medicalapp.data.Patient.getPatient;
 import static medicalapp.data.Patient.insertPatient;
 import static medicalapp.data.Patient.searchPatients;
+import medicalapp.data.Referral;
+import static medicalapp.data.Referral.getReferral;
+import static medicalapp.data.Referral.insertReferral;
 import medicalapp.data.Service;
+import static medicalapp.data.Service.getService;
+import static medicalapp.data.Service.getService;
 import static medicalapp.data.Service.getService;
 import medicalapp.data.Staff;
 import static medicalapp.data.Staff.getStaff;
@@ -309,6 +314,8 @@ public class GuiMainController implements Initializable {
     private static Staff currentUser;
     @FXML
     private Label welcomeLabel;
+    @FXML
+    private Button weeklyButton;
 
     @FXML
     private void loginAction(ActionEvent event) {
@@ -341,6 +348,11 @@ public class GuiMainController implements Initializable {
                     welcomeLabel.setText("Welcome,\n" + "Dr. " + currentUser.getFirstName() + " " + currentUser.getLastName());
                 } else {
                     welcomeLabel.setText("Welcome,\n" + currentUser.getFirstName() + " " + currentUser.getLastName());
+                }
+                if (!currentUser.isDoctor()) {
+                    weeklyButton.setVisible(false);
+                }else{
+                    weeklyButton.setVisible(true);
                 }
             } else {
                 loginErrorLabel.setVisible(true);
@@ -438,6 +450,7 @@ public class GuiMainController implements Initializable {
     private TextField balanceDueTF;
 
     public void initPayments() {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy");
         invoiceTable.setPlaceholder(new Text("No Invoices to be displayed"));
         invoiceIDCol.setCellValueFactory(
                 new PropertyValueFactory<>("invoiceID")
@@ -458,9 +471,11 @@ public class GuiMainController implements Initializable {
 //        invoiceDatePaidCol.setCellValueFactory(
 //                new PropertyValueFactory<>("isPaid")
 //        );
-        invoiceDateIssuedCol.setCellValueFactory(
-                new PropertyValueFactory<>("dateIssued")
-        );
+        invoiceDateIssuedCol.setCellValueFactory(new Callback<CellDataFeatures<Invoice, String>, ObservableValue<String>>() {
+            public ObservableValue<String> call(CellDataFeatures<Invoice, String> i) {
+                return new ReadOnlyObjectWrapper(sdf.format(i.getValue().getDateIssued()));
+            }
+        });
 
         invoiceDatePaidCol.setCellValueFactory(new Callback<CellDataFeatures<Invoice, Invoice>, ObservableValue<Invoice>>() {
             @Override
@@ -481,7 +496,6 @@ public class GuiMainController implements Initializable {
                         button.setMinWidth(70);
                     }
                     final Label label = new Label();
-                    SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yy");
 
                     @Override
                     public void updateItem(final Invoice invoice, boolean empty) {
@@ -509,9 +523,9 @@ public class GuiMainController implements Initializable {
 
                                     Action response = Dialogs.create()
                                             .owner(null)
-                                            .title("Confirm Dialog")
-                                            .masthead("Look, a Confirm Dialog")
-                                            .message("Do you want to continue?")
+                                            .title("Invoice Payment")
+                                            .masthead("Confirmation")
+                                            .message("Are you sure you want to confirm payment on Invoice: " + invoice.getInvoiceID() + "?")
                                             .showConfirm();
 
                                     if (response == Dialog.Actions.YES) {
@@ -737,16 +751,18 @@ public class GuiMainController implements Initializable {
     @FXML
     ListView servicesList;
     @FXML
-    Button updateServicesButton;
+    Button cancelInvoiceBtn;
     @FXML
     Button createInvoiceButton;
     @FXML
     Label newInvoicePatientLbl;
     @FXML
     Label newInvoiceAppLbl;
+    @FXML
+    CheckBox servicesCheck;
 
     public void initNewInvoice(int appointmentID) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/YY  HH:mm:");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/YY  HH:mm");
 
         newInvoicePatientLbl.setText(getPatient(getAppointment(appointmentID).getPatientID()).getFirstName()
                 + " " + getPatient(getAppointment(appointmentID).getPatientID()).getLastName());
@@ -763,17 +779,13 @@ public class GuiMainController implements Initializable {
         servicesList.setItems(services);
         servicesList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         servicesList.getFocusModel().focus(0);
-//        updateServicesButton.setOnAction(new EventHandler<ActionEvent>() {
-//            @Override
-//            public void handle(ActionEvent e) {
-//
-//                ObservableList<String> selectedServiceDescriptions = servicesList.getSelectionModel().getSelectedItems();
-//                for (String description : selectedServiceDescriptions) {
-//                    Service service = getService(description);
-//                    selectedServices.add(service);
-//                }
-//            }
-//        });
+        cancelInvoiceBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                newInvoice.setVisible(false);
+                homePane.setVisible(true);
+            }
+        });
         createInvoiceButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {
@@ -788,7 +800,7 @@ public class GuiMainController implements Initializable {
                     }
                 }
 
-                if (!selectedServices.isEmpty()) {
+                if (!selectedServices.isEmpty() && servicesCheck.isSelected()) {
                     for (Service s : selectedServices) { //Insert a number of services
                         InvoiceService is = new InvoiceService(currentInvoice.getInvoiceID(), s.getServiceID());
                         InvoiceService.insertInvoiceService(is);
@@ -799,7 +811,7 @@ public class GuiMainController implements Initializable {
                         .owner(null)
                         .title("Invoice Created")
                         .masthead(null)
-                        .message("Invoice successfully created.")
+                        .message("Invoice has been successfully created.")
                         .showInformation();
 
                 ChangeLog.insertChangeLog(new ChangeLog(1, date, "Payment", "InvoiceID: " + currentInvoice.getInvoiceID() + " - invoice "
@@ -1018,6 +1030,14 @@ public class GuiMainController implements Initializable {
                     itemPane.getChildren().add(healthFundBox);
                     itemPane.getChildren().add(buttonBox);
                     searchResultItems.add(itemPane);
+
+                    itemPane.setOnMouseClicked((MouseEvent event) -> {
+                        currentPatient = p;
+                        currentPatientName.setText(p.getFirstName() + " " + p.getLastName());
+                        setAllInvisible();
+                        refreshPatientFile();
+                        patientFile.setVisible(true);
+                    });
                 }
             }
             // remove duplicates
@@ -1185,19 +1205,17 @@ public class GuiMainController implements Initializable {
                         tooltip.setText("Time: " + timeFormat.format(a.getDate())
                                 + "\n" + a.getPurpose());
 
-                        if (currentUser.isDoctor()) {
-                            label.setOnMouseClicked(new EventHandler<MouseEvent>() {
-                                @Override
-                                public void handle(MouseEvent event) {
-                                    currentPatient = getPatient(a.getPatientID());
-                                    currentAppointment = a;
-                                    setAllInvisible();
-                                    patientFile.setVisible(true);
+                        label.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                            @Override
+                            public void handle(MouseEvent event) {
+                                currentPatient = getPatient(a.getPatientID());
+                                currentAppointment = a;
+                                setAllInvisible();
+                                patientFile.setVisible(true);
 
-                                    refreshPatientFile();
-                                }
-                            });
-                        }
+                                refreshPatientFile();
+                            }
+                        });
                         timetableAnchor.getChildren().add(label);
 
                         Button button = new Button("Invoice");
@@ -1548,12 +1566,37 @@ public class GuiMainController implements Initializable {
         openFile(myFile);
     }
 
+    @FXML
+    Tab documentsTab;
+    @FXML
+    Tab referralTab;
+    @FXML
+    Tab notesTab;
+    @FXML
+    Tab testsTab;
+
     private void refreshPatientFile() {
         pfName.setText(currentPatient.getFirstName() + " " + currentPatient.getLastName());
         pfAddress.setText(currentPatient.getAddress());
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
         pfDOB.setText("DOB:" + dateFormat.format(currentPatient.getDateOfBirth()));
         refreshVisitHistory();
+        refreshReferral();
+
+        documentsTab.setDisable(false);
+        notesTab.setDisable(false);
+        testsTab.setDisable(false);
+
+        /**
+         * User access levels depending on admin/nurse/doctor
+         */
+        if (!currentUser.isDoctor()) {
+            documentsTab.setDisable(true);
+            notesTab.setDisable(true);
+        }
+        if (!currentUser.isNurse() && !currentUser.isDoctor()) {
+            testsTab.setDisable(true);
+        }
     }
 
     @FXML
@@ -1786,20 +1829,145 @@ public class GuiMainController implements Initializable {
         }
     }
 
+    @FXML
+    private Label refStatusLabel;
+    @FXML
+    private DatePicker refDatePicker;
+    @FXML
+    private TextField gpNameTF;
+    @FXML
+    private TextField gpContactTF;
+    @FXML
+    private TextArea refPurposeTF;
+    @FXML
+    private Button submitRef;
+
+    public void refreshReferral() {
+        refStatusLabel.setText("No Referral");
+        refDatePicker.setValue(null);
+        gpNameTF.clear();
+        gpContactTF.clear();
+        refPurposeTF.clear();
+        ArrayList<Referral> referrals = new ArrayList<>();
+        for (int i = 1; i < Referral.getNextID(); i++) {
+            if (getReferral(i).getPatientID() == currentPatient.getPatientID()) {
+                referrals.add(getReferral(i));
+            }
+        }
+        if (!referrals.isEmpty()) {
+            for (Referral referral : referrals) {
+                Calendar calCurrent = Calendar.getInstance();
+                Date date = referral.getDate();
+                Calendar calReferral = Calendar.getInstance();
+                calReferral.setTime(date);
+                calReferral.set(Calendar.YEAR, calReferral.get(Calendar.YEAR) + 1); //1 year valid
+                if (calReferral.compareTo(calCurrent) >= 0) {  //Check if referral is not expired (1 year validity)
+                    refStatusLabel.setText("Valid");
+                } else {
+                    refStatusLabel.setText("Expired - Renewal Required");
+                }
+                refDatePicker.setValue(date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+                gpNameTF.setText(referral.getGpName());
+                gpContactTF.setText(referral.getContact());
+                refPurposeTF.setText(referral.getPurpose());
+            }
+        }
+    }
+
+    @FXML
+    public void handleSubmitReferral() {
+        ArrayList<Referral> referrals = new ArrayList<>();
+        for (int i = 1; i < Referral.getNextID(); i++) {
+            if (getReferral(i).getPatientID() == currentPatient.getPatientID()) {
+                referrals.add(getReferral(i));
+            }
+        }
+        Referral latestReferral = null;
+        if (!referrals.isEmpty()) {
+            latestReferral = referrals.get(referrals.lastIndexOf(this));
+        }
+
+        if (refDatePicker.getValue() != null || !gpNameTF.getText().isEmpty() || !gpContactTF.getText().isEmpty() || !refPurposeTF.getText().isEmpty()) {   //Field check
+            if (refDatePicker.getValue().compareTo(Calendar.getInstance().toInstant().atZone(ZoneId.systemDefault()).toLocalDate()) <= 0) { //Date picked must not be in the future
+                if (referrals.isEmpty() || refDatePicker.getValue().compareTo(latestReferral.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate()) >= 0) { //Date must be newer than old referral
+                    insertReferral(new Referral(0, currentPatient.getPatientID(), gpNameTF.getText(), gpContactTF.getText(), refPurposeTF.getText(),
+                            convertLocalDateToDate(refDatePicker.getValue())));
+                    Date changeLogDate = Calendar.getInstance().getTime();
+                    ChangeLog.insertChangeLog(new ChangeLog(1, changeLogDate, "Referral", "Referral updated for "
+                            + " Patient: " + getPatient(currentAppointment.getPatientID()).getFirstName()
+                            + " " + getPatient(currentAppointment.getPatientID()).getLastName(), currentUser.getStaffID()));
+
+                    Dialogs.create()
+                            .owner(null)
+                            .title("Referral Update")
+                            .masthead(null)
+                            .message("Referral successfully updated.")
+                            .showInformation();
+                } else {
+                    Dialogs.create()
+                            .owner(null)
+                            .title("Referral Update Error")
+                            .masthead(null)
+                            .message("Please enter a newer date than that of the last referral.")
+                            .showInformation();
+                }
+            } else {
+                Dialogs.create()
+                        .owner(null)
+                        .title("Referral Update Error")
+                        .masthead(null)
+                        .message("The date you have selected is in the future. Please enter a valid referral date.")
+                        .showInformation();
+            }
+        } else {
+            Dialogs.create()
+                    .owner(null)
+                    .title("Referral Update Error")
+                    .masthead(null)
+                    .message("Please complete all fields provided.")
+                    .showInformation();
+        }
+        refreshReferral();
+    }
+
+    @FXML
+    public void handleNotesTab() {
+        visitHistoryPane.setVisible(true);
+    }
+
+    @FXML
+    public void handleDocumentsTab() {
+        visitHistoryPane.setVisible(true);
+    }
+
+    @FXML
+    public void handleTestResultsTab() {
+        visitHistoryPane.setVisible(true);
+    }
+
+    @FXML
+    public void handleReferralTab() {
+        visitHistoryPane.setVisible(false);
+    }
+
     public boolean showNoteDialog(Note note) {
         try {
             // Load the fxml file and create a new stage for the popup dialog.
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(GuiMain.class.getResource("NoteDialog.fxml"));
+            loader
+                    .setLocation(GuiMain.class
+                            .getResource("NoteDialog.fxml"));
             AnchorPane page = (AnchorPane) loader.load();
 
             // Create the dialog Stage.
             Stage dialogStage = new Stage();
 
-            dialogStage.setTitle("New Addendum");
+            dialogStage.setTitle(
+                    "New Addendum");
             dialogStage.initModality(Modality.WINDOW_MODAL);
 
-            dialogStage.initOwner(null);
+            dialogStage.initOwner(
+                    null);
             Scene scene = new Scene(page);
 
             dialogStage.setScene(scene);
@@ -1810,6 +1978,7 @@ public class GuiMainController implements Initializable {
             controller.setDialogStage(dialogStage);
 
             controller.setNote(note);
+
             controller.setUser(currentUser);
 
             // Show the dialog and wait until the user closes it
@@ -2400,7 +2569,7 @@ public class GuiMainController implements Initializable {
                 Appointment.insertAppointment(currentPatient, currentDoctor, date, duration, purposeText.getText());
                 refreshSchedule(currentDay, currentMonth, currentYear);
 
-                SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy HH:MM");
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy HH:mm");
                 Dialogs.create()
                         .owner(null)
                         .title("Appointment Scheduled")
@@ -2613,6 +2782,7 @@ public class GuiMainController implements Initializable {
 
             setAllInvisible();
             homePane.setVisible(true);
+
         }
     }
 
@@ -2898,5 +3068,6 @@ public class GuiMainController implements Initializable {
                 .then((Effect) new Glow(1.0))
                 .otherwise((Effect) new Glow(0))
         );
+
     }
 }

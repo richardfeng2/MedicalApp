@@ -19,8 +19,19 @@ addendumID int,
 noteID int,
 text varchar(255),
 date timestamp,
-doctorID int,
+staffID int,
 PRIMARY KEY(addendumID)
+);
+
+CREATE TABLE SA.REFERRAL
+(
+referralID int,
+patientID int,
+gpName varchar(255),
+contact varchar(255),
+purpose varchar(255),
+date timestamp,
+PRIMARY KEY(referralID)
 );
 
 CREATE TABLE SA.CHANGELOG
