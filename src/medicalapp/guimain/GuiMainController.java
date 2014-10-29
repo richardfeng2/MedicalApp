@@ -351,7 +351,7 @@ public class GuiMainController implements Initializable {
                 }
                 if (!currentUser.isDoctor()) {
                     weeklyButton.setVisible(false);
-                }else{
+                } else {
                     weeklyButton.setVisible(true);
                 }
             } else {
@@ -467,10 +467,6 @@ public class GuiMainController implements Initializable {
                 return new ReadOnlyObjectWrapper(getPatient(getAppointment(i.getValue().getAppointmentID()).getPatientID()).getAddress());
             }
         });
-
-//        invoiceDatePaidCol.setCellValueFactory(
-//                new PropertyValueFactory<>("isPaid")
-//        );
         invoiceDateIssuedCol.setCellValueFactory(new Callback<CellDataFeatures<Invoice, String>, ObservableValue<String>>() {
             public ObservableValue<String> call(CellDataFeatures<Invoice, String> i) {
                 return new ReadOnlyObjectWrapper(sdf.format(i.getValue().getDateIssued()));
@@ -549,27 +545,52 @@ public class GuiMainController implements Initializable {
             }
         });
 
-//        invoiceDatePaidCol.setCellValueFactory(new Callback<CellDataFeatures<Invoice, Boolean>, ObservableValue<Boolean>>() {
-//            public ObservableValue<Boolean> call(CellDataFeatures<Invoice, Boolean> i) {
-//                if (i.getValue().isPaid()) {
-//                    return new ReadOnlyObjectWrapper("Yes");
-//                } else {
-//                    invoiceDatePaidCol.setCellFactory(
-//                            new Callback<TableColumn<Invoice, Boolean>, TableCell<Invoice, Boolean>>() {
-//                                @Override
-//                                public TableCell<Invoice, Boolean> call(TableColumn<Invoice, Boolean> p) {
-//                                    return new ButtonCell();
-//                                }
-//                            });
-//                }
-//                return null;
-//            }
-//        });
         invoiceAmountCol.setCellValueFactory(new Callback<CellDataFeatures<Invoice, String>, ObservableValue<String>>() {
             public ObservableValue<String> call(CellDataFeatures<Invoice, String> i) {
-                return new ReadOnlyObjectWrapper(String.valueOf(getTotalAmount(i.getValue())));
+                return new ReadOnlyObjectWrapper(String.format("%.2f", (getTotalAmount(i.getValue()))));
             }
         });
+
+        invoicePatientCol.setCellFactory(new Callback<TableColumn, TableCell>() {    //Align right of column
+            public TableCell call(TableColumn p) {
+
+                TableCell cell = new TableCell<Invoice, String>() {
+                    @Override
+                    public void updateItem(String item, boolean empty) {
+                        super.updateItem(item, empty);
+                        setText(empty ? null : getString());
+                        setGraphic(null);
+                    }
+
+                    private String getString() {
+                        return getItem() == null ? "" : getItem().toString();
+                    }
+                };
+                cell.setStyle("-fx-alignment: CENTER-LEFT;");
+                return cell;
+            }
+        });
+
+        invoiceAddressCol.setCellFactory(new Callback<TableColumn, TableCell>() {    //Align right of column
+            public TableCell call(TableColumn p) {
+
+                TableCell cell = new TableCell<Invoice, String>() {
+                    @Override
+                    public void updateItem(String item, boolean empty) {
+                        super.updateItem(item, empty);
+                        setText(empty ? null : getString());
+                        setGraphic(null);
+                    }
+
+                    private String getString() {
+                        return getItem() == null ? "" : getItem().toString();
+                    }
+                };
+                cell.setStyle("-fx-alignment: CENTER-LEFT;");
+                return cell;
+            }
+        });
+
         final ObservableList<Invoice> masterData = FXCollections.observableArrayList();
 
         try {
@@ -688,8 +709,8 @@ public class GuiMainController implements Initializable {
                 totalDue += getTotalAmount(i);
             }
         }
-        totalPaidTF.setText(String.valueOf(totalPaid));
-        balanceDueTF.setText(String.valueOf(totalDue));
+        totalPaidTF.setText(String.format("%.2f", totalPaid));
+        balanceDueTF.setText(String.format("%.2f", totalDue));
         balanceDueTF.setStyle("-fx-text-fill: red");
     }
 
@@ -1067,7 +1088,7 @@ public class GuiMainController implements Initializable {
     public AnchorPane initTimetable() {
         AnchorPane timetableBox = new AnchorPane();
         timetableScroll = new ScrollPane();
-        timetableScroll.setPrefSize(700, 550);
+        timetableScroll.setPrefSize(700, 400);
         timetableScroll.setPrefWidth(searchTextField.getWidth());
 
         timetableLabelBox = new HBox();
@@ -1567,19 +1588,23 @@ public class GuiMainController implements Initializable {
     }
 
     @FXML
-    Tab documentsTab;
+    private Tab documentsTab;
     @FXML
-    Tab referralTab;
+    private Tab referralTab;
     @FXML
-    Tab notesTab;
+    private Tab notesTab;
     @FXML
-    Tab testsTab;
+    private Tab testsTab;
+    @FXML
+    private Label pfContact;
 
     private void refreshPatientFile() {
-        pfName.setText(currentPatient.getFirstName() + " " + currentPatient.getLastName());
+        pfName.setText("Patient: " + currentPatient.getFirstName() + " " + currentPatient.getLastName());
         pfAddress.setText(currentPatient.getAddress());
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
-        pfDOB.setText("DOB:" + dateFormat.format(currentPatient.getDateOfBirth()));
+        pfDOB.setText("DOB: " + dateFormat.format(currentPatient.getDateOfBirth()));
+        pfContact.setText("Contact: " + currentPatient.getContactNumber());
+
         refreshVisitHistory();
         refreshReferral();
 
@@ -2127,8 +2152,6 @@ public class GuiMainController implements Initializable {
     }
 
     private VBox initCalendar() {
-
-        //Controls
         monthLabel = new Label("Januray");
 //        monthLabel.setPrefSize(50, 20);
         yearCombo = new ComboBox();
@@ -2148,7 +2171,6 @@ public class GuiMainController implements Initializable {
         calendarBox = new VBox();
         calendarBox.setPadding(new Insets(10, 10, 10, 10));
 
-        //Set actionlistners
         prevButton.setOnAction((ActionEvent event) -> {
             if (currentMonth == 0) { //Back a year
                 currentMonth = 11;
@@ -3025,6 +3047,12 @@ public class GuiMainController implements Initializable {
                 .otherwise(new javafx.scene.image.Image("medicalapp/guimain/res/settings_icon_w.png"))
         );
     }
+    @FXML
+    private GridPane menuGrid;
+    @FXML
+    private AnchorPane footer;
+    @FXML
+    private AnchorPane calendarPane;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -3044,7 +3072,7 @@ public class GuiMainController implements Initializable {
 
         newAppointment.getChildren().add(initSchedule());
 
-        MedicalAppCalendar.getChildren().add(calDashBoard);
+        calendarPane.getChildren().add(calDashBoard);
 
         MenuPatientAdd.setOnMouseClicked(this::handleAddPatientMouse);
         MenuHome.setOnMouseClicked(this::handleMenuHomeMouse);
@@ -3068,6 +3096,23 @@ public class GuiMainController implements Initializable {
                 .then((Effect) new Glow(1.0))
                 .otherwise((Effect) new Glow(0))
         );
+        MedicalAppSearch.setOnMouseClicked((MouseEvent event) -> {
+            searchList.setVisible(false);
+        });
 
+        workSpace.setOnMouseClicked((MouseEvent event) -> {
+            searchList.setVisible(false);
+        });
+        MedicalAppCalendar.setOnMouseClicked((MouseEvent event) -> {
+            searchList.setVisible(false);
+        });
+        footer.setOnMouseClicked((MouseEvent event) -> {
+            searchList.setVisible(false);
+        });
+        searchTextField.setOnMouseClicked((MouseEvent event) -> {
+            if (!searchList.getItems().isEmpty()) {
+                searchList.setVisible(true);
+            }
+        });
     }
 }

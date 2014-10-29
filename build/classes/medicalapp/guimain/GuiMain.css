@@ -39,42 +39,60 @@ and open the template in the editor.
 }
 
 #mainScreen{
-/*    -fx-background-image:url("res/mainBackground2.png");
-    -fx-background-repeat: stretch;   
-    -fx-background-size: cover;
-    -fx-background-position: center center;*/
+    /*    -fx-background-image:url("res/mainBackground2.png");
+        -fx-background-repeat: stretch;   
+        -fx-background-size: cover;
+        -fx-background-position: center center;*/
 }
 #menuBar{
     -fx-background-image:url("res/menuBarBG.png");
-/*    -fx-background-repeat: stretch;   */
+    /*    -fx-background-repeat: stretch;   */
     -fx-background-size: cover;
     -fx-background-position: center center;
 }
 #titleArea{
     -fx-background-image:url("res/titleBG.png");
-/*    -fx-background-repeat: stretch;   */
+    -fx-background-repeat: stretch;   
     -fx-background-size: cover;
     -fx-background-position: center center;
 }
 
 #workSpace{
     -fx-background-image:url("res/workspaceBG.png");
-/*    -fx-background-repeat: stretch;   */
+    /*    -fx-background-repeat: stretch;   */
     -fx-background-size: cover;
     -fx-background-position: center center;
 }
 #dashBoard{
     -fx-background-image:url("res/workspaceBG.png");
-/*    -fx-background-repeat: stretch;   */
+    /*    -fx-background-repeat: stretch;   */
     -fx-background-size: cover;
     -fx-background-position: center center;
 }
 
 #footer{
     -fx-background-image:url("res/footer.png");
-/*    -fx-background-repeat: stretch;   */
+    /*    -fx-background-repeat: stretch;   */
     -fx-background-size: cover;
     -fx-background-position: center center;
+}
+
+#workSpacePanes{
+    -fx-background-color: rgba(255, 255,255, 0.7) ; -fx-background-radius: 20 
+}
+
+#invoiceTable .table-cell {
+    -fx-alignment: CENTER-RIGHT;
+    /* The rest is from caspian.css */
+
+    -fx-skin: "com.sun.javafx.scene.control.skin.TableCellSkin";
+    -fx-padding: 0.166667em; /* 2px, plus border adds 1px */
+
+    -fx-background-color: transparent;
+    -fx-border-color: transparent -fx-table-cell-border-color transparent transparent;
+    -fx-border-width: 0.083333em; /* 1 */
+    -fx-cell-size: 2.0em; /* 24 */
+    -fx-text-fill: -fx-text-inner-color;
 }
 
 .iconHomeW{

@@ -15,9 +15,9 @@
     <children>
       <BorderPane id="mainScreen" fx:id="mainScreen" prefHeight="660.0" prefWidth="993.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <center>
-            <AnchorPane id="workSpace" fx:id="workSpace" prefHeight="422.0" prefWidth="710.0" BorderPane.alignment="CENTER">
+            <AnchorPane id="workSpace" fx:id="workSpace" prefHeight="497.0" prefWidth="893.0" BorderPane.alignment="CENTER">
                <children>
-                    <AnchorPane fx:id="MedicalAppNewPatient" prefHeight="221.0" prefWidth="779.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <AnchorPane id="workSpacePanes" fx:id="MedicalAppNewPatient" layoutX="56.0" prefHeight="350.0" prefWidth="787.0" visible="false" AnchorPane.bottomAnchor="301.0" AnchorPane.leftAnchor="56.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="50.0">
                         <!--<fx:include fx:id="newPatientPane" source="NewPatient.fxml" />-->
                                  <children>
                         <VBox layoutX="131.0" layoutY="68.0" prefHeight="397.0" prefWidth="577.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
@@ -74,7 +74,7 @@
                         </VBox>
                         </children>
                     </AnchorPane>
-                  <AnchorPane fx:id="patientFile" prefHeight="552.0" prefWidth="605.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <AnchorPane id="workSpacePanes" fx:id="patientFile" layoutX="51.0" prefHeight="380.0" prefWidth="792.0" visible="false" AnchorPane.bottomAnchor="271.0" AnchorPane.leftAnchor="51.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="50.0">
                      <children>
                         <BorderPane prefHeight="612.0" prefWidth="784.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <top>
@@ -82,9 +82,9 @@
                                  <children>
                                     <GridPane fx:id="patientFileGeneral" layoutX="8.0" layoutY="13.0" prefHeight="96.0" prefWidth="763.0">
                                       <columnConstraints>
-                                          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                          <ColumnConstraints hgrow="SOMETIMES" maxWidth="380.0" minWidth="10.0" prefWidth="380.0" />
+                                          <ColumnConstraints hgrow="SOMETIMES" maxWidth="256.0" minWidth="10.0" prefWidth="240.0" />
+                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="126.0" minWidth="10.0" prefWidth="23.0" />
                                         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                       </columnConstraints>
                                       <rowConstraints>
@@ -92,7 +92,7 @@
                                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                       </rowConstraints>
                                        <children>
-                                          <Label fx:id="fileNameLabel" text="Contact" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                          <Label fx:id="pfContact" text="Contact" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                           <Label fx:id="pfDOB" text="DOB: " GridPane.columnIndex="1" />
                                           <Label fx:id="pfAddress" text="Address" GridPane.rowIndex="1" />
                                           <Label fx:id="pfName" text="Name" />
@@ -248,23 +248,23 @@
                         </AnchorPane>
                      </children>
                   </AnchorPane>
-                  <AnchorPane fx:id="newAppointment" prefHeight="560.0" prefWidth="605.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                  <AnchorPane fx:id="homePane" prefHeight="611.0" prefWidth="781.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <AnchorPane id="workSpacePanes" fx:id="newAppointment" layoutX="51.0" prefHeight="306.0" prefWidth="792.0" visible="false" AnchorPane.bottomAnchor="345.0" AnchorPane.leftAnchor="51.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="50.0" />
+                  <AnchorPane id="workSpacePanes" fx:id="homePane" layoutX="55.0" prefHeight="293.0" prefWidth="788.0" AnchorPane.bottomAnchor="358.0" AnchorPane.leftAnchor="55.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="50.0">
                      <children>
-                        <VBox layoutX="-1.0" layoutY="-2.0" prefHeight="609.0" prefWidth="780.0">
+                        <VBox layoutX="-5.0" layoutY="-2.0" prefHeight="175.0" prefWidth="784.0">
                            <children>
                                   <!--<fx:include fx:id="AnchorPane" source="calendar.fxml" />-->
-                                  <AnchorPane fx:id="timetableAnchorPane" prefHeight="611.0" prefWidth="785.0" />
-                              <Button fx:id="weeklyButton" mnemonicParsing="false" onAction="#handleWeeklyBtn" text="Weekly Schedule" />
+                                  <AnchorPane fx:id="timetableAnchorPane" prefHeight="616.0" prefWidth="750.0" />
+                              <Button fx:id="weeklyButton" alignment="CENTER" mnemonicParsing="false" onAction="#handleWeeklyBtn" text="Weekly Schedule" />
                            </children>
                         </VBox>
                      </children>
                   </AnchorPane>
-                  <AnchorPane fx:id="paymentsPane" prefHeight="598.0" prefWidth="200.0" visible="false" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <AnchorPane id="workSpacePanes" fx:id="paymentsPane" layoutX="53.0" prefHeight="294.0" prefWidth="790.0" visible="false" AnchorPane.bottomAnchor="357.0" AnchorPane.leftAnchor="53.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="50.0">
                      <children>
-                        <VBox alignment="CENTER" prefHeight="366.0" prefWidth="538.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <VBox alignment="CENTER" layoutY="33.0" prefHeight="430.0" prefWidth="753.0" AnchorPane.bottomAnchor="157.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
                            <children>
-                              <GridPane alignment="CENTER" prefHeight="211.0" prefWidth="600.0">
+                              <GridPane alignment="CENTER" prefHeight="74.0" prefWidth="784.0">
                                  <children>
                                     <Label alignment="CENTER" text="Patient" GridPane.halignment="LEFT" />
                                     <Label alignment="CENTER" text="Status" GridPane.columnIndex="1" GridPane.halignment="LEFT" />
@@ -291,9 +291,9 @@
                                     <RowConstraints maxHeight="105.0" minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
                                  </rowConstraints>
                               </GridPane>
-                              <TableView fx:id="invoiceTable" prefHeight="596.0" prefWidth="784.0">
+                              <TableView id="invoiceTable" fx:id="invoiceTable" prefHeight="350.0" prefWidth="753.0">
                                  <columns>
-                                    <TableColumn fx:id="invoiceIDCol" prefWidth="67.0" text="Invoice#" />
+                                    <TableColumn fx:id="invoiceIDCol" prefWidth="67.0" text="Invoice" />
                                     <TableColumn fx:id="invoicePatientCol" prefWidth="124.0" text="Patient" />
                                     <TableColumn fx:id="invoiceAddressCol" prefWidth="262.0" text="Address" />
                                     <TableColumn fx:id="invoiceDateIssuedCol" prefWidth="97.0" text="Date Issued" />
@@ -305,9 +305,9 @@
                         </VBox>
                      </children>
                   </AnchorPane>
-                  <AnchorPane fx:id="newInvoice" prefHeight="602.0" prefWidth="785.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <AnchorPane id="workSpacePanes" fx:id="newInvoice" layoutX="53.0" prefHeight="447.0" prefWidth="790.0" AnchorPane.bottomAnchor="190.0" AnchorPane.leftAnchor="53.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="50.0">
                      <children>
-                        <BorderPane prefHeight="601.0" prefWidth="786.0">
+                        <BorderPane layoutX="-2.0" prefHeight="444.0" prefWidth="788.0">
                            <top>
                               <AnchorPane prefHeight="101.0" prefWidth="786.0" BorderPane.alignment="CENTER">
                                  <children>
@@ -323,33 +323,36 @@
                               </AnchorPane>
                            </top>
                            <center>
-                              <AnchorPane prefHeight="254.0" prefWidth="786.0" BorderPane.alignment="CENTER">
+                              <AnchorPane prefHeight="401.0" prefWidth="767.0" BorderPane.alignment="CENTER">
                                  <children>
-                                    <GridPane layoutX="20.0" layoutY="8.0" prefHeight="288.0" prefWidth="578.0">
+                                    <GridPane layoutX="20.0" layoutY="8.0" prefHeight="266.0" prefWidth="578.0">
                                       <columnConstraints>
                                         <ColumnConstraints hgrow="SOMETIMES" maxWidth="558.0" minWidth="10.0" prefWidth="387.0" />
                                       </columnConstraints>
                                       <rowConstraints>
                                         <RowConstraints maxHeight="84.0" minHeight="10.0" prefHeight="38.0" vgrow="SOMETIMES" />
-                                          <RowConstraints maxHeight="84.0" minHeight="10.0" prefHeight="22.0" vgrow="SOMETIMES" />
-                                        <RowConstraints maxHeight="222.0" minHeight="10.0" prefHeight="222.0" vgrow="SOMETIMES" />
+                                          <RowConstraints maxHeight="84.0" minHeight="10.0" prefHeight="31.0" vgrow="SOMETIMES" />
+                                        <RowConstraints maxHeight="222.0" minHeight="10.0" prefHeight="203.0" vgrow="SOMETIMES" />
                                       </rowConstraints>
                                        <children>
-                                          <ListView fx:id="servicesList" prefHeight="223.0" prefWidth="685.0" GridPane.rowIndex="2" />
+                                          <ListView fx:id="servicesList" prefHeight="133.0" prefWidth="558.0" GridPane.rowIndex="2" />
                                           <Label text="Select service(s) with the list below:" />
                                           <Label text="(Hold the 'CTRL' key to select multiple services)" GridPane.rowIndex="1" />
                                        </children>
                                     </GridPane>
                                     <Button fx:id="cancelInvoiceBtn" layoutX="429.0" layoutY="312.0" mnemonicParsing="false" text="Cancel" />
                                     <Button fx:id="createInvoiceButton" layoutX="517.0" layoutY="312.0" mnemonicParsing="false" text="Create" />
-                                    <CheckBox fx:id="servicesCheck" layoutX="387.0" layoutY="286.0" mnemonicParsing="false" selected="true" text="Include selected services" />
+                                    <CheckBox fx:id="servicesCheck" layoutX="388.0" layoutY="284.0" mnemonicParsing="false" selected="true" text="Include selected services" />
                                  </children>
                               </AnchorPane>
                            </center>
+                           <bottom>
+                              <AnchorPane prefHeight="2.0" prefWidth="788.0" BorderPane.alignment="CENTER" />
+                           </bottom>
                         </BorderPane>
                      </children>
                   </AnchorPane>
-                  <AnchorPane fx:id="changeLogPane" prefHeight="476.0" prefWidth="681.0" visible="false" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <AnchorPane id="workSpacePanes" fx:id="changeLogPane" prefHeight="320.0" prefWidth="793.0" visible="false" AnchorPane.bottomAnchor="317.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="50.0">
                      <children>
                         <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <top>
@@ -387,7 +390,7 @@
                         </AnchorPane>
                           <AnchorPane id="menuBar" fx:id="MedicalAppMenu" prefHeight="67.0" prefWidth="993.0" VBox.vgrow="ALWAYS">
                               <children>
-                              <GridPane alignment="CENTER" layoutX="167.0" layoutY="32.0" prefHeight="60.0" prefWidth="793.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="100.0" AnchorPane.topAnchor="10.0">
+                              <GridPane fx:id="menuGrid" alignment="CENTER" layoutX="167.0" layoutY="32.0" prefHeight="60.0" prefWidth="848.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="45.0" AnchorPane.topAnchor="10.0">
                                 <columnConstraints>
                                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -464,17 +467,20 @@
                      <children>
                             <!--<fx:include fx:id="SearchPane" source="Search.fxml" />-->
                             <TextField fx:id="searchTextField" layoutX="66.0" layoutY="29.0" prefHeight="39.0" prefWidth="703.0" promptText="Search patients by name or healthfund..." />
-                            <ListView fx:id="searchList" layoutX="66.0" layoutY="68.0" prefHeight="21.0" prefWidth="666.0" />
+                            <ListView fx:id="searchList" layoutX="66.0" layoutY="68.0" prefHeight="9.0" prefWidth="666.0" />
                      </children>
                   </AnchorPane>
                   </children>
               </AnchorPane>
          </top>
          <right>
-              <AnchorPane id="dashBoard" fx:id="MedicalAppCalendar" prefHeight="509.0" prefWidth="98.0" BorderPane.alignment="CENTER" />
+              <AnchorPane id="dashBoard" fx:id="MedicalAppCalendar" prefHeight="509.0" prefWidth="98.0" BorderPane.alignment="CENTER">
+               <children>
+                  <AnchorPane fx:id="calendarPane" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="50.0" />
+               </children></AnchorPane>
          </right>
          <bottom>
-            <AnchorPane id="footer" nodeOrientation="LEFT_TO_RIGHT" prefHeight="94.0" prefWidth="993.0" BorderPane.alignment="CENTER">
+            <AnchorPane id="footer" fx:id="footer" nodeOrientation="LEFT_TO_RIGHT" prefHeight="94.0" prefWidth="993.0" BorderPane.alignment="CENTER">
                <children>
                   <AnchorPane layoutY="-10.0" prefHeight="121.0" prefWidth="200.0" />
                </children></AnchorPane>
