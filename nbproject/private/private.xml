@@ -5,17 +5,17 @@
             <url>src/medicalapp/guimain/GuiMainController.java</url>
             <bookmark id="1">
                 <name/>
-                <line>703</line>
+                <line>700</line>
                 <key/>
             </bookmark>
             <bookmark id="3">
                 <name/>
-                <line>1668</line>
+                <line>1667</line>
                 <key/>
             </bookmark>
             <bookmark id="2">
                 <name/>
-                <line>2277</line>
+                <line>2283</line>
                 <key/>
             </bookmark>
         </file>
@@ -24,7 +24,6 @@
         <group>
             <file>file:/C:/Users/Richard/Documents/NetBeansProjects/MedicalApp/MedicalApp/src/medicalapp/guimain/GuiMain.css</file>
             <file>file:/C:/Users/Richard/Documents/NetBeansProjects/MedicalApp/MedicalApp/src/medicalapp/guimain/GuiMainController.java</file>
-            <file>file:/C:/Users/Richard/Documents/NetBeansProjects/MedicalApp/MedicalApp/src/medicalapp/guimain/GuiMain.java</file>
         </group>
     </open-files>
 </project-private>

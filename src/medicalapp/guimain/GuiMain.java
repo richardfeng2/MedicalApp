@@ -32,6 +32,7 @@ public class GuiMain extends Application {
         primaryStage.getIcons().add(new Image("file:res/lungs-icon.png"));
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
+        primaryStage.setMaximized(true);
         primaryStage.show();
 
     }

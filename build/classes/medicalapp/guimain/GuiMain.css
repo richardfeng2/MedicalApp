@@ -16,26 +16,75 @@ and open the template in the editor.
 }
 
 .button{
-    -fx-text-fill: #006464;
-    -fx-background-color: derive(-style1-color, 50%);
-    -fx-border-radius: 20;
-    -fx-background-radius: 20;
+    -fx-text-fill: peru;
+    /*-fx-font-weight:bold;*/
+    -fx-background-color: #FFFACD;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
     -fx-padding: 5;
+    -fx-cursor: hand;
 }
 
+.toggle-button {
+    -fx-background-color: azure;
+}
+
+.toggle-button:selected {
+    -fx-background-color: lightsalmon;
+}
+
+#closeButton{
+    -fx-background-image:url("res/close_icon.png");
+    -fx-background-color: transparent;
+    -fx-background-size:60 60;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+}
+#exportButton{
+    -fx-background-image:url("res/export_icon.png");
+    -fx-background-color: transparent;
+    -fx-background-size:70 60;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+}
+#pdfPreview{
+    -fx-background-color: rgba(240,230,140, 0.7) ; 
+    -fx-background-radius: 20 ;
+}
 #usernameTF{
-    -fx-background-image:url('https://cdn0.iconfinder.com/data/icons/duesseldorf/32/user.png');
+    -fx-background-image:url("res/username_icon.png");
     -fx-background-size: 18 18;
     -fx-background-repeat: no-repeat;
     -fx-background-position: right center;
 }
+#passwordTF{
+    -fx-background-image:url("res/password.png");
+    -fx-background-size: 18 18;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: right center ;
+}
 
 #loginScreen{
     -fx-background-image:url("res/loginbackground.jpg");
+    /*-fx-background-size: 500 500;*/
     -fx-background-repeat: stretch;   
-    -fx-background-size: contain;
-    -fx-background-radius: 20;
+    -fx-background-size: cover;
     -fx-background-position: center center;
+}
+
+#welcomeIcon{
+
+}
+
+.prevButton{
+    -fx-background-image: url('res/left.png');
+    -fx-background-size: 20 20 ;
+    -fx-background-position: center center
+}
+.nextButton{
+    -fx-background-image: url('res/right.png');
+    -fx-background-size: 20 20 ;
+    -fx-background-position: center center
 }
 
 #mainScreen{
@@ -70,15 +119,15 @@ and open the template in the editor.
     -fx-background-position: center center;
 }
 
-#footer{
+/*#footer{
     -fx-background-image:url("res/footer.png");
-    /*    -fx-background-repeat: stretch;   */
+        -fx-background-repeat: stretch;   
     -fx-background-size: cover;
     -fx-background-position: center center;
-}
+}*/
 
 #workSpacePanes{
-    -fx-background-color: rgba(255, 255,255, 0.7) ; -fx-background-radius: 20 
+    -fx-background-color: rgba(255, 255,255, 0.5) ; -fx-background-radius: 20 
 }
 
 #invoiceTable .table-cell {

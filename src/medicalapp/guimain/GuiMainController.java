@@ -344,23 +344,20 @@ public class GuiMainController implements Initializable {
                 loginScreen.setVisible(false);
                 mainScreen.setVisible(true);
                 homePane.setVisible(true);
-                if (currentUser.isDoctor()) {
-                    welcomeLabel.setText("Welcome,\n" + "Dr. " + currentUser.getFirstName() + " " + currentUser.getLastName());
-                } else {
-                    welcomeLabel.setText("Welcome,\n" + currentUser.getFirstName() + " " + currentUser.getLastName());
-                }
+                welcomeLabel.setText("Welcome " + currentUser.getFirstName() + " " + currentUser.getLastName() + "!");
                 if (!currentUser.isDoctor()) {
                     weeklyButton.setVisible(false);
                 } else {
                     weeklyButton.setVisible(true);
                 }
+                timetableAnchorPane.getChildren().add(initTimetable());
+                timetableAnchorPane.setTopAnchor(timetableAnchorPane.getChildren().get(0), 20.0);
+                timetableAnchorPane.setLeftAnchor(timetableAnchorPane.getChildren().get(0), 20.0);
+                timetableAnchorPane.setRightAnchor(timetableAnchorPane.getChildren().get(0), 20.0);
             } else {
                 loginErrorLabel.setVisible(true);
             }
-            timetableAnchorPane.getChildren().add(initTimetable());
-            timetableAnchorPane.setTopAnchor(timetableAnchorPane.getChildren().get(0), 20.0);
-            timetableAnchorPane.setLeftAnchor(timetableAnchorPane.getChildren().get(0), 100.0);
-            timetableAnchorPane.setRightAnchor(timetableAnchorPane.getChildren().get(0), 10.0);
+
         } catch (SQLException ex) {
             Logger.getLogger(GuiMainController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -404,8 +401,8 @@ public class GuiMainController implements Initializable {
         currentYear = realYear;
         HBox calDashBoard = new HBox();
         calDashBoard.getChildren().add(initCalendar());
-        MedicalAppCalendar.getChildren().clear();
-        MedicalAppCalendar.getChildren().add(calDashBoard);
+        calendarPane.getChildren().clear();
+        calendarPane.getChildren().add(calDashBoard);
 
         homePane.setVisible(true);
     }
@@ -850,8 +847,7 @@ public class GuiMainController implements Initializable {
         createInvoiceCopy(invoice);
         pdfPreviewPane.setVisible(true);
         invoiceCopy.setVisible(true);
-        invoiceCopy.setStyle("-fx-background-color: white ;");
-        pdfPreviewPane.setStyle("-fx-background-color: rgba(0, 100, 100, 0.5) ; -fx-background-radius: 10 ;");
+        invoiceCopy.setStyle("-fx-background-color: white ; -fx-background-radius: 10 ;");
     }
 
     public void handleClosePreviewButton(ActionEvent event) {
@@ -1088,7 +1084,7 @@ public class GuiMainController implements Initializable {
     public AnchorPane initTimetable() {
         AnchorPane timetableBox = new AnchorPane();
         timetableScroll = new ScrollPane();
-        timetableScroll.setPrefSize(700, 400);
+        timetableScroll.setPrefSize(720, 320);
         timetableScroll.setPrefWidth(searchTextField.getWidth());
 
         timetableLabelBox = new HBox();
@@ -1164,7 +1160,7 @@ public class GuiMainController implements Initializable {
         ArrayList<Doctor> doctors = new ArrayList<>();
         doctors.clear();
 
-        timeBox.setPrefSize(timetableLabelBox.getPrefWidth(), 48 * 50);
+        timeBox.setPrefSize(timetableLabelBox.getPrefWidth() - 1, 48 * 50);
         timeBox.setStyle("-fx-border-color: lightgrey; -fx-background-color: white;");
 
         for (int i = 1; i <= Doctor.getMaxID(); i++) {
@@ -1202,7 +1198,7 @@ public class GuiMainController implements Initializable {
                     int year = cal.get(Calendar.YEAR);
 
                     if (day == currentDay && month == currentMonth && year == currentYear) {
-                        Label label = new Label(Patient.getPatient(a.getPatientID()).getFirstName() + " "
+                        Label label = new Label(" " + Patient.getPatient(a.getPatientID()).getFirstName() + " "
                                 + Patient.getPatient(a.getPatientID()).getLastName());
 
                         label.setLayoutX(50 + docTile.getTileWidth() * doctors.indexOf(doctor)); //set layout according to placement of doctor in table column
@@ -1217,9 +1213,10 @@ public class GuiMainController implements Initializable {
                             label.setPrefWidth(timetableLabelBox.getPrefWidth() - 50 - 10);
                             label.setLayoutX(50);
                         }
-                        label.setStyle("-fx-border-color: green; -fx-text-fill: green; "
-                                + "-fx-background-color: lightgreen; -fx-opacity: 0.6;"
-                                + "  -fx-border-radius: 10 10 10 10; -fx-background-radius: 10 10 10 10;");
+                        label.setStyle("-fx-border-color: maroon; -fx-text-fill: maroon;"
+                                + "-fx-font: bold; "
+                                + "-fx-background-color: salmon; -fx-opacity: 0.7;"
+                                + "  -fx-border-radius: 15 15 15 15; -fx-background-radius: 15 15 15 15;");
 
                         label.setPadding(new Insets(0, 0, 70, 0));
                         Tooltip tooltip = new Tooltip();
@@ -1278,7 +1275,6 @@ public class GuiMainController implements Initializable {
                                 button.setVisible(true);
                             }
                         });
-
                     }
                 }
             }
@@ -1310,6 +1306,7 @@ public class GuiMainController implements Initializable {
             SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
             Date date = cal2.getTime();
             Label realTime = new Label(timeFormat.format(date));
+            realTime.setStyle("-fx-text-fill: dodgerblue");
             realTime.setLayoutX(line.getEndX() - 50);
             realTime.setLayoutY(line.getStartY() - 20);
             timetableAnchor.getChildren().addAll(line, realTime);
@@ -1324,7 +1321,7 @@ public class GuiMainController implements Initializable {
     public AnchorPane initWeeklyTimetable() {
         AnchorPane timetableBox = new AnchorPane();
         weeklyTimetableScroll = new AnchorPane();
-        weeklyTimetableScroll.setPrefSize(1000, 2000);
+        weeklyTimetableScroll.setPrefSize(1000, 500);
 
         weeklyTimetableLabelBox = new HBox();
         weeklyTimetableLabelBox.setPrefWidth(weeklyTimetableScroll.getPrefWidth() - 19); //discount for scrollbar width
@@ -1515,6 +1512,7 @@ public class GuiMainController implements Initializable {
             Logger.getLogger(GuiMainController.class.getName()).log(Level.SEVERE, null, ex);
         }
         changeLogTable.setPlaceholder(new Text("No changes to be displayed"));
+        changeLogTable.setPrefHeight(300);
 
         //Handle icon mouse action
         MenuChangeLog.setOnMouseClicked(this::handleChangeLogMouse);
@@ -1544,6 +1542,7 @@ public class GuiMainController implements Initializable {
         weeklySchedule.setVisible(true);
         saveAsPng(weeklySchedule, false);
         weeklySchedule.setVisible(false);
+        pane.getChildren().remove(0);
     }
 
     public void saveAsPng(Node n, Boolean isInvoice) {
@@ -2110,10 +2109,12 @@ public class GuiMainController implements Initializable {
             }
         }
         ObservableList<Label> documentItems = FXCollections.observableArrayList();
-        ArrayList<Label> labels = new ArrayList<>();
         for (Docos document : documents) {
-            if (documents != null) {
+            if (!documents.isEmpty()) {
                 Label label = new Label(document.getTitle());
+                label.setStyle("-fx-cursor: hand");
+                label.setPrefWidth(documentList.getWidth());
+
                 label.setOnMouseClicked(new EventHandler<MouseEvent>() {
                     @Override
                     public void handle(MouseEvent event) {
@@ -2134,8 +2135,10 @@ public class GuiMainController implements Initializable {
         if (!documentItems.isEmpty()) {
             noDocsLabel.setVisible(false);
             documentList.setItems(documentItems);
+            documentList.setVisible(true);
         } else {
             noDocsLabel.setVisible(true);
+            documentList.setVisible(false);
         }
     }
 
@@ -2152,18 +2155,21 @@ public class GuiMainController implements Initializable {
     }
 
     private VBox initCalendar() {
-        monthLabel = new Label("Januray");
+        monthLabel = new Label();
 //        monthLabel.setPrefSize(50, 20);
         yearCombo = new ComboBox();
-//        yearCombo.setPrefSize(40, 20);
-        prevButton = new Button("<");
+        prevButton = new Button();
+
         prevButton.setPrefSize(20, 20);
-        nextButton = new Button(">");
+        nextButton = new Button();
         nextButton.setPrefSize(20, 20);
         yearCombo.setPrefSize(55, 20);
 
+        prevButton.getStyleClass().add("prevButton");
+        nextButton.getStyleClass().add("nextButton");
+
         monthLabel.setStyle("-fx-font-size: 10");
-        yearCombo.setStyle("-fx-font-size: 10");
+        yearCombo.setStyle("-fx-font-size: 9");
         prevButton.setStyle("-fx-font-size: 10");
         nextButton.setStyle("-fx-font-size: 10");
 
@@ -2365,25 +2371,27 @@ public class GuiMainController implements Initializable {
                 for (int x = 0; x < 7; x++) {
                     for (int y = 0; y < 6; y++) {
                         cellButton[x][y].setDisable(true);
+                        cellButton[x][y].setStyle("-fx-text-fill: black;-fx-font-size: 12; -fx-background-color: azure; -fx-alignment: center;"
+                                + " -fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
                         //highlight future days
                         if (!cellButton[x][y].getText().equals("") && Integer.parseInt(cellButton[x][y].getText()) > realDay && currentMonth
                                 == realMonth && currentYear >= realYear) {
                             cellButton[x][y].setDisable(false);
-                            cellButton[x][y].setStyle("-fx-font-size: 12; -fx-background-color: lightcyan; -fx-alignment: center;"
+                            cellButton[x][y].setStyle("-fx-text-fill: black;-fx-font-size: 12; -fx-background-color: lightcyan; -fx-alignment: center;"
                                     + " -fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
                         } else if (!cellButton[x][y].getText().equals("") && currentYear > realYear) {
                             cellButton[x][y].setDisable(false);
-                            cellButton[x][y].setStyle("-fx-font-size: 12; -fx-background-color: lightcyan; -fx-alignment: center; "
+                            cellButton[x][y].setStyle("-fx-text-fill: black;-fx-font-size: 12; -fx-background-color: lightcyan; -fx-alignment: center; "
                                     + "-fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
                         } //highlight future months in current year
                         else if (!cellButton[x][y].getText().equals("") && currentMonth > realMonth && currentYear == realYear) {
                             cellButton[x][y].setDisable(false);
-                            cellButton[x][y].setStyle("-fx-font-size: 12; -fx-background-color: lightcyan; -fx-alignment: center; -fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
+                            cellButton[x][y].setStyle("-fx-text-fill: black;-fx-font-size: 12; -fx-background-color: lightcyan; -fx-alignment: center; -fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
                         } //highlight today's cell
                         else if (!cellButton[x][y].getText().equals("") && Integer.parseInt(cellButton[x][y].getText()) == realDay && currentMonth
                                 == realMonth && currentYear == realYear) { //Today
                             cellButton[x][y].setDisable(false);
-                            cellButton[x][y].setStyle("-fx-font-size: 12; -fx-background-color: lightsalmon; -fx-alignment: center; -fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
+                            cellButton[x][y].setStyle("-fx-text-fill: black;-fx-font-size: 12; -fx-background-color: lightsalmon; -fx-alignment: center; -fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
 
                         } else if (cellButton[x][y].getText().isEmpty()) {
                             cellButton[x][y].setDisable(false); //purely for presentation purposes
@@ -2391,26 +2399,28 @@ public class GuiMainController implements Initializable {
                     }
                 }
                 //render selected cell
-                cellButton[column][row].setStyle("-fx-font-size: 12; -fx-background-color: cyan; -fx-alignment: center; -fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
+                cellButton[column][row].setStyle("-fx-text-fill: black;-fx-font-size: 12; -fx-background-color: cyan; -fx-alignment: center; -fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
             });
             //highlight future days in month
             if (Integer.parseInt(cellButton[column][row].getText()) > realDay && currentMonth == realMonth && currentYear >= realYear) { //Today
-                cellButton[column][row].setStyle("-fx-font-size: 12; -fx-background-color: lightcyan; -fx-alignment: center; -fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
+                cellButton[column][row].setStyle("-fx-text-fill: black;-fx-font-size: 12; -fx-background-color: lightcyan; -fx-alignment: center; -fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
             } //highlight all future years 
             else if (currentYear > realYear) {
-                cellButton[column][row].setStyle("-fx-font-size: 12; -fx-background-color: lightcyan; -fx-alignment: center; -fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
+                cellButton[column][row].setStyle("-fx-text-fill: black;-fx-font-size: 12; -fx-background-color: lightcyan; -fx-alignment: center; -fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
             } //highlight future months in current year
             else if (currentMonth > realMonth && currentYear == realYear) {
-                cellButton[column][row].setStyle("-fx-font-size: 12; -fx-background-color: lightcyan; -fx-alignment: center; -fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
+                cellButton[column][row].setStyle(" -fx-text-fill: black;-fx-font-size: 12; -fx-background-color: lightcyan; -fx-alignment: center; -fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
             } //highlight today's cell
             else if (Integer.parseInt(cellButton[column][row].getText()) == realDay && currentMonth
                     == realMonth && currentYear == realYear) { //Today
-                cellButton[column][row].setStyle("-fx-font-size: 12; -fx-background-color: lightsalmon; -fx-alignment: center; -fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
+                cellButton[column][row].setStyle("-fx-text-fill: black;-fx-font-size: 12; -fx-background-color: lightsalmon; -fx-alignment: center; -fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
                 currentDay = i; //initializes the schedule date label
             } else {
                 cellButton[column][row].setDisable(true);
             }
+
         }
+
     }
 
     public static void renderCalendar() {
@@ -2422,7 +2432,7 @@ public class GuiMainController implements Initializable {
             if (n instanceof Control) {
                 Control control = (Control) n;
                 control.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-                control.setStyle("-fx-font-size: 12; -fx-background-color: azure; -fx-alignment: center;"
+                control.setStyle("-fx-text-fill: black;-fx-font-size: 12; -fx-background-color: azure; -fx-alignment: center;"
                         + " -fx-border-radius: 0 0 0 0; -fx-background-radius: 0 0 0 0;");
             }
 
@@ -2445,8 +2455,8 @@ public class GuiMainController implements Initializable {
      *
      * @return VBox
      */
-    public VBox initSchedule() {
-        VBox scheduleBox = new VBox();
+    public BorderPane initSchedule() {
+        BorderPane scheduleBox = new BorderPane();
         HBox scheduleTitlePane = new HBox(10);
         //scheduleTitlePane.setPrefColumns(3);
 
@@ -2532,12 +2542,12 @@ public class GuiMainController implements Initializable {
         scheduleTile.setHgap(2.5);
         scheduleTile.setVgap(2.5);
 
-        scheduleScroll.setPrefSize(380, 300);
+        scheduleScroll.setPrefSize(400, 300);
         scheduleScroll.setContent(scheduleTile);
 
         GridPane controlsGrid = new GridPane();
         HBox optionsBox = new HBox();
-        VBox buttonsBox = new VBox();
+        HBox buttonsBox = new HBox();
 
         VBox radiosBox = new VBox();
 
@@ -2627,6 +2637,7 @@ public class GuiMainController implements Initializable {
         buttonsBox.getChildren().add(createButton);
         buttonsBox.getChildren().add(cancelButton);
         buttonsBox.setAlignment(Pos.CENTER_RIGHT);
+        buttonsBox.setSpacing(10);
 
         VBox nameBox = new VBox();
         Label title = new Label("Patient: ");
@@ -2635,11 +2646,11 @@ public class GuiMainController implements Initializable {
         nameBox.getChildren().add(title);
         nameBox.getChildren().add(name);
 
-        controlsGrid.add(nameBox, 1, 0);
+        controlsGrid.add(nameBox, 0, 0);
 
-        controlsGrid.add(radiosBox, 0, 0);
-        controlsGrid.add(purposeBox, 0, 1);
-        controlsGrid.add(buttonsBox, 1, 1);
+        controlsGrid.add(radiosBox, 0, 1);
+        controlsGrid.add(purposeBox, 0, 2);
+        controlsGrid.add(buttonsBox, 0, 3);
 
         //Add padding
         buttonsBox.setPadding(new Insets(10, 10, 10, 10));
@@ -2653,9 +2664,11 @@ public class GuiMainController implements Initializable {
         scheduleTitlePane.getChildren().add(scheduleLabel);
         scheduleTitlePane.getChildren().add(scheduleDateLabel);
         scheduleTitlePane.getChildren().add(doctorCombo);
-        scheduleBox.getChildren().add(scheduleTitlePane);
-        scheduleBox.getChildren().add(scheduleScroll);
-        scheduleBox.getChildren().add(controlsGrid);
+        scheduleBox.setTop(scheduleTitlePane);
+        scheduleBox.setLeft(scheduleScroll);
+        scheduleBox.setRight(controlsGrid);
+
+        controlsGrid.setPadding(new Insets(0, 0, 0, 20));
 
         renderSchedule();
 
@@ -3106,13 +3119,14 @@ public class GuiMainController implements Initializable {
         MedicalAppCalendar.setOnMouseClicked((MouseEvent event) -> {
             searchList.setVisible(false);
         });
-        footer.setOnMouseClicked((MouseEvent event) -> {
-            searchList.setVisible(false);
-        });
+//        footer.setOnMouseClicked((MouseEvent event) -> {
+//            searchList.setVisible(false);
+//        });
         searchTextField.setOnMouseClicked((MouseEvent event) -> {
             if (!searchList.getItems().isEmpty()) {
                 searchList.setVisible(true);
             }
         });
+        visitHistoryPane.setVisible(false);
     }
 }
