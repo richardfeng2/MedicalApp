@@ -225,7 +225,7 @@
                                                          <font>
                                                             <Font name="Arial Rounded MT Bold" size="15.0" />
                                                          </font></Label>
-                                                      <Button fx:id="submitNote" layoutX="289.0" layoutY="246.0" mnemonicParsing="false" text="Submit" AnchorPane.topAnchor="246.0" />
+                                                      <Button fx:id="submitNote" layoutX="289.0" layoutY="246.0" mnemonicParsing="false" text="Submit" AnchorPane.bottomAnchor="25.0" />
                                                    </children>
                                                 </AnchorPane>
                                              </content>
@@ -555,8 +555,8 @@
                   <AnchorPane fx:id="searchPane" prefHeight="81.0" prefWidth="783.0" AnchorPane.bottomAnchor="130.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="228.0" AnchorPane.topAnchor="0.0">
                      <children>
                             <!--<fx:include fx:id="SearchPane" source="Search.fxml" />-->
-                            <TextField fx:id="searchTextField" layoutX="66.0" layoutY="21.0" prefHeight="39.0" prefWidth="770.0" promptText="Search patients by name or healthfund..." />
-                            <ListView fx:id="searchList" layoutX="66.0" layoutY="56.0" prefHeight="9.0" prefWidth="666.0" />
+                            <TextField fx:id="searchTextField" layoutX="66.0" layoutY="37.0" prefHeight="39.0" prefWidth="770.0" promptText="Search patients by name or healthfund..." />
+                            <ListView fx:id="searchList" layoutX="66.0" layoutY="72.0" prefHeight="9.0" prefWidth="666.0" />
                      </children>
                   </AnchorPane>
                   </children>

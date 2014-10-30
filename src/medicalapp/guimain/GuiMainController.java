@@ -344,7 +344,7 @@ public class GuiMainController implements Initializable {
                 loginScreen.setVisible(false);
                 mainScreen.setVisible(true);
                 homePane.setVisible(true);
-                welcomeLabel.setText("Welcome " + currentUser.getFirstName() + " " + currentUser.getLastName() + "!");
+                welcomeLabel.setText("Welcome " + currentUser.getFirstName() + "!");
                 if (!currentUser.isDoctor()) {
                     weeklyButton.setVisible(false);
                 } else {
@@ -1207,8 +1207,10 @@ public class GuiMainController implements Initializable {
                         DateFormat timeFormat = new SimpleDateFormat("HH:mm");
                         String time = timeFormat.format(date);
                         label.setLayoutY((toMins(time) - (8.75 * 60)) / 15 * 50); //(Time of appointment minus 9.00am) * height of 15 minute time labels
-                        label.prefHeightProperty().bind(timeBox.heightProperty().multiply(a.getDuration().toMinutes()).divide(15).divide(48));
-
+//                        label.prefHeightProperty().bind(timeBox.heightProperty().multiply(a.getDuration().toMinutes()).divide(15).divide(24));
+//                        label.prefHeightProperty().bind(timetableLabelBox.heightProperty().multiply(a.getDuration().toMinutes()/15));
+//                        label.setPrefHeight(timetableLabelBox.getHeight()*a.getDuration().toMinutes()/15);
+                        label.setPrefHeight(50 * a.getDuration().toMinutes() / 15);
                         if (currentUser.isDoctor()) {
                             label.setPrefWidth(timetableLabelBox.getPrefWidth() - 50 - 10);
                             label.setLayoutX(50);
@@ -1216,9 +1218,9 @@ public class GuiMainController implements Initializable {
                         label.setStyle("-fx-border-color: maroon; -fx-text-fill: maroon;"
                                 + "-fx-font: bold; "
                                 + "-fx-background-color: salmon; -fx-opacity: 0.7;"
-                                + "  -fx-border-radius: 15 15 15 15; -fx-background-radius: 15 15 15 15;");
+                                + "  -fx-border-radius: 10 10 10 10; -fx-background-radius: 10 10 10 10;");
 
-                        label.setPadding(new Insets(0, 0, 70, 0));
+//                        label.setPadding(new Insets(0, 0, 70, 0));
                         Tooltip tooltip = new Tooltip();
                         tooltip.setText("Time: " + timeFormat.format(a.getDate())
                                 + "\n" + a.getPurpose());
@@ -1254,7 +1256,7 @@ public class GuiMainController implements Initializable {
                                 Point2D p = label.localToScreen(label.getLayoutBounds().getMaxX(), label.getLayoutBounds().getMaxY()); //I position the tooltip at bottom right of the node (see below for explanation)  
                                 tooltip.show(label, p.getX(), p.getY());
                                 button.setLayoutX(label.getLayoutX() + label.getWidth() - 75);
-                                button.setLayoutY(label.getLayoutY() + label.getHeight() - 50);
+                                button.setLayoutY(label.getLayoutY() + label.getHeight() - 40);
                                 button.setVisible(true);
                             }
                         });
@@ -1447,7 +1449,6 @@ public class GuiMainController implements Initializable {
                                     + "-fx-background-color: lightgreen; -fx-opacity: 0.6;"
                                     + "  -fx-border-radius: 10 10 10 10; -fx-background-radius: 10 10 10 10;");
 
-                            label.setPadding(new Insets(0, 0, 70, 0));
                             timetableAnchor.getChildren().addAll(label);
                         }
                     }
@@ -1737,6 +1738,7 @@ public class GuiMainController implements Initializable {
             addendums.add(getAddendum(i));
         }
         if (selectedAppointment.getAppointmentID() == currentAppointment.getAppointmentID()) { //Notes for current appointment
+            submitNote.setVisible(true);
             if (!notes.isEmpty()) {
                 for (Note note : notes) {
                     if (note.getAppointmentID() == selectedAppointment.getAppointmentID()) { //A note exists already for current appt
@@ -1809,6 +1811,7 @@ public class GuiMainController implements Initializable {
             }
         }
         if (selectedAppointment.getAppointmentID() == currentAppointment.getAppointmentID()) {
+            submitTestBtn.setText("Submit");
             if (!results.isEmpty()) {
 
                 for (TestResult result : results) {
@@ -2960,7 +2963,7 @@ public class GuiMainController implements Initializable {
                         + currentAppointment.getDate() + ", Patient: " + getPatient(currentAppointment.getPatientID()).getFirstName()
                         + " " + getPatient(currentAppointment.getPatientID()).getLastName(), currentUser.getStaffID()));
 
-                submitTestBtn.setDisable(true);
+//                submitTestBtn.setDisable(true);
                 submitTestBtn.setText("Update");
             }
             refreshTestResult();
